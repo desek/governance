@@ -1,0 +1,4 @@
+
+# Ignore external documentation folders
+docs/anthropic/
+docs/agentskills/
