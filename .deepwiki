@@ -1,3 +1,4 @@
 # deepwiki repository
 
 - `agentskills/agentskills` is the  open standard for Agent Skills format - packaging instructions/scripts for AI agents with progressive disclosure; includes skills-ref Python library for validation
+- `googleapis/release-please` is Google's release automation tool for GitHub - creates release PRs based on Conventional Commits, manages versioning and changelogs; supports monorepo configurations with manifest files
