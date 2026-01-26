@@ -27,7 +27,6 @@ Use this checklist when creating an Architecture Decision Record:
 - [ ] Create file: docs/adr/ADR-NNNN-{short-title}.md
 - [ ] Fill in all required sections
 - [ ] Set status to "proposed"
-- [ ] Commit with message: docs(adr): add ADR-NNNN {title}
 ```
 
 **Strict requirements:**
@@ -51,7 +50,6 @@ Use this checklist when creating a Change Request:
 - [ ] Fill in all required sections
 - [ ] Write acceptance criteria in Gherkin format
 - [ ] Set status to "proposed"
-- [ ] Commit with message: docs(cr): add CR-NNNN {title}
 ```
 
 **Strict requirements:**
@@ -77,3 +75,10 @@ For detailed lifecycle information, best practices, and examples:
 
 - **ADR Guide**: [reference/adr-guide.md](reference/adr-guide.md)
 - **CR Guide**: [reference/cr-guide.md](reference/cr-guide.md)
+
+## Commit Message Format
+
+Committing governance documents is the human's responsibility. When ready to commit, use these formats:
+
+- **ADR**: `docs(adr): add ADR-NNNN {title}`
+- **CR**: `docs(cr): add CR-NNNN {title}`
