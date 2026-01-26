@@ -1,0 +1,3 @@
+# deepwiki repository
+
+- `agentskills/agentskills` is the  open standard for Agent Skills format - packaging instructions/scripts for AI agents with progressive disclosure; includes skills-ref Python library for validation
