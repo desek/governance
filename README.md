@@ -6,7 +6,7 @@ Reusable agent skills for project governance, including Architecture Decision Re
 
 ### Dogfooding: We Use What We Build
 
-This repository uses its own governance skill to manage changes—and the results speak for themselves. Browse our [Change Requests](docs/cr) to see real examples of how AI agents document and track modifications to this project.
+This repository uses its own governance skill to manage changes and the results speak for themselves. Browse our [Change Requests](docs/cr) to see real examples of how AI agents document and track modifications to this project.
 
 What you'll find there:
 - **Structured decision-making**: Each CR captures the motivation, current state, proposed changes, and implementation plan in a consistent format
