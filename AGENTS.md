@@ -15,78 +15,11 @@ Use `deepwiki` MCP for project specific documentation and implementation details
 </efficiency_files>
 </principles>
 
-<requirements>
-<rfc2119>
-Only use **MUST** keywords to define unambiguous requirements.
-</rfc2119>
-
-<gherkin>
-Only specify acceptance criteria according to the Given-When-Then formula.
-</gherkin>
-</requirements>
-
-<governance>
-<adr>
-An architecture decision record (ADR) is a document that captures an important architectural decision made along with its context and consequences.
-
-All architectural decisions **MUST** be logged in the folder `docs/adr` following the template @docs/adr/TEMPLATE.md
-
-Create an ADR when making decisions about:
-- Technology stack selection (frameworks, libraries, platforms)
-- System architecture patterns (microservices, monolith, event-driven)
-- Data storage and management strategies
-- Integration patterns and external service dependencies
-- Security architecture and authentication approaches
-- Infrastructure and deployment architecture
-- Performance and scalability strategies
-- Development tools and workflow decisions
-
-Lifecycle:
-1. **Proposed**: ADR is drafted and awaiting review
-2. **Accepted**: Decision has been approved and will be implemented
-3. **Rejected**: Alternative approach was chosen, reasoning documented
-4. **Deprecated**: Decision is superseded by a newer ADR
-5. **Superseded**: Replaced by ADR [number], with reference to new decision
-
-Best Practices:
-- **One Decision Per ADR**: Keep each ADR focused on a single architectural decision
-- **Immutable Records**: Never delete or modify accepted ADRs; create new ones to supersede them
-- **Clear Context**: Document the problem, constraints, and forces driving the decision
-- **Consider Alternatives**: List at least 2-3 alternatives considered and why they were not chosen
-- **Consequences**: Document both positive and negative outcomes of the decision
-- **Date and Author**: Always include decision date and author(s)
-- **Link Related ADRs**: Reference related or dependent architectural decisions
-</adr>
-
-<change_request>
-A change request (CR) is a document that captures changes to project requirements, features, or scope along with their justification, impact, and implementation approach.
-
-All requirement changes **MUST** be documented in the folder `docs/cr` following the template @docs/cr/TEMPLATE.md
-
-Create a CR when:
-- Adding new features or functionality not in the original requirements
-- Modifying existing feature behavior or user workflows
-- Removing or deprecating functionality
-- Making significant changes to non-functional requirements (performance, security, scalability)
-- Changing project scope, timeline, or success criteria
-- Responding to user feedback that requires requirement adjustments
-
-Lifecycle:
-1. **Proposed**: CR is created and awaiting review
-2. **Approved**: Stakeholders have approved the change
-3. **Implemented**: Change has been developed and merged
-4. **Rejected**: Change was declined with reasoning documented
-5. **On-Hold**: Change is postponed for future consideration
-6. **Cancelled**: Change is no longer needed or relevant
-7. **Obsolete**: Change is outdated due to external factors or superseded requirements
-</change_request>
-
 <efficiency_maintenance>
 - **`.deepwiki`**: Document repositories with complex implementations or custom packages used
 - **`.gitignore`**: Review and update after adding new dependencies, build artifacts, or IDE-specific files
 - **Frequency**: Update these files immediately when introducing new technologies or tools, not at project end
 </efficiency_maintenance>
-</governance>
 
 <git_workflow>
 <commits>
