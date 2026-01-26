@@ -8,11 +8,11 @@ priority: "medium"
 target-version: "1.0.0"
 ---
 
-# Add Apache 2.0 License and Contributing Guidelines to Project
+# Add Apache 2.0 License, Contributing Guidelines, and AI Disclaimer to Project
 
 ## Change Summary
 
-This change request proposes adding the Apache License, Version 2.0 and a CONTRIBUTING.md file to the governance project. Currently, the project has no license file, which means all rights are reserved by default and the code cannot be legally used, modified, or distributed by others. Additionally, there are no documented contribution guidelines for potential contributors. Adding the Apache 2.0 license will establish clear terms for open-source usage while providing patent protection for contributors and users. The CONTRIBUTING.md file will provide clear guidance for community members who wish to contribute to the project.
+This change request proposes adding the Apache License, Version 2.0, a CONTRIBUTING.md file, and an AI Disclaimer to the governance project. Currently, the project has no license file, which means all rights are reserved by default and the code cannot be legally used, modified, or distributed by others. Additionally, there are no documented contribution guidelines for potential contributors, and no disclaimer about AI-generated content. Adding the Apache 2.0 license will establish clear terms for open-source usage while providing patent protection for contributors and users. The CONTRIBUTING.md file will provide clear guidance for community members who wish to contribute to the project. The AI Disclaimer will inform users that this project uses AI and may produce inaccurate results, encouraging verification of critical outputs.
 
 ## Motivation and Background
 
@@ -21,6 +21,8 @@ Open-source projects require explicit licensing to enable community participatio
 The Apache 2.0 license is widely recognized and trusted in the open-source community, used by major projects including Kubernetes, TensorFlow, and Apache Software Foundation projects. It provides a good balance between permissiveness and protection, making it suitable for governance documentation and tooling projects.
 
 Beyond licensing, successful open-source projects provide clear contribution guidelines. A CONTRIBUTING.md file serves as the entry point for new contributors, explaining how to report issues, submit changes, and follow project conventions. This reduces friction for contributors and helps maintain consistent quality across contributions.
+
+As this project involves AI-powered skills and tooling, it is important to set appropriate expectations for users. An AI Disclaimer in the README helps users understand that AI-generated outputs may contain inaccuracies and should be verified before use in critical contexts. This transparency builds trust and encourages responsible use of the project.
 
 ## Change Drivers
 
@@ -31,6 +33,8 @@ Beyond licensing, successful open-source projects provide clear contribution gui
 * **Compatibility**: Apache 2.0 is compatible with many other open-source licenses, enabling integration
 * **Contributor onboarding**: Clear contribution guidelines reduce barriers for new contributors
 * **Quality consistency**: Documented processes help maintain consistent quality across contributions
+* **AI transparency**: Users need to understand that AI-generated content may be inaccurate
+* **Responsible use**: Clear disclaimers encourage verification of critical outputs
 
 ## Current State
 
@@ -48,6 +52,13 @@ Additionally, the project lacks a CONTRIBUTING.md file, which means:
 3. The process for reporting issues or suggesting features is unclear
 4. Contributors may not understand the project's workflow expectations
 
+Furthermore, the project lacks an AI Disclaimer, which means:
+
+1. Users may not be aware that AI is used in the project
+2. Users may place undue trust in AI-generated outputs
+3. There is no guidance to verify critical outputs
+4. The project does not set appropriate expectations for AI accuracy
+
 ### Current Project Structure
 
 ```mermaid
@@ -61,16 +72,17 @@ flowchart TD
         style A fill:#ffcccc
         note1[No LICENSE file]
         note2[No CONTRIBUTING.md file]
+        note3[No AI Disclaimer]
     end
 ```
 
 ## Proposed Change
 
-Add Apache License, Version 2.0 and contribution guidelines to the project by:
+Add Apache License, Version 2.0, contribution guidelines, and AI Disclaimer to the project by:
 
 1. Creating a `LICENSE` file in the project root containing the full Apache 2.0 license text
 2. Creating a `CONTRIBUTING.md` file in the project root with contribution guidelines
-3. Updating `README.md` to include a license section and reference to contribution guidelines
+3. Updating `README.md` to include a license section, reference to contribution guidelines, and AI Disclaimer
 4. Optionally adding license headers to source files (recommended but not required for Apache 2.0)
 
 The Apache 2.0 license grants users the right to use, reproduce, modify, and distribute the software, with the following conditions:
@@ -86,6 +98,15 @@ The CONTRIBUTING.md file will include:
 - Development setup instructions
 - Code of conduct reference (if applicable)
 - Licensing of contributions
+
+The AI Disclaimer will include:
+- Clear statement that the project uses AI
+- Warning that AI may produce inaccurate results
+- Recommendation to verify all critical outputs
+
+Example AI Disclaimer text for README.md:
+
+> **AI Disclaimer**: This skill uses AI and may produce inaccurate results. Verify all critical outputs.
 
 ### Proposed Project Structure
 
@@ -103,6 +124,7 @@ flowchart TD
         style C fill:#ffffcc
         style G fill:#ccffcc
         style H fill:#ccffcc
+        note4[README includes AI Disclaimer]
     end
 ```
 
@@ -120,6 +142,9 @@ flowchart TD
 8. The `CONTRIBUTING.md` file **MUST** reference the project's commit message conventions (Conventional Commits)
 9. The `CONTRIBUTING.md` file **MUST** state that contributions are licensed under Apache 2.0
 10. The `README.md` file **MUST** include a "Contributing" section that references the `CONTRIBUTING.md` file
+11. The `README.md` file **MUST** include an "AI Disclaimer" section
+12. The AI Disclaimer **MUST** state that the project uses AI and may produce inaccurate results
+13. The AI Disclaimer **MUST** recommend verifying all critical outputs
 
 ### Non-Functional Requirements
 
@@ -129,12 +154,13 @@ flowchart TD
 4. The `CONTRIBUTING.md` file **MUST** be written in clear, accessible language
 5. The `CONTRIBUTING.md` file **MUST** follow standard Markdown formatting conventions
 6. The contribution guidelines **MUST** be consistent with the project's existing AGENTS.md guidelines
+7. The AI Disclaimer **MUST** be prominently placed in the README.md for easy discovery
 
 ## Affected Components
 
 * `LICENSE` - New file to be created in project root
 * `CONTRIBUTING.md` - New file to be created in project root
-* `README.md` - Existing file to be updated with license and contributing sections
+* `README.md` - Existing file to be updated with license, contributing, and AI Disclaimer sections
 * Project metadata - License will be discoverable by GitHub and other platforms
 
 ## Scope Boundaries
@@ -143,9 +169,10 @@ flowchart TD
 
 * Creating the `LICENSE` file with Apache 2.0 license text
 * Creating the `CONTRIBUTING.md` file with contribution guidelines
-* Updating `README.md` to include license and contributing information
+* Updating `README.md` to include license, contributing, and AI Disclaimer information
 * Ensuring license is properly recognized by GitHub
 * Documenting the pull request and commit message workflow
+* Adding AI Disclaimer to set appropriate expectations for users
 
 ### Out of Scope ("Here, But Not Further")
 
@@ -228,9 +255,10 @@ This change does not involve code changes, so no automated tests are required. H
 |--------------|--------|-------------|-----------------|
 | LICENSE file exists | Manual | Check project root for LICENSE file | File exists with correct content |
 | CONTRIBUTING.md exists | Manual | Check project root for CONTRIBUTING.md file | File exists with required sections |
-| README.md updated | Manual | Check README.md for license and contributing sections | Sections exist with correct information |
+| README.md updated | Manual | Check README.md for license, contributing, and AI Disclaimer sections | Sections exist with correct information |
 | GitHub detection | Manual | Check GitHub repository page | License badge shows "Apache-2.0" |
 | Contribution guidelines complete | Manual | Review CONTRIBUTING.md content | Contains issue reporting, PR process, commit conventions |
+| AI Disclaimer present | Manual | Check README.md for AI Disclaimer section | Section exists with required warning text |
 
 ### Tests to Modify
 
@@ -312,6 +340,17 @@ Then the commit message format in CONTRIBUTING.md matches AGENTS.md
   And the merge strategy documentation is consistent
 ```
 
+### AC-8: README.md includes AI Disclaimer
+
+```gherkin
+Given the project README.md file
+When a user reads the README.md
+Then an "AI Disclaimer" section is present
+  And the section states that the project uses AI
+  And the section warns that AI may produce inaccurate results
+  And the section recommends verifying all critical outputs
+```
+
 ## Quality Standards Compliance
 
 ### Build & Compilation
@@ -331,13 +370,14 @@ Then the commit message format in CONTRIBUTING.md matches AGENTS.md
 
 - [ ] README.md updated with license section
 - [ ] README.md updated with contributing section
+- [ ] README.md updated with AI Disclaimer section
 - [ ] LICENSE file added with complete Apache 2.0 text
 - [ ] CONTRIBUTING.md file added with contribution guidelines
 
 ### Code Review
 
 - [ ] Changes submitted via pull request
-- [ ] PR title follows Conventional Commits format: `docs: add Apache 2.0 license and contributing guidelines`
+- [ ] PR title follows Conventional Commits format: `docs: add Apache 2.0 license, contributing guidelines, and AI disclaimer`
 - [ ] Code review completed and approved
 - [ ] Changes squash-merged to maintain linear history
 
@@ -363,6 +403,13 @@ grep -qi "license" README.md && echo "License section found in README" || echo "
 
 # Verify README.md contains contributing section
 grep -qi "contributing" README.md && echo "Contributing section found in README" || echo "Contributing section missing"
+
+# Verify README.md contains AI Disclaimer section
+grep -qi "AI Disclaimer" README.md && echo "AI Disclaimer section found in README" || echo "AI Disclaimer section missing"
+
+# Verify AI Disclaimer contains required warning
+grep -qi "may produce inaccurate results" README.md && echo "AI warning found" || echo "AI warning missing"
+grep -qi "verify" README.md && echo "Verification recommendation found" || echo "Verification recommendation missing"
 ```
 
 ## Risks and Mitigation
@@ -414,7 +461,7 @@ grep -qi "contributing" README.md && echo "Contributing section found in README"
 
 ## Decision Outcome
 
-Chosen approach: "Apache License, Version 2.0 with CONTRIBUTING.md", because it provides the best balance of permissiveness and protection for an open-source governance project. The explicit patent grant protects contributors and users, while the permissive terms encourage adoption. Apache 2.0 is widely recognized, OSI-approved, and compatible with many other licenses. The addition of CONTRIBUTING.md ensures that potential contributors have clear guidance on how to participate, reducing friction and maintaining quality standards.
+Chosen approach: "Apache License, Version 2.0 with CONTRIBUTING.md and AI Disclaimer", because it provides the best balance of permissiveness and protection for an open-source governance project. The explicit patent grant protects contributors and users, while the permissive terms encourage adoption. Apache 2.0 is widely recognized, OSI-approved, and compatible with many other licenses. The addition of CONTRIBUTING.md ensures that potential contributors have clear guidance on how to participate, reducing friction and maintaining quality standards. The AI Disclaimer sets appropriate expectations for users regarding AI-generated content accuracy and encourages responsible verification of critical outputs.
 
 ## Related Items
 
@@ -484,3 +531,28 @@ The CONTRIBUTING.md file should include the following sections to provide compre
 7. **License Agreement**: Statement that contributions are licensed under Apache 2.0.
 
 8. **Getting Help**: How to ask questions or get assistance.
+
+### AI Disclaimer Best Practices
+
+When adding an AI Disclaimer to a project README, consider the following best practices:
+
+1. **Prominent Placement**: Place the disclaimer in a visible location, such as near the top of the README or in a dedicated section that users will easily find.
+
+2. **Clear Language**: Use simple, direct language that clearly communicates the key points:
+   - The project uses AI
+   - AI outputs may be inaccurate
+   - Users should verify critical outputs
+
+3. **Appropriate Scope**: Tailor the disclaimer to the specific AI capabilities of the project. For this governance project with AI-powered skills, the disclaimer should address:
+   - AI-generated documentation or suggestions
+   - Automated decision support
+   - Any content that may be produced by AI agents
+
+4. **Recommended Disclaimer Text**:
+
+   > **AI Disclaimer**: This skill uses AI and may produce inaccurate results. Verify all critical outputs.
+
+5. **Additional Considerations**:
+   - Consider linking to more detailed documentation about AI limitations if available
+   - Update the disclaimer if AI capabilities change significantly
+   - Ensure the disclaimer is consistent with any other AI-related documentation in the project
