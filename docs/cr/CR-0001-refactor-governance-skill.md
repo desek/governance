@@ -1,6 +1,6 @@
 ---
 id: "CR-0001"
-status: "proposed"
+status: "implemented"
 date: 2026-01-26
 requestor: desek
 stakeholders:
