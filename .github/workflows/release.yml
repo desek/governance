@@ -1,0 +1,58 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      releases_created: ${{ steps.release.outputs.releases_created }}
+      paths_released: ${{ steps.release.outputs.paths_released }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  build-artifacts:
+    needs: release-please
+    if: needs.release-please.outputs.releases_created == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and upload release artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PATHS_RELEASED: ${{ needs.release-please.outputs.paths_released }}
+        run: |
+          # Parse released paths and build artifacts
+          echo "$PATHS_RELEASED" | jq -r '.[]' | while read -r path; do
+            # Extract skill name from path (e.g., skills/governance -> governance)
+            skill_name=$(basename "$path")
+            
+            # Get version from version.txt
+            version=$(cat "$path/version.txt")
+            
+            # Create artifact name
+            artifact_name="${skill_name}-${version}"
+            
+            # Create tar.gz archive
+            tar -czvf "${artifact_name}.tar.gz" -C "$(dirname "$path")" "$skill_name"
+            
+            # Generate SHA256 checksum
+            sha256sum "${artifact_name}.tar.gz" > "${artifact_name}.tar.gz.sha256"
+            
+            # Upload to GitHub Release
+            gh release upload "${skill_name}-v${version}" \
+              "${artifact_name}.tar.gz" \
+              "${artifact_name}.tar.gz.sha256" \
+              --clobber
+          done
