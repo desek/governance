@@ -1,0 +1,12 @@
+# Governance Documentation
+
+> Documentation for the governance repository, which provides tools and templates for project governance including Architecture Decision Records (ADRs) and Change Requests (CRs).
+
+## Change Requests
+
+- [CR-0001: Refactor Governance Skill](cr/CR-0001-refactor-governance-skill.md): Refactor governance skill to follow best practices
+- [CR-0002: Remove Auto-Commit](cr/CR-0002-remove-auto-commit-from-governance-skill.md): Remove auto-commit from governance skill workflows
+- [CR-0003: Add Apache 2.0 License](cr/CR-0003-add-apache-2-license.md): Add Apache 2.0 license, contributing guidelines, and AI disclaimer
+- [CR-0004: Release Workflow](cr/CR-0004-release-please-workflow.md): Implement release workflow with release-please
+- [CR-0005: Copyright Headers](cr/CR-0005-copyright-headers.md): Add copyright headers to all files
+- [CR-0006: Checkpoint Instruction](cr/CR-0006-checkpoint-instruction.md): Add checkpoint instruction to governance skill

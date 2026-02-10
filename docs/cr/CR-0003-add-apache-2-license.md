@@ -1,4 +1,9 @@
 ---
+name: cr-0003-add-apache-2-license
+description: Change request to add Apache 2.0 license to the repository.
+metadata:
+  copyright: Copyright Daniel Grenemark 2026
+  version: "0.0.1"
 id: "CR-0003"
 status: "proposed"
 date: 2026-01-26

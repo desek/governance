@@ -1,4 +1,9 @@
 ---
+name: cr-0002-remove-auto-commit-from-governance-skill
+description: Change request to remove automatic git commit functionality from the governance skill.
+metadata:
+  copyright: Copyright Daniel Grenemark 2026
+  version: "0.0.1"
 id: "CR-0002"
 status: "implemented"
 date: 2026-01-26

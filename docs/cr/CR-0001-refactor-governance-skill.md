@@ -1,4 +1,9 @@
 ---
+name: cr-0001-refactor-governance-skill
+description: Change request to refactor the governance skill to follow best practices and improve maintainability.
+metadata:
+  copyright: Copyright Daniel Grenemark 2026
+  version: "0.0.1"
 id: "CR-0001"
 status: "implemented"
 date: 2026-01-26

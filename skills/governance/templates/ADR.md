@@ -1,4 +1,9 @@
 ---
+name: adr-template
+description: Template for creating Architecture Decision Records (ADRs).
+metadata:
+  copyright: Copyright Daniel Grenemark 2026
+  version: "0.0.1"
 # These are required metadata elements. Feel free to add additional if motivated.
 status: "{proposed | rejected | accepted | deprecated | … | superseded by ADR-0123"
 date: {YYYY-MM-DD when the decision was last updated}
