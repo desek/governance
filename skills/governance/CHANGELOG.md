@@ -8,6 +8,13 @@ metadata:
 
 # Changelog
 
+## [1.1.0](https://github.com/desek/governance/compare/governance-v1.0.0...governance-v1.1.0) (2026-02-10)
+
+
+### Features
+
+* add copyright headers and governance skill enhancements ([#7](https://github.com/desek/governance/issues/7)) ([10ff7d7](https://github.com/desek/governance/commit/10ff7d78d4db41c15e3b365b84cc1c6228b4b4c4))
+
 ## [1.0.0](https://github.com/desek/governance/compare/governance-v1.0.0...governance-v1.0.0) (2026-01-26)
 
 
