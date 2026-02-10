@@ -31,19 +31,18 @@ When you install this skill, your AI coding agent gains the same capability: cre
 
 ### Checkpoint Hooks (Claude Code)
 
-Automate Git checkpoints using Claude Code hooks. Copy the hook configuration to your `.claude/settings.json`:
+Automate Git checkpoints using Claude Code prompt-based hooks. Copy the hook configuration to your `.claude/settings.json`:
 
 ```json
 {
   "hooks": {
     "Stop": [
       {
-        "matcher": "*",
         "hooks": [
           {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/checkpoint.sh",
-            "timeout": 30000
+            "type": "prompt",
+            "prompt": "You are evaluating whether Claude should create a checkpoint before stopping. Context: $ARGUMENTS\n\nIf stop_hook_active is true, respond with {\"ok\": true}.\nIf there are uncommitted changes and stop_hook_active is false, respond with {\"ok\": false, \"reason\": \"Create a checkpoint using the governance skill checkpoint instruction before stopping.\"}.\nOtherwise respond with {\"ok\": true}.",
+            "timeout": 30
           }
         ]
       }
@@ -52,7 +51,7 @@ Automate Git checkpoints using Claude Code hooks. Copy the hook configuration to
 }
 ```
 
-See [checkpoint-hooks.md](skills/governance/reference/checkpoint-hooks.md) for the complete script and additional hook events (PostToolUse, TaskCompleted).
+See [checkpoint-hooks.md](skills/governance/reference/checkpoint-hooks.md) for complete documentation on prompt-based hooks and best practices.
 
 ### Installation
 

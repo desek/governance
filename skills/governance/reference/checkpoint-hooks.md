@@ -8,15 +8,15 @@ metadata:
 
 # Checkpoint Hooks Integration
 
-Automate checkpoint creation using Claude Code hooks. This guide covers hook configuration for triggering checkpoints at key lifecycle events.
+Automate checkpoint creation using Claude Code prompt-based hooks. This guide covers hook configuration for triggering checkpoints at key lifecycle events.
 
 ## Overview
 
-Claude Code hooks can automatically trigger checkpoint creation at:
+Claude Code prompt-based hooks (`type: "prompt"`) can automatically evaluate whether to trigger checkpoint creation. When the hook returns `{"ok": false, "reason": "..."}`, Claude follows the instruction in the reason field.
 
-- **Stop**: When Claude finishes responding
-- **PostToolUse**: After file write/edit operations
-- **TaskCompleted**: When a task is marked complete
+Recommended hook event:
+
+- **Stop**: When Claude finishes responding - evaluates if checkpoint is needed
 
 ## Hook Configuration
 
@@ -27,12 +27,11 @@ Add hook configuration to your `.claude/settings.json`:
   "hooks": {
     "Stop": [
       {
-        "matcher": "*",
         "hooks": [
           {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/checkpoint.sh",
-            "timeout": 30000
+            "type": "prompt",
+            "prompt": "You are evaluating whether Claude should create a checkpoint before stopping. Context: $ARGUMENTS\n\nCheck if:\n1. There are uncommitted changes in the repository\n2. The stop_hook_active field is false (to prevent infinite loops)\n\nIf stop_hook_active is true, respond with {\"ok\": true}.\nIf there are uncommitted changes and stop_hook_active is false, respond with {\"ok\": false, \"reason\": \"Create a checkpoint using the governance skill checkpoint instruction before stopping.\"}.\nIf there are no uncommitted changes, respond with {\"ok\": true}.",
+            "timeout": 30
           }
         ]
       }
@@ -41,13 +40,17 @@ Add hook configuration to your `.claude/settings.json`:
 }
 ```
 
-## Hook Events
+## How Prompt-Based Hooks Work
 
-### Stop Hook
+1. The Stop event fires when Claude finishes responding
+2. Claude Code sends the hook input (including `$ARGUMENTS`) to a fast Claude model
+3. The model evaluates the prompt and returns a JSON decision
+4. If `{"ok": false, "reason": "..."}`, Claude continues working with the reason as instruction
+5. If `{"ok": true}`, Claude stops normally
 
-Triggers when Claude finishes responding. Best for general checkpoint creation.
+## JSON Input Fields
 
-**JSON Input Fields:**
+The `$ARGUMENTS` placeholder is replaced with the hook's JSON input:
 
 ```json
 {
@@ -57,136 +60,59 @@ Triggers when Claude finishes responding. Best for general checkpoint creation.
 }
 ```
 
-**Important:** Check `stop_hook_active` to prevent infinite loops. If `true`, the hook was triggered by another Stop hook.
+**Important:** The `stop_hook_active` field prevents infinite loops. When `true`, the hook was triggered by a previous Stop hook response.
 
-### PostToolUse Hook
+## Response Schema
 
-Triggers after successful tool execution. Use matcher to filter for file operations.
-
-```json
-{
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/checkpoint.sh"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-**JSON Input Fields:**
+The prompt hook must respond with JSON:
 
 ```json
 {
-  "session_id": "abc123",
-  "tool_name": "Write",
-  "tool_input": { "file_path": "/path/to/file.md" },
-  "tool_output": "File written successfully"
+  "ok": true | false,
+  "reason": "Explanation (required when ok is false)"
 }
 ```
 
-### TaskCompleted Hook
-
-Triggers when a task is marked complete. Ideal for final checkpoints.
-
-```json
-{
-  "hooks": {
-    "TaskCompleted": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/checkpoint.sh"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-## Checkpoint Script
-
-Create `.claude/hooks/checkpoint.sh`:
-
-```bash
-#!/bin/bash
-# Checkpoint hook script
-set -e
-
-# Read JSON input from stdin
-INPUT=$(cat)
-
-# Check for infinite loop prevention (Stop hook only)
-STOP_HOOK_ACTIVE=$(echo "$INPUT" | jq -r '.stop_hook_active // false')
-if [ "$STOP_HOOK_ACTIVE" = "true" ]; then
-  exit 0
-fi
-
-# Check for uncommitted changes
-if git diff --quiet && git diff --staged --quiet; then
-  exit 0  # No changes to checkpoint
-fi
-
-# Stage all changes
-git add -A
-
-# Create checkpoint commit
-TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-git commit -m "checkpoint: auto-save $TIMESTAMP" || true
-```
-
-Make the script executable:
-
-```bash
-chmod +x .claude/hooks/checkpoint.sh
-```
+| Field | Description |
+|-------|-------------|
+| `ok` | `true` allows Claude to stop, `false` continues working |
+| `reason` | Required when `ok` is `false`. Instruction shown to Claude |
 
 ## Best Practices
 
+### Infinite Loop Prevention
+
+Always check `stop_hook_active` in your prompt to prevent infinite loops:
+
+```
+If stop_hook_active is true, respond with {"ok": true}.
+```
+
+This ensures the hook allows stopping when triggered by a previous checkpoint action.
+
 ### Timeout Configuration
 
-Set appropriate timeouts to prevent hanging:
+Set appropriate timeouts (in seconds for prompt hooks):
 
 ```json
 {
-  "type": "command",
-  "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/checkpoint.sh",
-  "timeout": 30000
+  "type": "prompt",
+  "prompt": "...",
+  "timeout": 30
 }
 ```
 
-Default timeout is 60 seconds. Reduce for faster feedback.
+Default timeout is 30 seconds for prompt hooks.
 
-### Portable Paths
+### Activating the Governance Skill
 
-Always use `$CLAUDE_PROJECT_DIR` for script paths to ensure portability across environments.
+The prompt's reason field should reference the governance skill checkpoint instruction:
 
-### Error Handling
-
-- Use `set -e` to exit on errors
-- Use `|| true` for commands that may fail gracefully (e.g., `git commit` with no changes)
-- Log errors to stderr for debugging
-
-### Infinite Loop Prevention
-
-For Stop hooks, always check `stop_hook_active`:
-
-```bash
-STOP_HOOK_ACTIVE=$(echo "$INPUT" | jq -r '.stop_hook_active // false')
-if [ "$STOP_HOOK_ACTIVE" = "true" ]; then
-  exit 0
-fi
 ```
+"reason": "Create a checkpoint using the governance skill checkpoint instruction before stopping."
+```
+
+This ensures Claude follows the full checkpoint workflow including `.gitignore` maintenance.
 
 ## See Also
 
