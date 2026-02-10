@@ -1,3 +1,11 @@
+---
+name: checkpoint
+description: Reference guide for creating iterative Git checkpoints to preserve work-in-progress state during development.
+metadata:
+  copyright: Copyright Daniel Grenemark 2026
+  version: "0.0.1"
+---
+
 # Checkpoint Instruction
 
 Create iterative Git checkpoints to preserve work-in-progress state on active branches. Checkpoints serve as short-term memory during development and can be compressed into merge commits for long-term memory.

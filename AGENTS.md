@@ -1,3 +1,11 @@
+---
+name: agents
+description: Guidelines and instructions for AI agents working on this repository, including coding standards, git workflow, and copyright requirements.
+metadata:
+  copyright: Copyright Daniel Grenemark 2026
+  version: "0.0.1"
+---
+
 # AGENTS.md
 
 <principles>
@@ -57,3 +65,32 @@ Pull requests **MUST** use squash merge only. The PR title will become the commi
 A **linear commit history is required**. Merge commits are not allowed. Use rebase or squash merge strategies to maintain a clean, linear history on the main branch.
 </merge_strategy>
 </git_workflow>
+
+<copyright>
+All new files **MUST** include a copyright header. Use the appropriate format based on file type:
+
+**Markdown files** - Add to frontmatter metadata:
+```yaml
+---
+name: <file-identifier>
+description: <brief description of the file's purpose>
+metadata:
+  copyright: Copyright Daniel Grenemark 2026
+  version: "0.0.1"
+---
+```
+
+**TOML files** - Add as first line comment:
+```toml
+# Copyright Daniel Grenemark 2026
+```
+
+**Text files** - Add as first line comment:
+```
+# Copyright Daniel Grenemark 2026
+```
+
+**JSON files** - JSON does not support comments. Document copyright in accompanying README or skip.
+
+**Note:** The LICENSE file at the repository root contains the full Apache 2.0 license text with copyright notice.
+</copyright>

@@ -1,4 +1,9 @@
 ---
+name: cr-0005-copyright-headers
+description: Change request to add copyright headers to all files in the repository.
+metadata:
+  copyright: Copyright Daniel Grenemark 2026
+  version: "0.0.1"
 id: "CR-0005"
 status: "proposed"
 date: 2026-01-27

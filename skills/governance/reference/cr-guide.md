@@ -1,3 +1,11 @@
+---
+name: cr-guide
+description: Detailed guidance for creating and managing Change Requests (CRs).
+metadata:
+  copyright: Copyright Daniel Grenemark 2026
+  version: "0.0.1"
+---
+
 # CR Reference Guide
 
 Detailed guidance for creating and managing Change Requests.

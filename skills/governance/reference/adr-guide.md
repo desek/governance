@@ -1,3 +1,11 @@
+---
+name: adr-guide
+description: Detailed guidance for creating and managing Architecture Decision Records (ADRs).
+metadata:
+  copyright: Copyright Daniel Grenemark 2026
+  version: "0.0.1"
+---
+
 # ADR Reference Guide
 
 Detailed guidance for creating and managing Architecture Decision Records.

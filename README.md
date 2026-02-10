@@ -1,3 +1,11 @@
+---
+name: readme
+description: Overview of the Governance project, providing reusable agent skills for project governance including Architecture Decision Records (ADRs) and Change Requests (CRs).
+metadata:
+  copyright: Copyright Daniel Grenemark 2026
+  version: "0.0.1"
+---
+
 # governance
 
 Reusable agent skills for project governance, including Architecture Decision Records (ADRs) and Change Requests (CRs).

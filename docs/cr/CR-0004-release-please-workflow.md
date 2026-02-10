@@ -1,4 +1,9 @@
 ---
+name: cr-0004-release-please-workflow
+description: Change request to implement release-please workflow for automated releases.
+metadata:
+  copyright: Copyright Daniel Grenemark 2026
+  version: "0.0.1"
 id: "CR-0004"
 status: "proposed"
 date: 2026-01-26

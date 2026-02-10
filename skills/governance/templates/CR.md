@@ -1,4 +1,9 @@
 ---
+name: cr-template
+description: Template for creating Change Requests (CRs).
+metadata:
+  copyright: Copyright Daniel Grenemark 2026
+  version: "0.0.1"
 # These are required metadata elements. Feel free to add additional if motivated.
 id: "CR-XXXX"
 status: "{proposed | approved | rejected | implemented | on-hold | cancelled}"

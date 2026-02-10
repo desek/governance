@@ -1,4 +1,9 @@
 ---
+name: cr-0006-checkpoint-instruction
+description: Change request to add checkpoint instruction for iterative git commits during development.
+metadata:
+  copyright: Copyright Daniel Grenemark 2026
+  version: "0.0.1"
 id: "CR-0006"
 status: "proposed"
 date: 2026-02-10

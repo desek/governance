@@ -1,3 +1,11 @@
+---
+name: contributing
+description: Guidelines for contributing to the Governance project, including how to report issues, submit changes, and follow coding standards.
+metadata:
+  copyright: Copyright Daniel Grenemark 2026
+  version: "0.0.1"
+---
+
 # Contributing to Governance
 
 Thank you for your interest in contributing to this project! This document provides guidelines and information for contributors.

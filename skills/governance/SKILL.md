@@ -2,6 +2,7 @@
 name: governance
 description: Creates Architecture Decision Records (ADRs) and Change Requests (CRs) for project governance. Activates on keywords like "ADR", "architecture decision", "CR", "change request", "governance", "technical decision", or "requirement change". Use for documenting technology choices, architectural patterns, or scope modifications.
 metadata:
+  copyright: Copyright Daniel Grenemark 2026
   author: desek
   version: "1.1"
 ---
@@ -97,7 +98,7 @@ Use this workflow to create iterative checkpoints during development:
 - When merging, compress checkpoint commits into a single long-term memory message
 - Use for PR descriptions or local squash merge commits
 
-Full instructions: [instructions/checkpoint.md](instructions/checkpoint.md)
+Full instructions: [reference/checkpoint.md](reference/checkpoint.md)
 
 ## Commit Message Format
 

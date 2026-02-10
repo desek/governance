@@ -1,3 +1,4 @@
+# Copyright Daniel Grenemark 2026
 [tools]
 "npm:@jetbrains/junie-cli" = "704.1.0"
 "npm:mcp-remote" = "0.1.37"

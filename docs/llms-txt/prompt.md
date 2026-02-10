@@ -1,3 +1,11 @@
+---
+name: llms-txt-prompt
+description: Instructions for creating an llms.txt file for LLM-friendly documentation structure.
+metadata:
+  copyright: Copyright Daniel Grenemark 2026
+  version: "0.0.1"
+---
+
 Create an llms.txt file for the documentation in the `docs/` folder.
 
 <context>
