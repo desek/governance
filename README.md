@@ -29,6 +29,31 @@ When you install this skill, your AI coding agent gains the same capability: cre
 |-------|-------------|
 | [governance](skills/governance/SKILL.md) | Creates ADRs for architectural decisions and CRs for requirement changes |
 
+### Checkpoint Hooks (Claude Code)
+
+Automate Git checkpoints using Claude Code hooks. Copy the hook configuration to your `.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/checkpoint.sh",
+            "timeout": 30000
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+See [checkpoint-hooks.md](skills/governance/reference/checkpoint-hooks.md) for the complete script and additional hook events (PostToolUse, TaskCompleted).
+
 ### Installation
 
 Install skills using the [skills CLI](https://github.com/vercel-labs/skills):
