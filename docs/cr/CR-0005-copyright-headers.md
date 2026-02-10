@@ -65,11 +65,14 @@ flowchart TD
 
 Implement copyright headers across all files and establish guidelines for future files:
 
-1. **Markdown Files**: Add copyright as frontmatter metadata
+1. **Markdown Files**: Add copyright as frontmatter metadata with the following structure
    ```yaml
    ---
+   name: <file-identifier>
+   description: <brief description of the file's purpose>
    metadata:
      copyright: Copyright Daniel Grenemark 2026
+     version: "0.0.1"
    ---
    ```
 
@@ -128,8 +131,13 @@ sequenceDiagram
 5. The copyright text **MUST** be: "Copyright Daniel Grenemark 2026"
 6. Markdown frontmatter **MUST** use the format:
    ```yaml
+   ---
+   name: <file-identifier>
+   description: <brief description of the file's purpose>
    metadata:
      copyright: Copyright Daniel Grenemark 2026
+     version: "0.0.1"
+   ---
    ```
 
 ### Non-Functional Requirements
