@@ -2,7 +2,7 @@
 name: cr-0010-checkpoint-slash-command
 description: Change request to refactor the governance checkpoint commit feature to a slash command.
 id: "CR-0010"
-status: "proposed"
+status: "in-progress"
 date: 2026-03-02
 requestor: desek
 stakeholders: [desek]
