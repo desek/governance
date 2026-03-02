@@ -1,6 +1,6 @@
 ---
 name: readme
-description: Overview of the Governance project, providing reusable agent skills for project governance including Architecture Decision Records (ADRs) and Change Requests (CRs).
+description: Overview of the Governance project, providing reusable agent skills for project governance including Architecture Decision Records (ADRs), Change Requests (CRs), and checkpoint commits.
 metadata:
   copyright: Copyright Daniel Grenemark 2026
   version: "0.0.1"
@@ -8,7 +8,7 @@ metadata:
 
 # governance
 
-Reusable agent skills for project governance, including Architecture Decision Records (ADRs) and Change Requests (CRs).
+Reusable agent skills for project governance, including Architecture Decision Records (ADRs), Change Requests (CRs), and checkpoint commits.
 
 > **AI Disclaimer**: This project uses AI and may produce inaccurate results. Verify all critical outputs.
 
@@ -21,17 +21,18 @@ What you'll find there:
 - **Clear traceability**: From initial request through implementation, every change is documented with stakeholders, priorities, and target versions
 - **Living documentation**: These aren't theoretical templates—they're actual records of how this skill evolved
 
-When you install this skill, your AI coding agent gains the same capability: creating well-structured Architecture Decision Records and Change Requests that keep your project's history clear and your team aligned.
+When you install these skills, your AI coding agent gains the same capabilities: creating well-structured Architecture Decision Records and Change Requests that keep your project's history clear and your team aligned, plus checkpoint commits to preserve work-in-progress state.
 
 ### Available Skills
 
 | Skill | Description |
 |-------|-------------|
 | [governance](skills/governance/SKILL.md) | Creates ADRs for architectural decisions and CRs for requirement changes |
+| [checkpoint-commit](skills/checkpoint-commit/SKILL.md) | Slash command that creates governance checkpoint commits linked to Change Requests |
 
 ### Checkpoint Hooks (Claude Code)
 
-Automate Git checkpoints using Claude Code prompt-based hooks. Copy the hook configuration to your `.claude/settings.json`:
+Automate checkpoint creation using Claude Code prompt-based hooks. When Claude finishes responding, the hook evaluates whether uncommitted changes exist and triggers `/checkpoint-commit` automatically. Copy the hook configuration to your `.claude/settings.json`:
 
 ```json
 {
@@ -41,7 +42,7 @@ Automate Git checkpoints using Claude Code prompt-based hooks. Copy the hook con
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "You are evaluating whether Claude should create a checkpoint before stopping. Context: $ARGUMENTS\n\nIf stop_hook_active is true, respond with {\"ok\": true}.\nIf there are uncommitted changes and stop_hook_active is false, respond with {\"ok\": false, \"reason\": \"Create a checkpoint using the governance skill checkpoint instruction before stopping.\"}.\nOtherwise respond with {\"ok\": true}.",
+            "prompt": "You are evaluating whether Claude should create a checkpoint before stopping. Context: $ARGUMENTS\n\nCheck if:\n1. There are uncommitted changes in the repository\n2. The stop_hook_active field is false (to prevent infinite loops)\n\nIf stop_hook_active is true, respond with {\"ok\": true}.\nIf there are uncommitted changes and stop_hook_active is false, respond with {\"ok\": false, \"reason\": \"/checkpoint-commit\"}.\nIf there are no uncommitted changes, respond with {\"ok\": true}.",
             "timeout": 30
           }
         ]
