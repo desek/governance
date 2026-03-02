@@ -80,6 +80,8 @@ metadata:
 ---
 ```
 
+**Note:** Governance documents (CRs and ADRs) **MUST** omit the `metadata.copyright` and `metadata.version` fields. Only `name` and `description` are required in their frontmatter.
+
 **TOML files** - Add as first line comment:
 ```toml
 # Copyright Daniel Grenemark 2026
