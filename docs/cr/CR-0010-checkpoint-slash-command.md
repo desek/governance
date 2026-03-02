@@ -111,7 +111,7 @@ flowchart TD
 4. The command **MUST** analyze all repository changes (staged, unstaged, untracked) using `git diff` and `git ls-files`.
 5. The command **MUST** validate that no sensitive, build, or large temporary files are being staged by checking against `.gitignore` before committing.
 6. The command **MUST** attempt to auto-detect the active CR ID from the Git branch name or `docs/cr/` history if not provided in arguments.
-7. The command **MUST** offer to generate a semantic "Golden Summary" based on the `git diff` analysis if no summary is provided by the user.
+7. The command **MUST** generate a semantic "Golden Summary" based on the `git diff` analysis if no summary is provided by the user.
 8. The command **MUST** perform a `git add -A` to stage all changes after `.gitignore` validation.
 9. The command **MUST** generate a commit message in the format: `checkpoint(CR-xxxx): {summary}\n\n{detailed_body}` based on the analysis of the actual changes.
 10. The detailed body **MUST** explain what changed and why, matching the requirements in `reference/checkpoint.md`.
