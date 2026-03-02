@@ -20,6 +20,8 @@ Creates and manages governance documents: ADRs for architectural decisions, CRs 
 
 ## ADR Workflow
 
+> **Documentation-only task.** Creating an ADR is a documentation-only task. No code compilation, test execution, or linting is required.
+
 Use this checklist when creating an Architecture Decision Record:
 
 ```
@@ -29,6 +31,8 @@ Use this checklist when creating an Architecture Decision Record:
 - [ ] Fill in all required sections
 - [ ] Set status to "proposed"
 ```
+
+**Template frontmatter:** The template file contains its own frontmatter (`name: adr-template`, `description: Template for creating Architecture Decision Records (ADRs).`, and `metadata` fields) that describe the template itself. Do **not** copy these values into created documents. Each ADR must have its own unique `name` and `description` reflecting the specific decision. Created ADR documents **MUST** omit the `metadata.copyright` and `metadata.version` frontmatter fields.
 
 **Strict requirements:**
 - File naming: `ADR-NNNN-{title}.md` (four-digit number, lowercase, hyphens)
@@ -42,6 +46,8 @@ Use this checklist when creating an Architecture Decision Record:
 
 ## CR Workflow
 
+> **Documentation-only task.** Creating a CR is a documentation-only task. No code compilation, test execution, or linting is required.
+
 Use this checklist when creating a Change Request:
 
 ```
@@ -52,6 +58,8 @@ Use this checklist when creating a Change Request:
 - [ ] Write acceptance criteria in Gherkin format
 - [ ] Set status to "proposed"
 ```
+
+**Template frontmatter:** The template file contains its own frontmatter (`name: cr-template`, `description: Template for creating Change Requests (CRs).`, and `metadata` fields) that describe the template itself. Do **not** copy these values into created documents. Each CR must have its own unique `name` and `description` reflecting the specific change request. Created CR documents **MUST** omit the `metadata.copyright` and `metadata.version` frontmatter fields.
 
 **Strict requirements:**
 - File naming: `CR-NNNN-{title}.md` (four-digit number, lowercase, hyphens)
