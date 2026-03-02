@@ -1,6 +1,7 @@
 ---
 name: checkpoint-commit
 description: Slash command that creates governance checkpoint commits. Analyzes changes, validates .gitignore, and creates formatted checkpoint commits linked to Change Requests. Trigger with /checkpoint-commit [CR-XXXX] [summary].
+license: Apache-2.0
 metadata:
   copyright: Copyright Daniel Grenemark 2026
   version: "1.0"

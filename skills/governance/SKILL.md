@@ -1,6 +1,7 @@
 ---
 name: governance
 description: Creates Architecture Decision Records (ADRs) and Change Requests (CRs) for project governance. Activates on keywords like "ADR", "architecture decision", "CR", "change request", "governance", "technical decision", or "requirement change". Use for documenting technology choices, architectural patterns, or scope modifications.
+license: Apache-2.0
 metadata:
   copyright: Copyright Daniel Grenemark 2026
   author: desek
