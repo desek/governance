@@ -122,6 +122,7 @@ flowchart TD
 
 * `skills/governance/SKILL.md`: Update "Checkpoint Workflow" section to promote the slash command.
 * `skills/governance/reference/checkpoint.md`: Update documentation to reflect the new instruction-based workflow.
+* `skills/governance/reference/checkpoint-hooks.md`: Update hook configuration examples to use the `/gov:checkpoint` slash command.
 * `docs/cr/CR-0010-checkpoint-slash-command.md`: This document defining the change.
 * `.claude/skills/gov-checkpoint/SKILL.md`: New skill definition containing the instructions.
 
@@ -174,7 +175,7 @@ Draft the natural language instructions within `SKILL.md` to guide the model thr
 4. Execution of the `git commit` command.
 
 ### Phase 3: Documentation Update
-Update `SKILL.md` and `checkpoint.md` to deprecate the manual steps in favor of the `/gov:checkpoint` command and the model-triggered checkpoint capability.
+Update `SKILL.md`, `checkpoint.md`, and `checkpoint-hooks.md` to deprecate the manual steps in favor of the `/gov:checkpoint` command and the model-triggered checkpoint capability. Ensure the hook configuration examples in `checkpoint-hooks.md` are updated to use the new slash command.
 
 ### Implementation Flow
 
@@ -187,7 +188,7 @@ flowchart LR
         B1[Instruction Prototyping] --> B2[Model-Trigger Verification]
     end
     subgraph Phase3["Phase 3: Docs"]
-        C1[Update reference/checkpoint.md] --> C2[Update SKILL.md]
+        C1[Update reference docs] --> C2[Update SKILL.md]
     end
     Phase1 --> Phase2 --> Phase3
 ```
