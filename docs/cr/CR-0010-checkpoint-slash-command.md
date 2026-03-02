@@ -2,7 +2,7 @@
 name: cr-0010-checkpoint-slash-command
 description: Change request to refactor the governance checkpoint commit feature to a slash command.
 id: "CR-0010"
-status: "in-progress"
+status: "implemented"
 date: 2026-03-02
 requestor: desek
 stakeholders: [desek]
@@ -42,7 +42,7 @@ By refactoring this into a slash command, we provide a "golden path" for work pr
 
 ## Current State
 
-Currently, the checkpoint workflow is documented in `skills/governance/reference/checkpoint.md` and referenced in the `governance` skill's `SKILL.md`. It consists of five manual steps that must be executed in sequence.
+Previously, the checkpoint workflow was documented in `skills/governance/reference/checkpoint.md` and referenced in the `governance` skill's `SKILL.md`. It consisted of five manual steps that had to be executed in sequence. This has now been refactored into the `/checkpoint-commit` slash command.
 
 ### Current State Diagram
 
@@ -298,16 +298,16 @@ Then the system MUST NOT create a commit
 ## Quality Standards Compliance
 
 ### Build & Compilation
-- [ ] Command script/binary builds without errors
-- [ ] Integrated tool passes schema validation
+- [x] Command script/binary builds without errors
+- [x] Integrated tool passes schema validation
 
 ### Linting & Code Style
-- [ ] All shell/implementation scripts pass relevant linters
-- [ ] Documentation follows project standards
+- [x] All shell/implementation scripts pass relevant linters
+- [x] Documentation follows project standards
 
 ### Test Execution
-- [ ] All new checkpoint tests pass in the CI environment
-- [ ] Existing Git workflows remain unaffected
+- [x] All new checkpoint tests pass in the CI environment
+- [x] Existing Git workflows remain unaffected
 
 ### Verification Commands
 
