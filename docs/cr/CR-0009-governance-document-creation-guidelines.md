@@ -5,7 +5,7 @@ metadata:
   copyright: Copyright Daniel Grenemark 2026
   version: "0.0.1"
 id: "CR-0009"
-status: "proposed"
+status: "implemented"
 date: 2026-03-02
 requestor: desek
 stakeholders: [desek]
@@ -289,8 +289,8 @@ Then templates/CR.md is unchanged from its current state
 
 ### Documentation
 
-- [ ] Governance skill SKILL.md updated with new guidance
-- [ ] Guidance is clear and unambiguous
+- [x] Governance skill SKILL.md updated with new guidance
+- [x] Guidance is clear and unambiguous
 
 ### Code Review
 
