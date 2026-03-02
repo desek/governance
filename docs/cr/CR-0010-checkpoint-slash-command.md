@@ -20,7 +20,7 @@ CHANGE REQUEST: REFACTOR CHECKPOINT TO SLASH COMMAND
 
 ## Change Summary
 
-Refactor the existing manual governance checkpoint workflow into a unified slash command `/gov:checkpoint`. This change will transition the checkpoint process from a set of documented manual steps into an automated command implemented as a **Claude Code Skill**. The skill **MUST** handle change analysis, `.gitignore` validation, and commit creation through a set of **Instruction-Based Steps** defined in the `SKILL.md`. This avoids the need for a separate shell script and instead leverages the model's ability to execute complex workflows directly within the skill's context. This approach also allows for **model-triggered commits** by removing the `disable-model-invocation: true` constraint, while still being available as a user-initiated slash command.
+Refactor the existing manual governance checkpoint workflow into a unified slash command `/gov:checkpoint`. This change will transition the checkpoint process from a set of documented manual steps into an automated command implemented as a **Claude Code Skill**. The skill **MUST** handle change analysis, `.gitignore` validation, and commit creation through a set of **Instruction-Based Steps** defined in the `SKILL.md`. The default user workflow **MUST** be simplified to only require running `/gov:checkpoint`, with the model automatically detecting the active CR ID from the Git branch or context and generating a "Golden Summary" based on the diff analysis. This approach also allows for **Seamless Hook Handover**, where Claude Code hooks can return the exact `/gov:checkpoint` command to execute, making work preservation background-automated and low-friction.
 
 ## Motivation and Background
 
@@ -70,15 +70,20 @@ allowed-tools: Bash, Read, Grep, Glob
 
 Follow these instructions to create a checkpoint for $ARGUMENTS:
 
-1. **Analyze Changes**: Run `git status` and `git diff` to identify all staged and unstaged changes, as well as untracked files.
-2. **Validate .gitignore**: Ensure no temporary or ignored files are about to be staged. Update `.gitignore` if necessary.
-3. **Stage Changes**: Execute `git add -A` to stage all relevant changes.
-4. **Draft Commit Message**:
-   - Use the format `checkpoint(CR-xxxx): {summary}` where `CR-xxxx` and `{summary}` are from `$ARGUMENTS`.
-   - If missing, infer them from context.
+1. **Context Detection**:
+   - If a CR ID is provided in `$ARGUMENTS`, use it.
+   - Otherwise, **MUST** attempt to auto-detect the active CR ID from the current Git branch name (e.g., `dev/CR-XXXX`) or by finding the most recently modified file in `docs/cr/`.
+   - If ambiguous, prompt the user for confirmation of the detected ID.
+2. **Analyze Changes**: Run `git status` and `git diff` to identify all staged and unstaged changes, as well as untracked files.
+3. **Validate .gitignore**: Ensure no temporary or ignored files are about to be staged. Update `.gitignore` if necessary.
+4. **Stage Changes**: Execute `git add -A` to stage all relevant changes.
+5. **Draft Commit Message**:
+   - If a summary is provided in `$ARGUMENTS`, use it.
+   - Otherwise, **SHOULD** analyze the `git diff` and propose a **"Golden Summary"** (e.g., `refactor(auth): migrate JWT validation to middleware`).
+   - Use the format `checkpoint(CR-xxxx): {summary}`.
    - Include a detailed body with a list of modified files and a brief summary of what changed.
-5. **Create Commit**: Execute `git commit -m "{message}"`.
-6. **Report**: Share the commit hash and a summary of the action taken.
+6. **Create Commit**: Execute `git commit -m "{message}"`.
+7. **Report**: Share the commit hash and a summary of the action taken.
 ```
 
 ### Proposed State Diagram
@@ -101,15 +106,16 @@ flowchart TD
 
 1. The system **MUST** provide a `/gov:checkpoint` command implemented as a Claude Code Skill.
 2. The skill **SHOULD NOT** include `disable-model-invocation: true` in its frontmatter, allowing the model to suggest or trigger checkpoints during long development tasks.
-3. The skill **MUST** use `$ARGUMENTS` (or `$0`, `$1`) to capture the CR identifier and summary.
+3. The skill **MUST** use `$ARGUMENTS` (or `$0`, `$1`) to capture optional CR identifier and summary.
 4. The command **MUST** automatically perform a `git add -A` to stage all changes, including untracked files.
 5. The command **MUST** validate that no sensitive or large temporary files are being staged by checking against `.gitignore` before committing.
-6. The command **MUST** require a CR identifier (e.g., `CR-0010`) and a summary string as input.
-7. If the CR identifier or summary is missing, the command **MUST** infer them from the current context or prompt for a clear error message.
+6. The command **MUST** attempt to auto-detect the active CR ID from the Git branch name or `docs/cr/` history if not provided in arguments.
+7. The command **SHOULD** offer to generate a semantic "Golden Summary" based on the `git diff` analysis if no summary is provided by the user.
 8. The command **MUST** generate a commit message in the format: `checkpoint(CR-xxxx): {summary}\n\n{detailed_body}` based on the analysis of the actual changes.
 9. The detailed body **MUST** include a list of modified files and a summary of changes detected during the analysis phase.
 10. The command **MUST** fail if there are no changes to commit.
 11. The command **MUST** provide clear feedback to the user upon successful commit, including the commit hash.
+12. The `checkpoint-hooks.md` **MUST** be updated to define a handover protocol where hooks return the exact command to execute: `{"ok": false, "reason": "/gov:checkpoint"}`.
 
 ### Non-Functional Requirements
 
@@ -165,17 +171,17 @@ Higher developer productivity and better project traceability. More reliable che
 ## Implementation Approach
 
 ### Phase 1: Skill Definition
-Define the `SKILL.md` in `.claude/skills/gov-checkpoint/`. Set appropriate frontmatter (`name`, `description`). Use `$ARGUMENTS` for input handling.
+Define the `SKILL.md` in `.claude/skills/gov-checkpoint/`. Set appropriate frontmatter (`name`, `description`). Implement logic for CR ID auto-detection and "Golden Summary" generation.
 
 ### Phase 2: Instruction Refinement
 Draft the natural language instructions within `SKILL.md` to guide the model through:
-1. Analysis of current Git state.
-2. Verification of `.gitignore` compliance.
-3. Message construction using context-aware details.
+1. Context-aware auto-detection of CR ID from Git branch or history.
+2. Analysis of current Git state and diff-based summary drafting.
+3. Verification of `.gitignore` compliance.
 4. Execution of the `git commit` command.
 
 ### Phase 3: Documentation Update
-Update `SKILL.md`, `checkpoint.md`, and `checkpoint-hooks.md` to deprecate the manual steps in favor of the `/gov:checkpoint` command and the model-triggered checkpoint capability. Ensure the hook configuration examples in `checkpoint-hooks.md` are updated to use the new slash command.
+Update `SKILL.md`, `checkpoint.md`, and `checkpoint-hooks.md` to deprecate the manual steps in favor of the `/gov:checkpoint` command. Specifically, update `checkpoint-hooks.md` to implement the **Seamless Handover Protocol**, where hooks return `/gov:checkpoint` as the direct instruction.
 
 ### Implementation Flow
 
@@ -214,17 +220,26 @@ Not applicable.
 
 ## Acceptance Criteria
 
-### AC-1: Successful Checkpoint Creation
+### AC-1: Successful Checkpoint Creation with Auto-Detection
 
 ```gherkin
-Given a repository with uncommitted changes
-When I execute `/gov:checkpoint CR-0010 'implementing slash command'`
+Given a repository with uncommitted changes on branch 'dev/CR-0010'
+When I execute `/gov:checkpoint`
 Then a new Git commit MUST be created
-  And the commit subject MUST be 'checkpoint(CR-0010): implementing slash command'
+  And the commit subject MUST be 'checkpoint(CR-0010): {auto_generated_summary}'
   And the commit body MUST contain a list of changed files
 ```
 
-### AC-2: Handling No Changes
+### AC-2: Successful Checkpoint with Manual Arguments
+
+```gherkin
+Given a repository with uncommitted changes
+When I execute `/gov:checkpoint CR-0011 'manual override'`
+Then a new Git commit MUST be created
+  And the commit subject MUST be 'checkpoint(CR-0011): manual override'
+```
+
+### AC-3: Handling No Changes
 
 ```gherkin
 Given a repository with no uncommitted changes
@@ -233,11 +248,13 @@ Then no commit MUST be created
   And the system MUST report "No changes to checkpoint"
 ```
 
-### AC-3: Validation of Arguments
+### AC-4: Validation of Arguments and Context Detection Failure
 
 ```gherkin
-Given I am in a repository
-When I execute `/gov:checkpoint` without any arguments
+Given I am in a repository with uncommitted changes
+  And the branch name does not contain a CR ID
+  And no CR files exist in docs/cr/
+When I execute `/gov:checkpoint`
 Then the system MUST NOT create a commit
   And the system MUST prompt for or request a CR identifier and summary
 ```
