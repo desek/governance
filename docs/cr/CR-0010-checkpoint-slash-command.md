@@ -78,7 +78,7 @@ Follow these instructions to create a checkpoint for $ARGUMENTS:
 3. **Step 2: Update .gitignore**: Review identified untracked files and changes. Ensure no temporary files (`.tmp`, `.bak`, `*.log`), build artifacts (`dist/`, `build/`, `node_modules/`), or generated content are staged. Update `.gitignore` if necessary. **This step is mandatory**.
 4. **Step 3: Write Summary**:
    - If a summary is provided in `$ARGUMENTS`, use it.
-   - Otherwise, **SHOULD** analyze the `git diff` and propose a **"Golden Summary"** (e.g., `refactor(auth): migrate JWT validation to middleware`).
+   - Otherwise, **MUST** analyze the `git diff` and propose a **"Golden Summary"** (e.g., `refactor(auth): migrate JWT validation to middleware`).
    - Use the format `checkpoint(CR-xxxx): {summary}`.
    - Include a detailed body with a list of modified files and a brief description explaining what changed and why.
 5. **Step 4: Stage All Changes**: Execute `git add -A` to stage all relevant changes.
@@ -106,12 +106,12 @@ flowchart TD
 ### Functional Requirements
 
 1. The system **MUST** provide a `/gov:checkpoint` command implemented as a Claude Code Skill.
-2. The skill **SHOULD NOT** include `disable-model-invocation: true` in its frontmatter, allowing the model to suggest or trigger checkpoints during long development tasks.
+2. The skill **MUST NOT** include `disable-model-invocation: true` in its frontmatter, allowing the model to suggest or trigger checkpoints during long development tasks.
 3. The skill **MUST** use `$ARGUMENTS` (or `$0`, `$1`) to capture optional CR identifier and summary.
 4. The command **MUST** analyze all repository changes (staged, unstaged, untracked) using `git diff` and `git ls-files`.
 5. The command **MUST** validate that no sensitive, build, or large temporary files are being staged by checking against `.gitignore` before committing.
 6. The command **MUST** attempt to auto-detect the active CR ID from the Git branch name or `docs/cr/` history if not provided in arguments.
-7. The command **SHOULD** offer to generate a semantic "Golden Summary" based on the `git diff` analysis if no summary is provided by the user.
+7. The command **MUST** offer to generate a semantic "Golden Summary" based on the `git diff` analysis if no summary is provided by the user.
 8. The command **MUST** perform a `git add -A` to stage all changes after `.gitignore` validation.
 9. The command **MUST** generate a commit message in the format: `checkpoint(CR-xxxx): {summary}\n\n{detailed_body}` based on the analysis of the actual changes.
 10. The detailed body **MUST** explain what changed and why, matching the requirements in `reference/checkpoint.md`.
@@ -292,12 +292,12 @@ git log -1 --pretty=format:"%B"
 ### Risk 1: Over-staging files
 **Likelihood:** medium
 **Impact:** low
-**Mitigation:** The command **MUST** explicitly rely on `.gitignore` and **SHOULD** provide a "dry-run" or confirmation if too many files (>50) are being staged.
+**Mitigation:** The command **MUST** explicitly rely on `.gitignore` and **MUST** provide a "dry-run" or confirmation if too many files (>50) are being staged.
 
 ### Risk 2: Incorrect CR ID
 **Likelihood:** high
 **Impact:** medium
-**Mitigation:** The command **SHOULD** try to find the most recent CR ID used in the branch history to suggest as a default.
+**Mitigation:** The command **MUST** try to find the most recent CR ID used in the branch history to suggest as a default.
 
 ## Dependencies
 
