@@ -2,6 +2,10 @@
 # Jetbrain Junie
 .junie/
 
+# Environment files
+.env
+.env.*
+
 # Ignore external documentation folders
 docs/anthropic/
 docs/agentskills/
