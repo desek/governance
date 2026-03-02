@@ -58,33 +58,39 @@ flowchart TD
 
 Introduce a new slash command `/gov:checkpoint` implemented as a Claude Code Skill in `.claude/skills/gov-checkpoint/SKILL.md`. This skill will encapsulate the entire workflow through a series of natural language instructions. The command **MUST** use the `$ARGUMENTS` placeholder to accept optional arguments for the CR number and summary. By providing the model with clear instructions, we ensure it can accurately analyze changes and create the commit without a separate script, allowing the model to trigger checkpoints when appropriate.
 
-### Skill Definition Example
+### Skill Pseudo-Implementation
 
 ```yaml
----
-name: gov:checkpoint
-description: Creates a Git checkpoint commit for work-in-progress.
-argument-hint: [CR-XXXX] [summary]
-allowed-tools: Bash, Read, Grep, Glob
----
+# Note: This is a pseudo-implementation for the slash command logic.
+# The actual implementation MUST strictly follow the steps in 
+# skills/governance/reference/checkpoint.md with minimal modifications.
 
-Follow these instructions to create a checkpoint for $ARGUMENTS:
-
-1. **Context Detection**:
-   - If a CR ID is provided in `$ARGUMENTS`, use it.
-   - Otherwise, **MUST** attempt to auto-detect the active CR ID from the current Git branch name (e.g., `dev/CR-XXXX`) or by finding the most recently modified file in `docs/cr/`.
-   - If ambiguous, prompt the user for confirmation of detected ID.
-2. **Step 1: Analyze Changes**: Run `git status`, `git diff --staged`, `git diff`, and `git ls-files --others --exclude-standard` to identify all staged and unstaged changes, as well as untracked files.
-3. **Step 2: Update .gitignore**: Review identified untracked files and changes. Ensure no temporary files (`.tmp`, `.bak`, `*.log`), build artifacts (`dist/`, `build/`, `node_modules/`), or generated content are staged. Update `.gitignore` if necessary. **This step is mandatory**.
-4. **Step 3: Write Summary**:
-   - If a summary is provided in `$ARGUMENTS`, use it.
-   - Otherwise, **MUST** analyze the `git diff` and propose a **"Golden Summary"** (e.g., `refactor(auth): migrate JWT validation to middleware`).
-   - Use the format `checkpoint(CR-xxxx): {summary}`.
-   - Include a detailed body with a list of modified files and a brief description explaining what changed and why.
-5. **Step 4: Stage All Changes**: Execute `git add -A` to stage all relevant changes.
-6. **Step 5: Create Checkpoint Commit**: Execute `git commit -m "{message}"`.
-7. **Report**: Share the commit hash and a summary of the action taken.
-8. **Safety Rules**: **DO NOT** perform destructive Git operations (reset, rebase, amend, force push). Ensure all operations are idempotent and safe to run multiple times.
+/gov:checkpoint [CR-XXXX] [summary]:
+  1. CONTEXT DETECTION:
+     - IF CR-ID NOT in $ARGUMENTS:
+       - Detect from branch name (e.g., dev/CR-XXXX) OR most recent docs/cr/ edit
+       - MUST prompt for confirmation if ambiguous
+     - ELSE: Use provided CR-ID
+  2. ANALYZE CHANGES:
+     - Run `git status`, `git diff --staged`, `git diff`, and `git ls-files --others --exclude-standard`
+     - MUST identify all staged, unstaged, and untracked files
+  3. UPDATE .GITIGNORE:
+     - MUST review identified untracked files
+     - IF temporary/build/generated files found: Update .gitignore
+     - This step MUST be performed BEFORE staging
+  4. WRITE SUMMARY:
+     - IF summary NOT in $ARGUMENTS:
+       - Analyze diff and generate "Golden Summary" (MUST)
+     - Format: "checkpoint(CR-xxxx): {summary}\n\n{detailed body}"
+     - Detailed body MUST explain what changed and why per reference/checkpoint.md
+  5. STAGE ALL CHANGES:
+     - Execute `git add -A`
+  6. CREATE CHECKPOINT COMMIT:
+     - Execute `git commit -m "{message}"`
+  7. REPORT:
+     - Share commit hash and summary of actions
+  8. SAFETY:
+     - MUST NOT perform destructive Git operations (reset, rebase, amend, force push)
 ```
 
 ### Proposed State Diagram
@@ -174,14 +180,14 @@ Higher developer productivity and better project traceability. More reliable che
 ## Implementation Approach
 
 ### Phase 1: Skill Definition
-Define the `SKILL.md` in `.claude/skills/gov-checkpoint/`. Set appropriate frontmatter (`name`, `description`). Implement logic for CR ID auto-detection and "Golden Summary" generation.
+Define the `SKILL.md` in `.claude/skills/gov-checkpoint/`. Set appropriate frontmatter (`name`, `description`). The implementation MUST strictly adhere to the five-step workflow from `skills/governance/reference/checkpoint.md`: Analyze, Update .gitignore, Write Summary, Stage, and Commit.
 
-### Phase 2: Instruction Refinement
-Draft the natural language instructions within `SKILL.md` to guide the model through:
+### Phase 2: Instruction Implementation
+Implement the pseudo-logic within `SKILL.md` to guide the model through:
 1. Context-aware auto-detection of CR ID from Git branch or history.
-2. Analysis of current Git state and diff-based summary drafting.
-3. Verification of `.gitignore` compliance.
-4. Execution of the `git commit` command.
+2. Implementation of Step 1-5 from `reference/checkpoint.md` with minimal changes to support automation.
+3. Verification of `.gitignore` compliance as a mandatory pre-staging step.
+4. Generation of the "Golden Summary" if no summary is provided in arguments.
 
 ### Phase 3: Documentation Update
 Update `SKILL.md`, `checkpoint.md`, and `checkpoint-hooks.md` to deprecate the manual steps in favor of the `/gov:checkpoint` command. Specifically, update `checkpoint-hooks.md` to implement the **Seamless Handover Protocol**, where hooks return `/gov:checkpoint` as the direct instruction.
