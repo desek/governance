@@ -73,17 +73,18 @@ Follow these instructions to create a checkpoint for $ARGUMENTS:
 1. **Context Detection**:
    - If a CR ID is provided in `$ARGUMENTS`, use it.
    - Otherwise, **MUST** attempt to auto-detect the active CR ID from the current Git branch name (e.g., `dev/CR-XXXX`) or by finding the most recently modified file in `docs/cr/`.
-   - If ambiguous, prompt the user for confirmation of the detected ID.
-2. **Analyze Changes**: Run `git status` and `git diff` to identify all staged and unstaged changes, as well as untracked files.
-3. **Validate .gitignore**: Ensure no temporary or ignored files are about to be staged. Update `.gitignore` if necessary.
-4. **Stage Changes**: Execute `git add -A` to stage all relevant changes.
-5. **Draft Commit Message**:
+   - If ambiguous, prompt the user for confirmation of detected ID.
+2. **Step 1: Analyze Changes**: Run `git status`, `git diff --staged`, `git diff`, and `git ls-files --others --exclude-standard` to identify all staged and unstaged changes, as well as untracked files.
+3. **Step 2: Update .gitignore**: Review identified untracked files and changes. Ensure no temporary files (`.tmp`, `.bak`, `*.log`), build artifacts (`dist/`, `build/`, `node_modules/`), or generated content are staged. Update `.gitignore` if necessary. **This step is mandatory**.
+4. **Step 3: Write Summary**:
    - If a summary is provided in `$ARGUMENTS`, use it.
    - Otherwise, **SHOULD** analyze the `git diff` and propose a **"Golden Summary"** (e.g., `refactor(auth): migrate JWT validation to middleware`).
    - Use the format `checkpoint(CR-xxxx): {summary}`.
-   - Include a detailed body with a list of modified files and a brief summary of what changed.
-6. **Create Commit**: Execute `git commit -m "{message}"`.
+   - Include a detailed body with a list of modified files and a brief description explaining what changed and why.
+5. **Step 4: Stage All Changes**: Execute `git add -A` to stage all relevant changes.
+6. **Step 5: Create Checkpoint Commit**: Execute `git commit -m "{message}"`.
 7. **Report**: Share the commit hash and a summary of the action taken.
+8. **Safety Rules**: **DO NOT** perform destructive Git operations (reset, rebase, amend, force push). Ensure all operations are idempotent and safe to run multiple times.
 ```
 
 ### Proposed State Diagram
@@ -107,15 +108,17 @@ flowchart TD
 1. The system **MUST** provide a `/gov:checkpoint` command implemented as a Claude Code Skill.
 2. The skill **SHOULD NOT** include `disable-model-invocation: true` in its frontmatter, allowing the model to suggest or trigger checkpoints during long development tasks.
 3. The skill **MUST** use `$ARGUMENTS` (or `$0`, `$1`) to capture optional CR identifier and summary.
-4. The command **MUST** automatically perform a `git add -A` to stage all changes, including untracked files.
-5. The command **MUST** validate that no sensitive or large temporary files are being staged by checking against `.gitignore` before committing.
+4. The command **MUST** analyze all repository changes (staged, unstaged, untracked) using `git diff` and `git ls-files`.
+5. The command **MUST** validate that no sensitive, build, or large temporary files are being staged by checking against `.gitignore` before committing.
 6. The command **MUST** attempt to auto-detect the active CR ID from the Git branch name or `docs/cr/` history if not provided in arguments.
 7. The command **SHOULD** offer to generate a semantic "Golden Summary" based on the `git diff` analysis if no summary is provided by the user.
-8. The command **MUST** generate a commit message in the format: `checkpoint(CR-xxxx): {summary}\n\n{detailed_body}` based on the analysis of the actual changes.
-9. The detailed body **MUST** include a list of modified files and a summary of changes detected during the analysis phase.
-10. The command **MUST** fail if there are no changes to commit.
-11. The command **MUST** provide clear feedback to the user upon successful commit, including the commit hash.
-12. The `checkpoint-hooks.md` **MUST** be updated to define a handover protocol where hooks return the exact command to execute: `{"ok": false, "reason": "/gov:checkpoint"}`.
+8. The command **MUST** perform a `git add -A` to stage all changes after `.gitignore` validation.
+9. The command **MUST** generate a commit message in the format: `checkpoint(CR-xxxx): {summary}\n\n{detailed_body}` based on the analysis of the actual changes.
+10. The detailed body **MUST** explain what changed and why, matching the requirements in `reference/checkpoint.md`.
+11. The command **MUST** fail if there are no changes to commit.
+12. The command **MUST** provide clear feedback to the user upon successful commit, including the commit hash.
+13. The `checkpoint-hooks.md` **MUST** be updated to define a handover protocol where hooks return the exact command to execute: `{"ok": false, "reason": "/gov:checkpoint"}`.
+14. The command **MUST** strictly follow the safety rules: no destructive Git operations (reset, rebase, amend, force push).
 
 ### Non-Functional Requirements
 
@@ -227,7 +230,8 @@ Given a repository with uncommitted changes on branch 'dev/CR-0010'
 When I execute `/gov:checkpoint`
 Then a new Git commit MUST be created
   And the commit subject MUST be 'checkpoint(CR-0010): {auto_generated_summary}'
-  And the commit body MUST contain a list of changed files
+  And the commit body MUST contain a list of changed files and explanation of what changed
+  And destructive operations MUST NOT have been performed
 ```
 
 ### AC-2: Successful Checkpoint with Manual Arguments
