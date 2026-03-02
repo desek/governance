@@ -20,7 +20,9 @@ CHANGE REQUEST: REFACTOR CHECKPOINT TO SLASH COMMAND
 
 ## Change Summary
 
-Refactor the existing manual governance checkpoint workflow into a unified slash command `/gov:checkpoint`. This change will transition the checkpoint process from a set of documented manual steps into an automated command implemented as a **Claude Code Skill**. The skill **MUST** handle change analysis, `.gitignore` validation, and commit creation through a set of **Instruction-Based Steps** defined in the `SKILL.md`. The default user workflow **MUST** be simplified to only require running `/gov:checkpoint`, with the model automatically detecting the active CR ID from the Git branch or context and generating a "Golden Summary" based on the diff analysis. This approach also allows for **Seamless Hook Handover**, where Claude Code hooks can return the exact `/gov:checkpoint` command to execute, making work preservation background-automated and low-friction.
+Refactor the existing manual governance checkpoint workflow into a unified slash command `/checkpoint-commit`. This change will transition the checkpoint process from a set of documented manual steps into an automated command implemented as a **Claude Code Skill**. The skill **MUST** handle change analysis, `.gitignore` validation, and commit creation through a set of **Instruction-Based Steps** defined in the `SKILL.md`. The default user workflow **MUST** be simplified to only require running `/checkpoint-commit`, with the model automatically detecting the active CR ID from the Git branch or context and generating a "Golden Summary" based on the diff analysis. This approach also allows for **Seamless Hook Handover**, where Claude Code hooks can return the exact `/checkpoint-commit` command to execute, making work preservation background-automated and low-friction.
+
+> **Naming Constraint**: Per the [Claude Code Skills documentation](docs/anthropic/skills.md), the skill `name` field must contain only lowercase letters, numbers, and hyphens (max 64 characters). Colons are not permitted, so the original `/gov:checkpoint` naming is invalid. The command **MUST** be named `/checkpoint-commit`.
 
 ## Motivation and Background
 
@@ -56,7 +58,27 @@ flowchart TD
 
 ## Proposed Change
 
-Introduce a new slash command `/gov:checkpoint` implemented as a Claude Code Skill in `.claude/skills/gov-checkpoint/SKILL.md`. This skill will encapsulate the entire workflow through a series of natural language instructions. The command **MUST** use the `$ARGUMENTS` placeholder to accept optional arguments for the CR number and summary. By providing the model with clear instructions, we ensure it can accurately analyze changes and create the commit without a separate script, allowing the model to trigger checkpoints when appropriate.
+Introduce a new slash command `/checkpoint-commit` implemented as a **separate skill**. The skill **MUST** be created at `skills/checkpoint-commit/SKILL.md` within the project source directory. This repository creates reusable skills distributed via `npx skills add` — all skill source files reside under `skills/`, not in `.claude/` or `.junie/` (those are consumer-side installation targets).
+
+The new skill **MUST** reference shared resources from `skills/governance/` (e.g., `../governance/reference/checkpoint.md`) for checkpoint workflow details. As part of this refactoring, the "Checkpoint Workflow" section **MUST** be removed from `skills/governance/SKILL.md` to avoid duplication and ensure the checkpoint functionality is owned exclusively by the new `checkpoint-commit` skill.
+
+This skill will encapsulate the entire workflow through a series of natural language instructions. The command **MUST** use the `$ARGUMENTS` placeholder to accept optional arguments for the CR number and summary. By providing the model with clear instructions, we ensure it can accurately analyze changes and create the commit without a separate script, allowing the model to trigger checkpoints when appropriate.
+
+### Skill Architecture
+
+```
+skills/
+├── checkpoint-commit/
+│   └── SKILL.md              # New checkpoint commit skill
+└── governance/               # Existing governance skill (checkpoint section removed)
+    ├── SKILL.md
+    ├── reference/
+    │   ├── checkpoint.md     # Checkpoint workflow reference
+    │   └── checkpoint-hooks.md
+    └── ...
+```
+
+> **Note**: The existing `skills/governance/SKILL.md` **MUST NOT** be repurposed as the checkpoint commit skill. Each skill has its own directory under `skills/`.
 
 ### Skill Pseudo-Implementation
 
@@ -65,7 +87,7 @@ Introduce a new slash command `/gov:checkpoint` implemented as a Claude Code Ski
 # The actual implementation MUST strictly follow the steps in 
 # skills/governance/reference/checkpoint.md with minimal modifications.
 
-/gov:checkpoint [CR-XXXX] [summary]:
+/checkpoint-commit [CR-XXXX] [summary]:
   1. CONTEXT DETECTION:
      - IF CR-ID NOT in $ARGUMENTS:
        - Detect from branch name (e.g., dev/CR-XXXX) OR most recent docs/cr/ edit
@@ -98,7 +120,7 @@ Introduce a new slash command `/gov:checkpoint` implemented as a Claude Code Ski
 ```mermaid
 flowchart TD
     subgraph Automated["Proposed Slash Command Workflow"]
-        User["User/Agent: /gov:checkpoint CR-XXXX 'summary'"] --> Cmd[Command Handler]
+        User["User/Agent: /checkpoint-commit CR-XXXX 'summary'"] --> Cmd[Command Handler]
         Cmd --> Analysis[Automated Analysis]
         Analysis --> GitIgnore[Validate .gitignore]
         GitIgnore --> Stage[Stage Changes]
@@ -111,7 +133,7 @@ flowchart TD
 
 ### Functional Requirements
 
-1. The system **MUST** provide a `/gov:checkpoint` command implemented as a Claude Code Skill.
+1. The system **MUST** provide a `/checkpoint-commit` command implemented as a skill, with its entry point at `skills/checkpoint-commit/SKILL.md`.
 2. The skill **MUST NOT** include `disable-model-invocation: true` in its frontmatter, allowing the model to suggest or trigger checkpoints during long development tasks.
 3. The skill **MUST** use `$ARGUMENTS` (or `$0`, `$1`) to capture optional CR identifier and summary.
 4. The command **MUST** analyze all repository changes (staged, unstaged, untracked) using `git diff` and `git ls-files`.
@@ -123,31 +145,33 @@ flowchart TD
 10. The detailed body **MUST** explain what changed and why, matching the requirements in `reference/checkpoint.md`.
 11. The command **MUST** fail if there are no changes to commit.
 12. The command **MUST** provide clear feedback to the user upon successful commit, including the commit hash.
-13. The `checkpoint-hooks.md` **MUST** be updated to define a handover protocol where hooks return the exact command to execute: `{"ok": false, "reason": "/gov:checkpoint"}`.
+13. The `checkpoint-hooks.md` **MUST** be updated to define a handover protocol where hooks return the exact command to execute: `{"ok": false, "reason": "/checkpoint-commit"}`.
 14. The command **MUST** strictly follow the safety rules: no destructive Git operations (reset, rebase, amend, force push).
 
 ### Non-Functional Requirements
 
-1. The execution of the `/gov:checkpoint` command **MUST** take less than 5 seconds for repositories with fewer than 1000 changed files.
+1. The execution of the `/checkpoint-commit` command **MUST** take less than 5 seconds for repositories with fewer than 1000 changed files.
 2. The command **MUST** be idempotent; running it multiple times with no new changes should result in a graceful "no changes" message.
 3. The implementation **MUST** be compatible with the existing `governance` skill structure.
 4. The command **MUST NOT** perform destructive operations like `git reset` or `git push`.
 
 ## Affected Components
 
-* `skills/governance/SKILL.md`: Update "Checkpoint Workflow" section to promote the slash command.
+* `skills/checkpoint-commit/SKILL.md` **(new)**: Skill entry point defining the `/checkpoint-commit` skill with frontmatter and instruction-based workflow.
+* `skills/governance/SKILL.md`: Remove the "Checkpoint Workflow" section entirely, as checkpoint functionality is moving to the dedicated `checkpoint-commit` skill.
 * `skills/governance/reference/checkpoint.md`: Update documentation to reflect the new instruction-based workflow.
-* `skills/governance/reference/checkpoint-hooks.md`: Update hook configuration examples to use the `/gov:checkpoint` slash command.
+* `skills/governance/reference/checkpoint-hooks.md`: Update hook configuration examples to use the `/checkpoint-commit` slash command.
 * `docs/cr/CR-0010-checkpoint-slash-command.md`: This document defining the change.
-* `.claude/skills/gov-checkpoint/SKILL.md`: New skill definition containing the instructions.
 
 ## Scope Boundaries
 
 ### In Scope
 
-* Definition and implementation of the `/gov:checkpoint` slash command logic.
+* Definition and implementation of the `/checkpoint-commit` slash command logic.
+* Creation of `skills/checkpoint-commit/SKILL.md` as the skill entry point.
 * Automation of change analysis and commit message generation.
-* Integration with the existing governance skill documentation.
+* Removal of the "Checkpoint Workflow" section from `skills/governance/SKILL.md`.
+* Integration with the existing governance skill reference documentation.
 * Validation of `.gitignore` as part of the command execution.
 
 ### Out of Scope ("Here, But Not Further")
@@ -162,6 +186,8 @@ flowchart TD
 1. **Keep Manual Workflow**: Rejected because it remains a point of friction and inconsistency for users and agents.
 2. **Git Alias**: Considered creating a Git alias `git checkpoint`. Rejected because it doesn't easily handle the "detailed body" generation or the integration with LLM agent instructions as well as a native slash command/tool.
 3. **Automated Background Checkpoints**: Considered triggering checkpoints on a timer. Rejected as it might capture incomplete or broken states that the user didn't intend to checkpoint yet.
+4. **Extend Existing `governance` Skill**: Considered adding the checkpoint slash command directly to `skills/governance/SKILL.md`. Rejected because the existing skill serves a different purpose (ADR/CR creation). A separate skill at `skills/checkpoint-commit/SKILL.md` provides clean separation of concerns.
+5. **Colon-Separated Name (`/gov:checkpoint`)**: Rejected because Claude Code's skill naming rules only allow lowercase letters, numbers, and hyphens. The colon syntax is reserved for plugin namespacing (`plugin-name:skill-name`) and cannot be used in skill names.
 
 ## Impact Assessment
 
@@ -180,7 +206,7 @@ Higher developer productivity and better project traceability. More reliable che
 ## Implementation Approach
 
 ### Phase 1: Skill Definition
-Define the `SKILL.md` in `.claude/skills/gov-checkpoint/`. Set appropriate frontmatter (`name`, `description`). The implementation MUST strictly adhere to the five-step workflow from `skills/governance/reference/checkpoint.md`: Analyze, Update .gitignore, Write Summary, Stage, and Commit.
+Create `skills/checkpoint-commit/SKILL.md` as the skill entry point. Set appropriate frontmatter (`name: checkpoint-commit`, `description`). The `SKILL.md` **MUST** reference shared resources in `skills/governance/` (e.g., `../governance/reference/checkpoint.md`) for checkpoint workflow details. All supporting artifacts (reference docs, supporting files) **MUST** remain in `skills/governance/`. The implementation **MUST** strictly adhere to the five-step workflow from `skills/governance/reference/checkpoint.md`: Analyze, Update .gitignore, Write Summary, Stage, and Commit.
 
 ### Phase 2: Instruction Implementation
 Implement the pseudo-logic within `SKILL.md` to guide the model through:
@@ -190,7 +216,7 @@ Implement the pseudo-logic within `SKILL.md` to guide the model through:
 4. Generation of the "Golden Summary" if no summary is provided in arguments.
 
 ### Phase 3: Documentation Update
-Update `SKILL.md`, `checkpoint.md`, and `checkpoint-hooks.md` to deprecate the manual steps in favor of the `/gov:checkpoint` command. Specifically, update `checkpoint-hooks.md` to implement the **Seamless Handover Protocol**, where hooks return `/gov:checkpoint` as the direct instruction.
+Remove the "Checkpoint Workflow" section from `skills/governance/SKILL.md` so that checkpoint functionality is owned exclusively by the new skill. Update `checkpoint.md` and `checkpoint-hooks.md` to reference the new `/checkpoint-commit` slash command. Specifically, update `checkpoint-hooks.md` to implement the **Seamless Handover Protocol**, where hooks return `/checkpoint-commit` as the direct instruction.
 
 ### Implementation Flow
 
@@ -233,7 +259,7 @@ Not applicable.
 
 ```gherkin
 Given a repository with uncommitted changes on branch 'dev/CR-0010'
-When I execute `/gov:checkpoint`
+When I execute `/checkpoint-commit`
 Then a new Git commit MUST be created
   And the commit subject MUST be 'checkpoint(CR-0010): {auto_generated_summary}'
   And the commit body MUST contain a list of changed files and explanation of what changed
@@ -244,7 +270,7 @@ Then a new Git commit MUST be created
 
 ```gherkin
 Given a repository with uncommitted changes
-When I execute `/gov:checkpoint CR-0011 'manual override'`
+When I execute `/checkpoint-commit CR-0011 'manual override'`
 Then a new Git commit MUST be created
   And the commit subject MUST be 'checkpoint(CR-0011): manual override'
 ```
@@ -253,7 +279,7 @@ Then a new Git commit MUST be created
 
 ```gherkin
 Given a repository with no uncommitted changes
-When I execute `/gov:checkpoint CR-0010 'some summary'`
+When I execute `/checkpoint-commit CR-0010 'some summary'`
 Then no commit MUST be created
   And the system MUST report "No changes to checkpoint"
 ```
@@ -264,7 +290,7 @@ Then no commit MUST be created
 Given I am in a repository with uncommitted changes
   And the branch name does not contain a CR ID
   And no CR files exist in docs/cr/
-When I execute `/gov:checkpoint`
+When I execute `/checkpoint-commit`
 Then the system MUST NOT create a commit
   And the system MUST prompt for or request a CR identifier and summary
 ```

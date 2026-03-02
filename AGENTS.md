@@ -8,6 +8,10 @@ metadata:
 
 # AGENTS.md
 
+<project_purpose>
+This repository creates **reusable skills** that are distributed and installed via `npx skills add`. The `skills/` folder is the source directory for all skill implementations. Agents **MUST NOT** add skills to `.claude/` or `.junie/` directories in this repository — those are consumer-side installation targets, not source locations. All skill source files, templates, reference documentation, and supporting artifacts **MUST** reside under `skills/`.
+</project_purpose>
+
 <principles>
 <focus>
 Don't be an overachiever. Aim for perfection in execution rather than adding extras.
