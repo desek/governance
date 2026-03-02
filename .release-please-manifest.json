@@ -1,3 +1,4 @@
 {
-  "skills/governance": "1.1.0"
+  "skills/governance": "1.1.0",
+  "skills/checkpoint-commit": "0.0.0"
 }
