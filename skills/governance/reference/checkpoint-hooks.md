@@ -30,7 +30,7 @@ Add hook configuration to your `.claude/settings.json`:
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "You are evaluating whether Claude should create a checkpoint before stopping. Context: $ARGUMENTS\n\nCheck if:\n1. There are uncommitted changes in the repository\n2. The stop_hook_active field is false (to prevent infinite loops)\n\nIf stop_hook_active is true, respond with {\"ok\": true}.\nIf there are uncommitted changes and stop_hook_active is false, respond with {\"ok\": false, \"reason\": \"Create a checkpoint using the governance skill checkpoint instruction before stopping.\"}.\nIf there are no uncommitted changes, respond with {\"ok\": true}.",
+            "prompt": "You are evaluating whether Claude should create a checkpoint before stopping. Context: $ARGUMENTS\n\nCheck if:\n1. There are uncommitted changes in the repository\n2. The stop_hook_active field is false (to prevent infinite loops)\n\nIf stop_hook_active is true, respond with {\"ok\": true}.\nIf there are uncommitted changes and stop_hook_active is false, respond with {\"ok\": false, \"reason\": \"/checkpoint-commit\"}.\nIf there are no uncommitted changes, respond with {\"ok\": true}.",
             "timeout": 30
           }
         ]
@@ -104,17 +104,17 @@ Set appropriate timeouts (in seconds for prompt hooks):
 
 Default timeout is 30 seconds for prompt hooks.
 
-### Activating the Governance Skill
+### Seamless Handover Protocol
 
-The prompt's reason field should reference the governance skill checkpoint instruction:
+The prompt's reason field should return a checkpoint instruction directly:
 
 ```
-"reason": "Create a checkpoint using the governance skill checkpoint instruction before stopping."
+"reason": "/checkpoint-commit"
 ```
 
-This ensures Claude follows the full checkpoint workflow including `.gitignore` maintenance.
+This seamless handover ensures Claude executes the checkpoint workflow directly, including `.gitignore` maintenance.
 
 ## See Also
 
-- [Checkpoint Instruction](checkpoint.md) - Manual checkpoint workflow
+- [Checkpoint Instruction](checkpoint.md) - Checkpoint workflow reference
 - [Claude Code Hooks Reference](https://docs.anthropic.com/en/docs/claude-code/hooks) - Official documentation

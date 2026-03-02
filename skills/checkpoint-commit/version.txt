@@ -1,0 +1,2 @@
+# Copyright Daniel Grenemark 2026
+0.0.0

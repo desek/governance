@@ -8,6 +8,10 @@ metadata:
 
 # AGENTS.md
 
+<project_purpose>
+This repository creates **reusable skills** that are distributed and installed via `npx skills add`. The `skills/` folder is the source directory for all skill implementations. Agents **MUST NOT** add skills to `.claude/` or `.junie/` directories in this repository — those are consumer-side installation targets, not source locations. All skill source files, templates, reference documentation, and supporting artifacts **MUST** reside under `skills/`.
+</project_purpose>
+
 <principles>
 <focus>
 Don't be an overachiever. Aim for perfection in execution rather than adding extras.
@@ -64,6 +68,38 @@ Pull requests **MUST** use squash merge only. The PR title will become the commi
 
 A **linear commit history is required**. Merge commits are not allowed. Use rebase or squash merge strategies to maintain a clean, linear history on the main branch.
 </merge_strategy>
+
+<release_please>
+This repository uses [Release Please](https://github.com/googleapis/release-please) to automate versioning and releases. Configuration is split across two files:
+
+- **`release-please-config.json`**: Defines per-skill package settings (release type, component name, tag format).
+- **`.release-please-manifest.json`**: Tracks the current version of each skill.
+
+Each skill under `skills/` is configured as a separate package with `"release-type": "simple"`, which tracks version in `version.txt` and generates a `CHANGELOG.md` per skill directory.
+
+**Key settings:**
+- `"separate-pull-requests": true` — Each skill gets its own release PR so changes are released independently.
+- `"include-component-in-tag": true` — Produces tags like `governance-v1.2.0` to prevent collisions between skills.
+- `"include-v-in-tag": true` — Conventional `v`-prefixed semver tags.
+
+**When modifying an existing skill:**
+- Commit messages **MUST** follow Conventional Commits. Release Please uses these to determine version bumps and generate changelogs automatically.
+- No manual version changes are needed — Release Please updates `version.txt` and `CHANGELOG.md` via its release PR.
+
+**When adding a new skill** (e.g., `skills/my-new-skill`):
+1. Create the skill directory with `SKILL.md` under `skills/my-new-skill/`.
+2. Create `skills/my-new-skill/version.txt` with initial content `0.0.0`.
+3. Add the package entry to `release-please-config.json`:
+   ```json
+   "skills/my-new-skill": {
+     "release-type": "simple",
+     "component": "my-new-skill",
+     "include-component-in-tag": true,
+     "include-v-in-tag": true
+   }
+   ```
+4. Add `"skills/my-new-skill": "0.0.0"` to `.release-please-manifest.json`.
+</release_please>
 </git_workflow>
 
 <copyright>

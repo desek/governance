@@ -1,6 +1,7 @@
 ---
 name: governance
 description: Creates Architecture Decision Records (ADRs) and Change Requests (CRs) for project governance. Activates on keywords like "ADR", "architecture decision", "CR", "change request", "governance", "technical decision", or "requirement change". Use for documenting technology choices, architectural patterns, or scope modifications.
+license: Apache-2.0
 metadata:
   copyright: Copyright Daniel Grenemark 2026
   author: desek
@@ -84,29 +85,6 @@ For detailed lifecycle information, best practices, and examples:
 
 - **ADR Guide**: [reference/adr-guide.md](reference/adr-guide.md)
 - **CR Guide**: [reference/cr-guide.md](reference/cr-guide.md)
-
-## Checkpoint Workflow
-
-Use this workflow to create iterative checkpoints during development:
-
-```
-- [ ] Analyze changes: git diff --staged, git diff, git ls-files --others
-- [ ] Review and update .gitignore to exclude temporary files
-- [ ] Write one-sentence summary and detailed body
-- [ ] Stage all changes: git add -A
-- [ ] Create checkpoint commit: checkpoint(CR-xxxx): {summary}
-```
-
-**Strict requirements:**
-- Update `.gitignore` before staging to prevent repository bloat
-- Commit format: `checkpoint(CR-xxxx): {summary}` with detailed body
-- No destructive Git operations (reset, rebase, amend, force push)
-
-**Squash merge output:**
-- When merging, compress checkpoint commits into a single long-term memory message
-- Use for PR descriptions or local squash merge commits
-
-Full instructions: [reference/checkpoint.md](reference/checkpoint.md)
 
 ## Commit Message Format
 
