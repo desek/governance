@@ -2,7 +2,7 @@
 name: cr-0010-checkpoint-slash-command
 description: Change request to refactor the governance checkpoint commit feature to a slash command.
 id: "CR-0010"
-status: "implemented"
+status: "in-progress"
 date: 2026-03-02
 requestor: desek
 stakeholders: [desek]
@@ -346,6 +346,66 @@ git log -1 --pretty=format:"%B"
 ## Decision Outcome
 
 Chosen approach: "Implement as a dedicated slash command/tool within the agent's environment", because it provides the highest level of automation and control over the commit quality while minimizing user effort.
+
+## Release Please Configuration
+
+The `checkpoint-commit` skill requires its own release-please package entry to enable independent versioning and release management via `npx skills add`.
+
+### Configuration Changes
+
+**`release-please-config.json`** — Add `checkpoint-commit` as a separate package with `separate-pull-requests` enabled:
+
+```json
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "separate-pull-requests": true,
+  "packages": {
+    "skills/governance": {
+      "release-type": "simple",
+      "component": "governance",
+      "include-component-in-tag": true,
+      "include-v-in-tag": true
+    },
+    "skills/checkpoint-commit": {
+      "release-type": "simple",
+      "component": "checkpoint-commit",
+      "include-component-in-tag": true,
+      "include-v-in-tag": true
+    }
+  }
+}
+```
+
+**`.release-please-manifest.json`** — Add initial version for `checkpoint-commit`:
+
+```json
+{
+  "skills/governance": "1.1.0",
+  "skills/checkpoint-commit": "0.0.0"
+}
+```
+
+### Design Decisions
+
+| Decision | Rationale |
+|----------|----------|
+| **`separate-pull-requests: true`** | Each skill gets its own release PR, so a governance change doesn't force a checkpoint-commit release. |
+| **`include-component-in-tag: true`** | Produces tags like `checkpoint-commit-v1.0.0`, preventing tag collisions between skills. |
+| **`release-type: "simple"`** | Tracks version in `version.txt` and generates `CHANGELOG.md` per skill directory — no `package.json` needed. |
+| **`include-v-in-tag: true`** | Conventional `v`-prefixed semver tags. |
+
+### Release Workflow
+
+The existing `.github/workflows/release.yml` already handles multi-package releases correctly — it iterates over `paths_released`, extracts the skill name via `basename`, reads `version.txt`, and uploads per-skill tarballs. No workflow changes are needed.
+
+### Adding Future Skills
+
+When adding a new skill (e.g., `skills/my-new-skill`):
+
+1. Create `skills/my-new-skill/SKILL.md`
+2. Create `skills/my-new-skill/version.txt` with `0.0.0`
+3. Add to `release-please-config.json` under `packages`
+4. Add `"skills/my-new-skill": "0.0.0"` to `.release-please-manifest.json`
 
 ## Related Items
 
