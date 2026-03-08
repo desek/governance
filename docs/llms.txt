@@ -10,3 +10,30 @@
 - [CR-0004: Release Workflow](cr/CR-0004-release-please-workflow.md): Implement release workflow with release-please
 - [CR-0005: Copyright Headers](cr/CR-0005-copyright-headers.md): Add copyright headers to all files
 - [CR-0006: Checkpoint Instruction](cr/CR-0006-checkpoint-instruction.md): Add checkpoint instruction to governance skill
+- [CR-0007: Checkpoint Claude Code Hooks](cr/CR-0007-checkpoint-claude-code-hooks.md): Add instructions for using checkpoint instruction with Claude Code hooks
+- [CR-0008: PR Title Validation](cr/CR-0008-pr-title-validation.md): Add GitHub workflow to validate PR titles follow Conventional Commits format
+- [CR-0009: Governance Document Creation Guidelines](cr/CR-0009-governance-document-creation-guidelines.md): Clarify that CR and ADR creation are documentation-only tasks and that template copyright headers must not be copied into created documents
+- [CR-0010: Checkpoint Slash Command](cr/CR-0010-checkpoint-slash-command.md): Refactor the governance checkpoint commit feature to a slash command
+
+## Anthropic Documentation
+
+- [Agent Skills Best Practices](anthropic/agent-skills-best-practices.md): Best practices for writing effective Agent Skills that Claude can discover and use successfully
+- [Hooks Reference](anthropic/hooks.md): Reference for Claude Code hook events, configuration schema, JSON input/output formats, exit codes, async hooks, prompt hooks, and MCP tool hooks
+- [Prompt Engineering: Be Clear and Direct](anthropic/prompt-engineering-be-clear-and-direct.md): Guide on writing clear, direct, and detailed prompts for Claude
+- [Prompt Engineering: Prefill Claude's Response](anthropic/prompt-engineering-prefill-claudes-response.md): Guide on prefilling Claude's response for greater output control
+- [Prompt Engineering: Use XML Tags](anthropic/prompt-engineering-use-xml-tags.md): Guide on using XML tags to structure prompts for Claude, improving clarity and parsing
+- [Skills](anthropic/skills.md): Create, manage, and share skills to extend Claude's capabilities in Claude Code
+- [Structured Outputs](anthropic/structured-outputs.md): Guide on getting validated JSON results from Claude agent workflows
+
+## Agent Skills
+
+- [Agent Skills Specification](agentskills/specification.md): The complete format specification for Agent Skills
+
+## Add Skills CLI
+
+- [Add Skills README](add-skills/README.md): Documentation for the CLI tool for the open agent skills ecosystem
+
+## llms.txt Resources
+
+- [llms.txt Prompt](llms-txt/prompt.md): Instructions for creating an llms.txt file for LLM-friendly documentation structure
+- [FastHTML llms.txt Example](llms-txt/fasthtml-llms.txt): Example llms.txt file for the FastHTML library
