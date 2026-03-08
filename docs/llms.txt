@@ -14,6 +14,8 @@
 - [CR-0008: PR Title Validation](cr/CR-0008-pr-title-validation.md): Add GitHub workflow to validate PR titles follow Conventional Commits format
 - [CR-0009: Governance Document Creation Guidelines](cr/CR-0009-governance-document-creation-guidelines.md): Clarify that CR and ADR creation are documentation-only tasks and that template copyright headers must not be copied into created documents
 - [CR-0010: Checkpoint Slash Command](cr/CR-0010-checkpoint-slash-command.md): Refactor the governance checkpoint commit feature to a slash command
+- [CR-0011: Governance Source Traceability](cr/CR-0011-governance-source-traceability.md): Add source branch and commit metadata to CR and ADR templates for traceability and staleness detection
+- [CR-0012: Checkpoint Read Slash Command](cr/CR-0012-checkpoint-read-slash-command.md): Add a /checkpoint-read slash command that reads checkpoint commit history to recover context for new sessions
 
 ## Anthropic Documentation
 
