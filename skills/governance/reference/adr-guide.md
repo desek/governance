@@ -16,6 +16,7 @@ Detailed guidance for creating and managing Architecture Decision Records.
 - [ADR Lifecycle](#adr-lifecycle)
 - [Best Practices](#best-practices)
 - [Document Numbering](#document-numbering)
+- [Source Traceability](#source-traceability)
 
 ## When to Create an ADR
 
@@ -104,3 +105,18 @@ ADRs use sequential four-digit numbering:
 - Example: `ADR-0001-use-postgresql.md`
 
 Check existing documents in the project's `docs/adr/` folder to determine the next available number.
+
+## Source Traceability
+
+Every ADR **MUST** record the repository state it was based on using two frontmatter fields:
+
+| Field | Purpose | How to populate |
+|-------|---------|----------------|
+| `source-branch` | Git branch the decision is based on | `git rev-parse --abbrev-ref HEAD` |
+| `source-commit` | Short commit hash at time of creation | `git rev-parse --short HEAD` |
+
+These fields enable:
+
+- **Context preservation** — Knowing the exact commit helps reviewers understand the codebase state in which the decision was made.
+- **Staleness detection** — Compare `source-commit` against the current HEAD to determine whether the architectural landscape has shifted enough to warrant revisiting the decision.
+- **Audit trail** — Provides a clear link between the ADR and the repository state it was based on.

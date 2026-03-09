@@ -1,0 +1,27 @@
+# Copyright Daniel Grenemark 2026
+name: Test
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  bats:
+    name: Bats Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Bats
+        run: npm install -g bats
+
+      - name: Run tests
+        run: bats tests/ --recursive

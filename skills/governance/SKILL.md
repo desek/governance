@@ -28,8 +28,9 @@ Use this checklist when creating an Architecture Decision Record:
 ```
 - [ ] Read the template: templates/ADR.md
 - [ ] Check docs/adr/ for the next available number
+- [ ] Capture current branch (`git rev-parse --abbrev-ref HEAD`) and commit (`git rev-parse --short HEAD`)
 - [ ] Create file: docs/adr/ADR-NNNN-{short-title}.md
-- [ ] Fill in all required sections
+- [ ] Fill in all required sections (including source-branch and source-commit in frontmatter)
 - [ ] Set status to "proposed"
 ```
 
@@ -54,8 +55,9 @@ Use this checklist when creating a Change Request:
 ```
 - [ ] Read the template: templates/CR.md
 - [ ] Check docs/cr/ for the next available number
+- [ ] Capture current branch (`git rev-parse --abbrev-ref HEAD`) and commit (`git rev-parse --short HEAD`)
 - [ ] Create file: docs/cr/CR-NNNN-{short-title}.md
-- [ ] Fill in all required sections
+- [ ] Fill in all required sections (including source-branch and source-commit in frontmatter)
 - [ ] Write acceptance criteria in Gherkin format
 - [ ] Set status to "proposed"
 ```

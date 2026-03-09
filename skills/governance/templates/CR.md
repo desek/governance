@@ -12,6 +12,8 @@ requestor: {person or team requesting the change}
 stakeholders: {list everyone involved in reviewing/approving the change}
 priority: "{critical | high | medium | low}"
 target-version: {version or milestone when this change should be implemented}
+source-branch: {current Git branch name, from `git rev-parse --abbrev-ref HEAD`}
+source-commit: {short commit hash, from `git rev-parse --short HEAD`}
 ---
 
 <!--
@@ -130,6 +132,14 @@ CHANGE REQUEST TEMPLATE GUIDELINES
      * Bypassing or weakening tests to force them to pass
      * Using skip flags to avoid running tests
      * Marking tests as @Ignored/@Disabled without explicit approval
+
+8. SOURCE TRACEABILITY (Required)
+   - The `source-branch` and `source-commit` frontmatter fields **MUST** be populated
+   - Run `git rev-parse --abbrev-ref HEAD` to get the branch name
+   - Run `git rev-parse --short HEAD` to get the short commit hash
+   - These fields record the repository state the document's analysis is based on
+   - If the repository has changed significantly since `source-commit`, the CR may need
+     to be reviewed and updated ("rebased") to reflect the current state
 =============================================================================
 -->
 
