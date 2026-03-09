@@ -8,6 +8,13 @@ metadata:
 
 # Changelog
 
+## [1.3.0](https://github.com/desek/governance/compare/governance-v1.2.0...governance-v1.3.0) (2026-03-09)
+
+
+### Features
+
+* **governance:** add source traceability fields and Bats test infrastructure ([#19](https://github.com/desek/governance/issues/19)) ([7f1eed5](https://github.com/desek/governance/commit/7f1eed5acbe361248b45f61ea9c5fb29fc474bec))
+
 ## [1.2.0](https://github.com/desek/governance/compare/governance-v1.1.0...governance-v1.2.0) (2026-03-02)
 
 
