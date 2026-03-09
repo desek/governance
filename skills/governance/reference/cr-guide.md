@@ -16,6 +16,7 @@ Detailed guidance for creating and managing Change Requests.
 - [CR Lifecycle](#cr-lifecycle)
 - [Requirements](#requirements)
 - [Document Numbering](#document-numbering)
+- [Source Traceability](#source-traceability)
 
 ## When to Create a CR
 
@@ -121,3 +122,27 @@ CRs use sequential four-digit numbering:
 - Example: `CR-0001-add-user-auth.md`
 
 Check existing documents in the project's `docs/cr/` folder to determine the next available number.
+
+## Source Traceability
+
+Every CR **MUST** record the repository state it was based on using two frontmatter fields:
+
+| Field | Purpose | How to populate |
+|-------|---------|----------------|
+| `source-branch` | Git branch the analysis is based on | `git rev-parse --abbrev-ref HEAD` |
+| `source-commit` | Short commit hash at time of creation | `git rev-parse --short HEAD` |
+
+These fields enable:
+
+- **Staleness detection** — Compare `source-commit` against the current HEAD to see what has changed since the CR was written.
+- **Conflict identification** — When multiple CRs are in-flight, reviewers can determine if one CR's implementation invalidates another's analysis.
+- **Audit trail** — Provides a clear link between the CR and the repository state it was based on.
+
+### When to Rebase a CR
+
+A CR may need to be reviewed and updated ("rebased") when the diff between its `source-commit` and the current HEAD affects:
+
+- The "Current State" section's accuracy
+- The implementation plan's feasibility
+- The impact assessment's completeness
+- The acceptance criteria's validity

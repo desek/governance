@@ -10,6 +10,8 @@ date: {YYYY-MM-DD when the decision was last updated}
 decision-makers: {list everyone involved in the decision}
 consulted: {list everyone whose opinions are sought (typically subject-matter experts); and with whom there is a two-way communication}
 informed: {list everyone who is kept up-to-date on progress; and with whom there is a one-way communication}
+source-branch: {current Git branch name, from `git rev-parse --abbrev-ref HEAD`}
+source-commit: {short commit hash, from `git rev-parse --short HEAD`}
 ---
 
 # {short title, representative of solved problem and found solution}
