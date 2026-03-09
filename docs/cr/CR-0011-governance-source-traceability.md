@@ -2,8 +2,8 @@
 name: cr-0011-governance-source-traceability
 description: Add source branch and commit metadata to CR and ADR templates to enable traceability and staleness detection for governance documents.
 id: "CR-0011"
-status: "proposed"
-date: 2026-03-08
+status: "implemented"
+date: 2026-03-09
 requestor: desek
 stakeholders: desek
 priority: "medium"
