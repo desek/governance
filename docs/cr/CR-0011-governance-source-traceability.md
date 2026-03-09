@@ -29,12 +29,16 @@ Adding source traceability metadata enables:
 1. **Staleness detection** — Compare the document's `source-commit` against the current HEAD to see what has changed since the document was written.
 2. **Conflict identification** — When multiple CRs are in-flight, reviewers can determine if one CR's implementation invalidates another CR's analysis.
 3. **Audit trail** — Provides a clear link between governance documents and the repository state they were based on.
+4. **Multi-CR branch coordination** — A single working branch may contain multiple CRs when the change is complex enough to warrant decomposition. Source traceability allows each CR to record the exact commit it was based on, making it possible to verify that later CRs in the branch correctly build upon the state left by earlier ones. This also encourages keeping individual CRs small and focused — overly large CRs (measured by the number of rows in the document) risk loss of implementation details and reduce review quality.
+5. **Known-unknowns management** — During implementation, new questions and uncertainties inevitably surface that were not anticipated when the CR was written. Source traceability makes it possible to compare the document's assumptions against the actual repository state at any point, helping teams identify and track these known unknowns rather than letting them silently invalidate the original plan.
 
 ## Change Drivers
 
 * CRs can invalidate each other when implemented out of order, but there is no mechanism to detect this today
 * Reviewers have no way to assess whether a CR's "Current State" section is still accurate
 * ADR decisions may need revisiting after significant codebase changes, but there is no baseline to compare against
+* Complex changes often span multiple CRs on the same working branch, and without source traceability there is no way to verify sequential consistency between them
+* Overly large CRs risk loss of implementation details; source traceability supports decomposing work into smaller, traceable CRs
 
 ## Current State
 
