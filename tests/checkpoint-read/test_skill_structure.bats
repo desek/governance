@@ -9,8 +9,8 @@ setup() {
     [ -f "$SKILL_MD" ]
 }
 
-@test "version.txt exists with correct content" {
-    [ "$(cat "${SKILL_DIR}/version.txt")" = "0.0.0" ]
+@test "version.txt exists with valid semver content" {
+    [[ "$(cat "${SKILL_DIR}/version.txt")" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
 }
 
 @test "release-please-config.json contains checkpoint-read" {
