@@ -13,6 +13,12 @@
       "component": "checkpoint-commit",
       "include-component-in-tag": true,
       "include-v-in-tag": true
+    },
+    "skills/checkpoint-read": {
+      "release-type": "simple",
+      "component": "checkpoint-read",
+      "include-component-in-tag": true,
+      "include-v-in-tag": true
     }
   }
 }

@@ -117,6 +117,7 @@ skills/
 * `release-please-config.json` — Add new package entry for checkpoint-read
 * `.release-please-manifest.json` — Add initial version tracking for checkpoint-read
 * `docs/llms.txt` — Update with reference to this CR
+* `README.md` — Add checkpoint-read to the Available Skills table
 
 ## Scope Boundaries
 
@@ -126,6 +127,7 @@ skills/
 * Defining the step-by-step workflow for reading checkpoint commits from Git history
 * Registering the skill in release-please configuration
 * Updating `docs/llms.txt` with this CR
+* Updating `README.md` Available Skills table to include checkpoint-read
 
 ### Out of Scope ("Here, But Not Further")
 
@@ -175,6 +177,7 @@ The implementation consists of three phases:
 ### Phase 3: Update Documentation
 
 1. Update `docs/llms.txt` with this CR entry.
+2. Add checkpoint-read to the Available Skills table in `README.md` following the existing row format: `| [checkpoint-read](skills/checkpoint-read/SKILL.md) | Slash command that reads checkpoint commit history to recover context for new sessions |`.
 
 ### Implementation Flow
 
@@ -187,7 +190,7 @@ flowchart LR
         B1["Update config"] --> B2["Update manifest"]
     end
     subgraph Phase3["Phase 3: Documentation"]
-        C1["Update llms.txt"]
+        C1["Update llms.txt"] --> C2["Update README.md"]
     end
     Phase1 --> Phase2 --> Phase3
 ```
@@ -224,15 +227,20 @@ flowchart LR
 
 ### Tests to Add
 
+Tests follow the bats testing infrastructure established by CR-0013. Each test file uses the `.bats` extension, `@test "descriptive string"` syntax, and loads shared helpers via a `setup()` function.
+
+A shared helper **MUST** be created at `tests/checkpoint-read/test_helpers/setup.bash` defining `REPO_ROOT`, `SKILL_DIR`, and `SKILL_MD` variables for use across all test files.
+
 | Test File | Test Name | Description | Inputs | Expected Output |
 |-----------|-----------|-------------|--------|-----------------|
-| `tests/checkpoint-read/test_skill_structure.sh` | `test_skill_md_exists` | Validates SKILL.md exists at correct path | Skill directory path | File exists with correct frontmatter |
-| `tests/checkpoint-read/test_skill_structure.sh` | `test_version_txt_exists` | Validates version.txt exists with correct content | Skill directory path | File contains `0.0.0` |
-| `tests/checkpoint-read/test_skill_structure.sh` | `test_release_please_config` | Validates release-please-config.json contains checkpoint-read entry | Config file | Entry exists with correct settings |
-| `tests/checkpoint-read/test_skill_structure.sh` | `test_release_please_manifest` | Validates .release-please-manifest.json contains checkpoint-read entry | Manifest file | Entry exists with version `0.0.0` |
-| `tests/checkpoint-read/test_skill_structure.sh` | `test_skill_frontmatter` | Validates SKILL.md frontmatter has required fields | SKILL.md content | Contains name, description, license, metadata |
-| `tests/checkpoint-read/test_skill_structure.sh` | `test_skill_name_format` | Validates skill name follows naming constraints | SKILL.md name field | Lowercase, hyphens only, max 64 chars |
-| `tests/checkpoint-read/test_skill_structure.sh` | `test_read_only_safety` | Validates SKILL.md contains no destructive Git commands | SKILL.md content | No reset, rebase, amend, or force-push commands |
+| `tests/checkpoint-read/test_skill_structure.bats` | `SKILL.md exists at correct path` | Validates SKILL.md exists | `SKILL_DIR` from helper | File exists |
+| `tests/checkpoint-read/test_skill_structure.bats` | `version.txt exists with correct content` | Validates version.txt | `SKILL_DIR` from helper | Contains `0.0.0` |
+| `tests/checkpoint-read/test_skill_structure.bats` | `release-please-config.json contains checkpoint-read` | Validates config entry | `REPO_ROOT` from helper | Entry with correct settings |
+| `tests/checkpoint-read/test_skill_structure.bats` | `release-please-manifest contains checkpoint-read` | Validates manifest entry | `REPO_ROOT` from helper | Entry with `0.0.0` |
+| `tests/checkpoint-read/test_skill_structure.bats` | `SKILL.md frontmatter has required fields` | Validates frontmatter fields | `SKILL_MD` from helper | name, description, license, metadata present |
+| `tests/checkpoint-read/test_skill_structure.bats` | `SKILL.md contains no destructive Git commands` | Read-only safety check | `SKILL_MD` from helper | No reset, rebase, amend, force-push |
+| `tests/checkpoint-read/test_skill_structure.bats` | `llms.txt contains CR-0012 entry` | Validates docs/llms.txt updated | `REPO_ROOT` from helper | CR-0012 entry present |
+| `tests/checkpoint-read/test_skill_structure.bats` | `README.md contains checkpoint-read in Available Skills` | Validates README.md updated | `REPO_ROOT` from helper | checkpoint-read row present |
 
 ### Tests to Modify
 
@@ -334,6 +342,16 @@ When the checkpoint-read CR is created
 Then llms.txt MUST contain an entry for CR-0012
 ```
 
+### AC-10: README.md updated
+
+```gherkin
+Given the README.md file
+When the checkpoint-read skill is implemented
+Then the Available Skills table MUST contain a row for checkpoint-read
+  And the row MUST link to skills/checkpoint-read/SKILL.md
+  And the row MUST include a description of the skill
+```
+
 ## Quality Standards Compliance
 
 ### Build & Compilation
@@ -386,8 +404,11 @@ grep -q '"skills/checkpoint-read"' .release-please-manifest.json && echo "PASS" 
 # Verify llms.txt updated
 grep -q 'CR-0012' docs/llms.txt && echo "PASS" || echo "FAIL"
 
-# Run existing tests
-cd tests && bash run_tests.sh
+# Verify README.md contains checkpoint-read in Available Skills
+grep -q 'checkpoint-read' README.md && echo "PASS" || echo "FAIL"
+
+# Run checkpoint-read bats tests
+bats tests/checkpoint-read/
 ```
 
 ## Risks and Mitigation
