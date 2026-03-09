@@ -24,12 +24,14 @@ Use `deepwiki` MCP for project specific documentation and implementation details
 <efficiency_files>
 - `.deepwiki`: Repository for relevant DeepWiki repositories
 - `.gitignore`: Keep accurate to avoid repository bloat
+- `docs/llms.txt`: Index of all documentation files under `docs/`, formatted as an [llms.txt](https://llmstxt.org/) file for LLM-friendly consumption. Use this file to quickly discover available reference documentation — including Change Requests, ADRs, Anthropic guides, and skill specifications — before searching individual files. Update it whenever files are added to or removed from `docs/`.
 </efficiency_files>
 </principles>
 
 <efficiency_maintenance>
 - **`.deepwiki`**: Document repositories with complex implementations or custom packages used
 - **`.gitignore`**: Review and update after adding new dependencies, build artifacts, or IDE-specific files
+- **`docs/llms.txt`**: Update whenever documentation files are added to or removed from `docs/`
 - **Frequency**: Update these files immediately when introducing new technologies or tools, not at project end
 </efficiency_maintenance>
 
