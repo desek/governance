@@ -1,6 +1,6 @@
 ---
 name: cr-0013-bats-test-infrastructure
-description: Add Bats (Bash Automated Testing System) test infrastructure to the repository and implement the governance template validation tests specified by CR-0011.
+description: Add Bats (Bash Automated Testing System) test infrastructure to the repository, implement the governance template validation tests specified by CR-0011, and add a GitHub Actions CI workflow to run tests on pull requests.
 id: "CR-0013"
 status: "proposed"
 date: 2026-03-09
@@ -73,7 +73,7 @@ flowchart TD
 
 ## Proposed Change
 
-Install Bats and its assertion libraries via `mise.toml`, create a test directory structure with shared helpers, and implement the CR-0011 governance template validation tests.
+Install Bats and its assertion libraries via `mise.toml`, create a test directory structure with shared helpers, implement the CR-0011 governance template validation tests, and add a GitHub Actions workflow that runs the test suite on every pull request.
 
 ### Proposed State Diagram
 
@@ -86,6 +86,7 @@ flowchart TD
         B --> E[test_helpers/ shared setup]
         C --> F[Validates CR template fields]
         D --> G[Validates ADR template fields]
+        H[GitHub Actions workflow] --> I[Runs bats tests/ on PRs]
     end
 ```
 
@@ -100,6 +101,9 @@ flowchart TD
 5. All test files **MUST** include the project copyright header as a comment
 6. Tests **MUST** be runnable via `bats tests/` from the repository root
 7. The shared test helper **MUST** define `REPO_ROOT` so tests reference template files via absolute paths, making them independent of the working directory
+8. A GitHub Actions workflow **MUST** run `bats tests/` on every pull request targeting the `main` branch
+9. The GitHub Actions workflow **MUST** install Bats via `npm` and check out the repository before running tests
+10. The GitHub Actions workflow file **MUST** include the project copyright header
 
 ### Non-Functional Requirements
 
@@ -113,6 +117,7 @@ flowchart TD
 * `tests/governance/test_cr_template.bats` — New file: CR template validation tests
 * `tests/governance/test_adr_template.bats` — New file: ADR template validation tests
 * `tests/governance/test_helpers/setup.bash` — New file: shared test setup
+* `.github/workflows/test.yml` — New file: GitHub Actions workflow to run Bats tests on PRs
 * `.gitignore` — Review for any test artifact exclusions if needed
 
 ## Scope Boundaries
@@ -122,11 +127,11 @@ flowchart TD
 * Installing Bats via `mise.toml`
 * Creating the `tests/governance/` directory structure with shared helpers
 * Implementing the four CR-0011 template validation tests
+* Adding a GitHub Actions workflow to run Bats tests on pull requests
 * Adding copyright headers to all new files
 
 ### Out of Scope ("Here, But Not Further")
 
-* CI/CD pipeline integration (e.g., GitHub Actions workflow to run bats) — deferred to a future CR
 * Installing `bats-support` and `bats-assert` helper libraries — the initial tests are simple enough to use plain Bash assertions; these libraries can be added when test complexity warrants them
 * Tests for non-governance skills — this CR only covers the governance skill templates
 * Backfilling tests for all existing template fields — only the `source-branch` and `source-commit` fields specified by CR-0011 are tested initially
@@ -158,7 +163,7 @@ No impact on end users of the governance skill. Tests are a development-time con
 
 ## Implementation Approach
 
-This is a single-phase change with four deliverables.
+This is a single-phase change with five deliverables.
 
 ### Implementation Flow
 
@@ -168,7 +173,8 @@ flowchart LR
         A1[Add bats-core to mise.toml] --> A2[Create test_helpers/setup.bash]
         A2 --> A3[Create test_cr_template.bats]
         A3 --> A4[Create test_adr_template.bats]
-        A4 --> A5[Run bats tests/ and verify all pass]
+        A4 --> A5[Create .github/workflows/test.yml]
+        A5 --> A6[Run bats tests/ and verify all pass]
     end
 ```
 
@@ -245,6 +251,42 @@ setup() {
     grep -q "^source-commit:" "$ADR_TEMPLATE"
 }
 ```
+
+#### 5. Create GitHub Actions Workflow
+
+Create `.github/workflows/test.yml`:
+
+```yaml
+# Copyright Daniel Grenemark 2026
+name: Test
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  bats:
+    name: Bats Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Bats
+        run: npm install -g bats
+
+      - name: Run tests
+        run: bats tests/
+```
+
+This workflow mirrors the existing workflow patterns in the repository (see `pr-title.yml` and `release.yml`). It runs on every pull request targeting `main`, installs Bats via npm, and executes the full test suite.
 
 ## Test Strategy
 
@@ -337,7 +379,17 @@ Given the new files created by this CR
 When reviewing each file
 Then every .bats file contains "# Copyright Daniel Grenemark 2026"
   And every .bash file contains "# Copyright Daniel Grenemark 2026"
+  And the .github/workflows/test.yml file contains "# Copyright Daniel Grenemark 2026"
   And the mise.toml retains its existing copyright header
+```
+
+### AC-9: GitHub Actions workflow runs tests on pull requests
+
+```gherkin
+Given the workflow file .github/workflows/test.yml
+When a pull request is opened or updated targeting the main branch
+Then the workflow installs Bats and runs bats tests/
+  And the workflow reports pass or fail status on the pull request
 ```
 
 ## Quality Standards Compliance
@@ -387,7 +439,10 @@ bats tests/governance/test_cr_template.bats
 bats tests/governance/test_adr_template.bats
 
 # Verify copyright headers
-grep -l "Copyright Daniel Grenemark 2026" tests/governance/*.bats tests/governance/test_helpers/setup.bash
+grep -l "Copyright Daniel Grenemark 2026" tests/governance/*.bats tests/governance/test_helpers/setup.bash .github/workflows/test.yml
+
+# Verify GitHub Actions workflow exists and targets PRs
+grep -q "pull_request" .github/workflows/test.yml && echo "Workflow triggers on PRs"
 ```
 
 ## Risks and Mitigation
@@ -408,14 +463,15 @@ grep -l "Copyright Daniel Grenemark 2026" tests/governance/*.bats tests/governan
 
 * `mise` — Already used by the project for tool management
 * CR-0011 (implemented) — Defines the test cases this CR implements
+* GitHub Actions — Already used by the project for PR title validation and releases
 
 ## Estimated Effort
 
-Approximately 1 person-hour to implement all infrastructure and test files.
+Approximately 1–2 person-hours to implement all infrastructure, test files, and GitHub Actions workflow.
 
 ## Decision Outcome
 
-Chosen approach: "Install Bats via mise npm package and implement CR-0011 tests with shared helpers", because it aligns with the existing `npm:`-prefixed tool management pattern in `mise.toml`, requires no additional runtime dependencies, and fulfills CR-0011's deferred test obligation with minimal overhead.
+Chosen approach: "Install Bats via mise npm package, implement CR-0011 tests with shared helpers, and add a GitHub Actions CI workflow", because it aligns with the existing `npm:`-prefixed tool management pattern in `mise.toml`, requires no additional runtime dependencies, fulfills CR-0011's deferred test obligation, and ensures tests run automatically on every pull request.
 
 ## Related Items
 
