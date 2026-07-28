@@ -19,7 +19,8 @@ flowchart TD
     C --> D[Implement each phase]
     D --> E[Finalize implementation]
     E --> F["Iterate the last mile (optional)"]
-    F --> G[Push & create PR]
+    F --> F2["Distil into standing instructions (optional)"]
+    F2 --> G[Push & create PR]
     G --> H[Review & merge]
 ```
 
@@ -122,27 +123,40 @@ Each session commit uses the scoped subject `checkpoint(CR-XXXX-iterate): {summa
 
 #### 6c. Close and distil
 
-When the gap is closed, close the session. The agent distils the ledger into recommended patterns and anti-patterns and hands them to the distillation workflow, which routes durable practices into the project's standing instructions.
+When the gap is closed, close the session. The agent distils the ledger into recommended patterns and anti-patterns, which then become one of the inputs to the distillation stage (Step 7) rather than being written into the standing instructions directly.
 
 **Prompt:**
 > /checkpoint-iterate close CR-XXXX
 
 Use `/checkpoint-iterate status CR-XXXX` at any point to report the active session, its attempt count, and its dispositions so far. See the [checkpoint-iterate skill](skills/checkpoint-iterate/SKILL.md) for the full protocol, including concurrency rules for running sessions in separate Git worktrees.
 
-### Step 7: Push and create a PR
+### Step 7: Distil the session into standing instructions (optional)
+
+Finished work leaves a durable record — the Change Request, its validation report, and (when a last-mile session ran) its iteration ledger — that holds knowledge worth carrying into future sessions: the invariants the implementation now depends on, the paths that were tried and abandoned, the foot-guns that cost real debugging time. Nothing promotes that record into the project's standing instructions on its own. This stage does, converting the completed unit of work into guidance the next session inherits rather than relearns.
+
+The stage is opt-in and user-initiated. It reads the durable artifacts, identifies candidates across invariants, failure narratives, reusable patterns, foot-guns, and documentation drift, ranks them by leverage against decay risk and cost of being wrong into three tiers, and then **stops**. Nothing is written without per-tier approval — you may accept the top tier and decline the rest. On approval each rule is written as narrative that carries the mechanism making it work, the cost of breaking it, and what was tried before it stuck, matching whatever structure the target document already uses.
+
+**Run it before the branch merges.** The three file-borne inputs survive a squash merge, but the branch's checkpoint commits do not — they collapse into a single squashed commit and their per-phase reasoning is lost from the default branch. A run that wants the commit-borne reasoning must therefore happen while the branch is still unmerged, which is why this stage sits before the push and review. The stage reports which inputs it found rather than silently producing a thinner analysis, so a post-merge run remains useful but is visibly working from the file inputs alone.
+
+**Prompt:**
+> /checkpoint-distill CR-XXXX
+
+The analysis is scoped to the unit of work the identifier names, not to a count of recent commits. Approved additions land on the branch and travel into the same pull request as the implementation. See the [checkpoint-distill skill](skills/checkpoint-distill/SKILL.md) for the full protocol, including the branch-scoped mode and the input-availability reporting.
+
+### Step 8: Push and create a PR
 
 Push the branch and create a pull request.
 
 **Prompt:**
 > git push and create a pr
 
-### Step 8: Review
+### Step 9: Review
 
 Review the PR for correctness, completeness, and adherence to project standards.
 
-### Step 9: Fix any issues
+### Step 10: Fix any issues
 
-If the review surfaces issues, fix them and return to step 7.
+If the review surfaces issues, fix them and return to step 8.
 
 ```mermaid
 flowchart TD
@@ -152,11 +166,11 @@ flowchart TD
     B -->|No| D[Approve]
 ```
 
-### Step 10: Merge the PR
+### Step 11: Merge the PR
 
 Squash merge the PR into `main`. The PR title becomes the commit message and must follow [Conventional Commits](https://www.conventionalcommits.org/).
 
-### Step 11: Release
+### Step 12: Release
 
 [Release Please](https://github.com/googleapis/release-please) automatically creates a release PR based on conventional commit messages. Merge the release PR to publish the new version.
 
@@ -174,7 +188,8 @@ flowchart TD
     H -->|Yes| D
     H -->|No| I[Finalize implementation]
     I --> P["Iterate the last mile (optional)"]
-    P --> J[Push & create PR]
+    P --> P2["Distil into standing instructions (optional)"]
+    P2 --> J[Push & create PR]
     J --> K[Review]
     K --> L{Issues?}
     L -->|Yes| M[Fix issues]
