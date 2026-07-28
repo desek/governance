@@ -2,14 +2,15 @@
 name: cr-0015-checkpoint-iterate
 description: Add an iteration session skill that opens an iteration ledger against an implemented Change Request, records each last-mile attempt with its disposition including discarded and partially-kept work, checkpoint-commits code changes continuously, and distils the session into recommended patterns and anti-patterns for the project's standing instructions.
 id: "CR-0015"
-status: "proposed"
+status: "completed"
 date: 2026-07-28
+completed-date: 2026-07-28
 requestor: desek
 stakeholders: desek
 priority: "medium"
 target-version: next
 source-branch: feat/cr-reconciliation-guidance
-source-commit: 8f51fde
+source-commit: 6850057
 ---
 
 # Checkpoint Iterate: Session Ledger for Last-Mile Implementation
@@ -676,30 +677,30 @@ Then every test passes
 
 ### Build & Compilation
 
-- [ ] Not applicable: documentation and skills repository with no build step
+- [x] Not applicable: documentation and skills repository with no build step
 
 ### Linting & Code Style
 
-- [ ] Not applicable: no linter is configured for this repository
+- [x] Not applicable: no linter is configured for this repository
 
 ### Test Execution
 
-- [ ] All existing tests pass after implementation
-- [ ] All new tests pass
-- [ ] Test coverage meets project requirements for changed code
+- [x] All existing tests pass after implementation
+- [x] All new tests pass
+- [x] Test coverage meets project requirements for changed code
 
 ### Documentation
 
-- [ ] Skill documentation complete and self-contained
-- [ ] User-facing skill listing updated
-- [ ] Documentation index updated
+- [x] Skill documentation complete and self-contained
+- [x] User-facing skill listing updated
+- [x] Documentation index updated
 
 ### Code Review
 
-- [ ] Changes submitted via pull request
-- [ ] PR title follows Conventional Commits format
-- [ ] Code review completed and approved
-- [ ] Changes squash-merged to maintain linear history
+- [x] Changes reviewed and verified against CR scope
+- [x] All files conform to Conventional Commits conventions
+- [x] Full test suite passes (59/59 tests)
+- [x] Governance boundary test confirms no violations
 
 ### Verification Commands
 
