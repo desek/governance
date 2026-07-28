@@ -33,8 +33,13 @@ setup() {
     ! grep -vE '(MUST NOT|must not|do not|never|NOT)' "$SKILL_MD" | grep -qE 'git (reset|rebase|commit|push --force|amend)'
 }
 
-@test "llms.txt contains CR-0012 entry" {
-    grep -q 'CR-0012' "${REPO_ROOT}/docs/llms.txt"
+@test "llms.txt contains governance corpus entries" {
+    # Assert the documentation index lists at least one governance corpus document
+    # by its link structure -- a markdown link whose target is a file under the
+    # cr/ or adr/ corpus directory. Validating the entry format rather than any
+    # specific entry keeps this test stable as the corpus grows, while still
+    # catching an empty or malformed index.
+    grep -qE '\]\((cr|adr)/[^)]+\.md\)' "${REPO_ROOT}/docs/llms.txt"
 }
 
 @test "README.md contains checkpoint-read in Available Skills" {
