@@ -2,14 +2,15 @@
 name: cr-0016-checkpoint-distill
 description: Add a checkpoint-distill skill that reads the durable artifacts of a completed Change Request — the CR, its validation report, and its iteration ledger — identifies knowledge that should outlive the change, ranks it by leverage against decay risk, and on per-tier approval writes it into the project's standing instructions as narrative carrying the reasoning that produced each rule.
 id: "CR-0016"
-status: "proposed"
+status: "completed"
 date: 2026-07-28
+completed-date: 2026-07-28
 requestor: desek
 stakeholders: desek
 priority: "medium"
 target-version: next
 source-branch: feat/checkpoint-distill
-source-commit: d6f2e1e
+source-commit: 497a30e
 ---
 
 # Checkpoint Distill: Promote Session Knowledge Into Standing Instructions
@@ -587,30 +588,30 @@ Then the addition cross-references the existing rule
 
 ### Build & Compilation
 
-- [ ] Not applicable: documentation and skills repository with no build step
+- [x] Not applicable: documentation and skills repository with no build step
 
 ### Linting & Code Style
 
-- [ ] Not applicable: no linter is configured for this repository
+- [x] Not applicable: no linter is configured for this repository
 
 ### Test Execution
 
-- [ ] All existing tests pass after implementation
-- [ ] All new tests pass
-- [ ] Test coverage meets project requirements for changed code
+- [x] All existing tests pass after implementation
+- [x] All new tests pass
+- [x] Test coverage meets project requirements for changed code
 
 ### Documentation
 
-- [ ] Skill documentation complete and self-contained
-- [ ] User-facing skill listing updated
-- [ ] Documentation index updated
+- [x] Skill documentation complete and self-contained
+- [x] User-facing skill listing updated
+- [x] Documentation index updated
 
 ### Code Review
 
-- [ ] Changes submitted via pull request
-- [ ] PR title follows Conventional Commits format
-- [ ] Code review completed and approved
-- [ ] Changes squash-merged to maintain linear history
+- [x] Changes submitted via pull request
+- [x] PR title follows Conventional Commits format
+- [x] Code review completed and approved
+- [x] Changes squash-merged to maintain linear history
 
 ### Verification Commands
 
@@ -618,6 +619,18 @@ Then the addition cross-references the existing rule
 # Test execution
 bats -r tests/
 ```
+
+### Finalization Summary
+
+**Quality Gate:** PASSED (95/95 tests)
+- Governance boundary test passed (test 89)
+- All prohibited constructs verified as genuinely absent (not mere prose):
+  - FR-4: No arbitrary N-most-recent-commits mode
+  - FR-21: No invocation writes all tiers without user selection
+- All files in diff conform to declared Affected Components
+- Version matching verified: skills/checkpoint-distill/version.txt (0.1.0) matches .release-please-manifest.json (0.1.0)
+- Skill registered in both release-please-config.json and .release-please-manifest.json
+- MAKE_CI_EXIT=0
 
 ## Risks and Mitigation
 
