@@ -113,13 +113,14 @@ Define a governance reference boundary with two territories, document it as a no
 * The governance corpus: any file under `docs/cr/` or `docs/adr/`, including filenames
 * The governance corpus index: `docs/llms.txt`, whose purpose is to enumerate the corpus
 * Git metadata: commit messages, branch names, pull request titles and descriptions, and issue text
-* The governance skill's own definition of the rule and of its document-naming conventions, where the pattern appears as a placeholder such as `CR-NNNN` rather than as a reference to a specific document
+* The governance skill's own definition of the rule and of its document-naming conventions, where the pattern appears as a placeholder rather than as a reference to a specific document. Because these files use concrete-looking digit forms in their examples (for example `CR-0001` in `reference/cr-guide.md`, `ADR-0123` in `templates/ADR.md`, and the `AC-1` / `AC-2` acceptance-criteria headers in `templates/CR.md`), they match the reference pattern and **MUST** therefore appear on the allowlist by path. The allowlisted skill files are exactly `skills/governance/templates/CR.md`, `skills/governance/templates/ADR.md`, `skills/governance/reference/cr-guide.md`, and `skills/governance/reference/adr-guide.md`
+* The boundary test's own machinery: `tests/governance/test_reference_boundary.bats` and `tests/governance/test_helpers/setup.bash`, which must embed the pattern and sample identifiers in order to define and exercise the check
 
 **Prohibited territory.** A governance reference pattern must not appear in:
 
 * Source code of any kind, including code comments
 * Test names, test descriptions, and test assertions
-* User-facing documentation: `README.md`, `AGENTS.md`, `CONTRIBUTING.md`, `WORKFLOW.md`, skill `SKILL.md` files, and any documentation outside the governance corpus
+* User-facing documentation: `README.md`, `AGENTS.md`, `CONTRIBUTING.md`, `WORKFLOW.md`, skill `SKILL.md` files, and any documentation outside the governance corpus that is not explicitly named on the permitted allowlist above
 
 The distinction is one of audience. The governance corpus is read by people who are reasoning about decisions, and identifiers are how they navigate it. Everything else is read by people who are using or changing the software, for whom an identifier is a dead end.
 
@@ -272,13 +273,15 @@ flowchart LR
 
 ### Detailed Implementation Steps
 
-#### 1. Document the boundary
+The steps below map onto the five phases of the Implementation Flow one-to-one, except that **Phase 3 ("Correct") comprises two steps** — fixing the workflow instruction and rewriting the hardcoded corpus test. A phase implementor assigned Phase 3 **MUST** perform both. The phase each step belongs to is named in its heading.
+
+#### Phase 1 — Document the boundary
 
 Add a `## Governance Reference Boundary` section to `skills/governance/reference/cr-guide.md`, placed after `## Source Traceability` so the two directions of traceability read together. The section defines the reference pattern, enumerates the permitted and prohibited territories as two lists, and states the rationale in brief. Add the section to the guide's table of contents.
 
 Add a short subsection to `skills/governance/SKILL.md` stating the rule in two sentences and linking to the guide section, satisfying the one-link reachability requirement.
 
-#### 2. Amend both templates
+#### Phase 2 — Amend both templates
 
 Delete the `metadata:` block containing `copyright` and `version` from the frontmatter of `skills/governance/templates/CR.md` and `skills/governance/templates/ADR.md`. Both templates retain their `name` and `description` fields, which identify the template itself and are already understood to be replaced in the created document.
 
@@ -288,21 +291,21 @@ Update `skills/governance/SKILL.md`: the two "Template frontmatter" paragraphs, 
 
 Update the `<copyright>` section of `AGENTS.md`: replace the note carving out governance documents with one covering both governance documents and the two template files, so that a contributor adding copyright frontmatter to a template is told not to.
 
-#### 3. Remove the instruction that violates the boundary
+#### Phase 3 (part 1 of 2) — Remove the instruction that violates the boundary
 
 In `skills/governance/reference/cr-implementation-workflow.md`, replace the Documentation Updater's step 7 so that it directs the agent to describe the implemented behavior on its own terms and explicitly prohibits naming the governance document. Verify no other agent instruction in the workflow directs an identifier into the working tree outside `docs/cr/`; the `/checkpoint-commit` invocations and the validation report path both remain permitted.
 
-#### 4. Replace the hardcoded corpus test
+#### Phase 3 (part 2 of 2) — Replace the hardcoded corpus test
 
 Rewrite the offending test in `tests/checkpoint-read/test_skill_structure.bats` so its name describes the structural property it asserts and its assertion validates the index's entry format rather than any specific entry. The replacement checks that the index contains at least one entry matching the corpus link structure, so it continues to detect an empty or malformed index without naming a document.
 
-#### 5. Add the boundary test
+#### Phase 4 — Add the boundary test
 
-Add the reference pattern and the permitted-path allowlist to `tests/governance/test_helpers/setup.bash` as shell variables, so both are defined once.
+Add the reference pattern and the permitted-path allowlist to `tests/governance/test_helpers/setup.bash` as shell variables, so both are defined once. The allowlist **MUST** enumerate every permitted-territory path that contains the pattern: `docs/cr/`, `docs/adr/`, `docs/llms.txt`, the four governance-skill placeholder files (`skills/governance/templates/CR.md`, `skills/governance/templates/ADR.md`, `skills/governance/reference/cr-guide.md`, `skills/governance/reference/adr-guide.md`), and the boundary test's own machinery (`tests/governance/test_reference_boundary.bats` and `tests/governance/test_helpers/setup.bash`). Omitting any one of these makes the boundary test fail against the current repository.
 
 Add `tests/governance/test_reference_boundary.bats` containing a test that greps the repository for the reference pattern, excludes the allowlisted paths and the Git directory, and fails if any match remains. On failure the test emits each offending path together with the matched identifier. A second test asserts that the allowlisted governance corpus does still contain identifiers, so that a mistake in the exclusion logic that silently matches nothing is itself caught.
 
-#### 6. Verify
+#### Phase 5 — Verify
 
 Run the full Bats suite. Confirm it passes, and confirm by inspection that the boundary test fails when a governance identifier is temporarily introduced into a prohibited file.
 
@@ -321,6 +324,10 @@ Run the full Bats suite. Confirm it passes, and confirm by inspection that the b
 | `tests/governance/test_adr_template.bats` | `ADR template has no copyright metadata field` | Asserts the removed field is absent from the template frontmatter | `templates/ADR.md` | No match for a `copyright:` key |
 | `tests/governance/test_adr_template.bats` | `ADR template has no version metadata field` | Asserts the removed field is absent from the template frontmatter | `templates/ADR.md` | No match for a `version:` key |
 | `tests/governance/test_adr_template.bats` | `ADR template states the reference boundary` | Asserts the commented instruction is present and sits inside an HTML comment | `templates/ADR.md` | Instruction found within a comment block |
+| `tests/governance/test_reference_boundary.bats` | `SKILL.md states the boundary rule and links to the guide` | Covers AC-1 and NFR-3: asserts `SKILL.md` states the boundary rule and links to the guide section within one hop | `skills/governance/SKILL.md` | Rule text present and a markdown link to the cr-guide boundary section present |
+| `tests/governance/test_reference_boundary.bats` | `cr-guide documents pattern, territories, and commit mechanism` | Covers AC-2 and AC-3: asserts the guide's boundary section defines the pattern, enumerates both territories, and names Git commit metadata as the link mechanism | `skills/governance/reference/cr-guide.md` | Pattern definition, both territory lists, and the commit-metadata statement all present |
+| `tests/governance/test_reference_boundary.bats` | `doc-updater instruction names no governance identifier` | Covers AC-4: asserts the Documentation Updater step neither instructs referencing a governance document identifier nor contains the reference pattern | `skills/governance/reference/cr-implementation-workflow.md` | No "reference the CR ID" instruction and no pattern match in the doc-updater step |
+| `tests/governance/test_reference_boundary.bats` | `no strip-fields instruction remains and AGENTS.md records the template exception` | Covers AC-11: asserts `SKILL.md` and `AGENTS.md` carry no instruction to strip the removed fields, and that `AGENTS.md` records the two templates as an exception to the copyright frontmatter rule | `skills/governance/SKILL.md`, `AGENTS.md` | No omit-those-fields instruction remains; the template exception is recorded in the copyright section |
 
 ### Tests to Modify
 
@@ -481,12 +488,23 @@ Then every test passes
 # Test execution
 bats -r tests/
 
-# Manual boundary verification: expect no output
+# Manual boundary verification. The set of excluded paths below MUST mirror the
+# allowlist encoded in tests/governance/test_helpers/setup.bash exactly. The
+# governance corpus is not the only permitted territory: the governance skill's
+# own placeholder-bearing files (both templates and the cr-guide/adr-guide naming
+# examples) and the boundary test's own sample fixtures also legitimately contain
+# the pattern, so they are excluded here as well. With every allowlisted path
+# excluded, expect no output.
 grep -rnE '(CR|ADR|FR|NFR|AC)-[0-9]+' . \
   --exclude-dir=.git \
   --exclude-dir=cr \
   --exclude-dir=adr \
-  --exclude=llms.txt
+  --exclude-dir=templates \
+  --exclude=llms.txt \
+  --exclude=cr-guide.md \
+  --exclude=adr-guide.md \
+  --exclude=test_reference_boundary.bats \
+  --exclude=setup.bash
 ```
 
 ## Risks and Mitigation
@@ -527,6 +545,12 @@ grep -rnE '(CR|ADR|FR|NFR|AC)-[0-9]+' . \
 **Impact:** low
 **Mitigation:** This is the intended behavior. The instruction is guidance for whoever implements the document, so its presence in the created CR is the point. It is an HTML comment, so it does not render, and it is consistent with the template's existing guideline block, which is already carried into created documents in the same way.
 
+### Risk 7: Whole-file allowlisting of the skill placeholder files blinds the check inside them
+
+**Likelihood:** medium
+**Impact:** low
+**Mitigation:** A path allowlist cannot distinguish a legitimate placeholder (for example `CR-NNNN`) from a genuine leak (for example a stale `CR-0009` reference) that both live in the same file. Because `templates/CR.md`, `templates/ADR.md`, `reference/cr-guide.md`, and `reference/adr-guide.md` must be allowlisted by path to accommodate their placeholder examples, a real stray identifier introduced into one of those four files would not be caught by the boundary test. This is an accepted, bounded blind spot: the four files are small, change rarely, and are covered by ordinary review. The alternative — normalising every example in those files to a non-digit placeholder form so they need not be allowlisted at all — is recorded as an open decision in the review summary for the author to resolve.
+
 ## Dependencies
 
 * Requires the Bats test infrastructure established by CR-0013, which is already in place
@@ -552,3 +576,33 @@ Chosen approach: "a documented boundary with automated enforcement and an explic
 
 * Links to related change requests: CR-0005 established the copyright frontmatter rule this change narrows for two files; CR-0009 introduced the field-stripping guidance this change makes unnecessary; CR-0011 established source traceability in the opposite direction; CR-0013 established the Bats infrastructure this change builds on
 * Links to issues/tickets: #25
+
+<!-- review-summary -->
+## Review Summary (CR Reviewer)
+
+Reviewed 2026-07-28 against branch `fix/governance-reference-leaks` at current HEAD.
+
+### Findings by category
+
+- **Drift: 0 substantive.** Every cited path, symbol, and quotation was verified against the current codebase and matches: the `SKILL.md` two "Template frontmatter" paragraphs, the `AGENTS.md <copyright>` note, the `cr-implementation-workflow.md` step-7 "reference the CR ID" instruction, the `test_skill_structure.bats` hardcoded `CR-0012` test, the `## Source Traceability` anchor and TOC in `cr-guide.md`, and dependency CRs 0005/0009/0011/0013 all exist as described. No commit has touched the affected components since the CR's `source-commit`. Two minor, non-blocking notes: (a) `docs/adr/` does not yet exist — allowlisting it is harmless and forward-looking; (b) `.junie/skills/governance` is a symlink mirror that `grep -r` (as used, not `-R`) does not follow, so it produces no duplicate matches.
+- **Contradiction: 2 (both fixed).**
+  1. The Verification Commands grep claimed "expect no output", but run as written it returns matches in the governance skill's placeholder files (`templates/CR.md`, `templates/ADR.md`, `reference/cr-guide.md`, `reference/adr-guide.md`), and the boundary test's own sample fixtures live in prohibited-by-path territory. As originally specified, the allowlist (only `docs/cr/`, `docs/adr/`, `docs/llms.txt`) contradicts the Permitted Territory, and the boundary test could never pass. Fixed by expanding the allowlist definition consistently across Permitted Territory, Implementation step 5 (Phase 4), and the Verification Commands.
+  2. The Prohibited Territory catch-all ("any documentation outside the governance corpus") swept in the now-allowlisted skill files. Fixed with a qualifier excluding allowlisted paths.
+- **Coverage: 1 (fixed).** AC-1, AC-2, AC-3, AC-4, and AC-11 (all documentation-content assertions) had no Test Strategy entry. Added four grep-based "Tests to Add" rows covering all five, consistent with the CR's existing template-grep approach. FR-to-AC coverage was already complete (every FR 1-15 maps to an AC).
+- **Ambiguity: 0.** All requirements use MUST / MUST NOT. No SHOULD/MAY/"appropriate" language in requirements.
+- **Scope + diagram: 1 (fixed).** The five Mermaid phases versus six numbered detailed steps were ambiguous for a per-phase implementor (Phase 3 "Correct" silently comprises two steps). Relabeled all six step headings by phase and added an explicit mapping note. All three Mermaid diagrams parse and quote punctuated labels correctly; Affected Components matches the Implementation phases.
+
+### Fixes applied
+
+1. Relabeled the six detailed steps by governing phase and added a 5-phase-to-6-step mapping note.
+2. Corrected the Verification Commands grep so its exclusions mirror the real allowlist.
+3. Expanded the Permitted Territory list to name the four skill placeholder files and the boundary test machinery, explaining they match the pattern via digit-form examples.
+4. Qualified the Prohibited Territory catch-all to exempt allowlisted paths.
+5. Enumerated the full allowlist in Implementation step 5 (Phase 4).
+6. Added four Test Strategy rows covering AC-1, AC-2, AC-3, AC-4, and AC-11.
+7. Added Risk 7 documenting the enforcement blind spot created by whole-file allowlisting.
+
+### Unresolved — requires author/human decision
+
+- **U1 (allowlist strategy).** The boundary is enforced with a path allowlist (NFR-2), but a path allowlist cannot distinguish a legitimate placeholder from a genuine leak inside the same file. The CR has been made internally consistent by allowlisting the four governance-skill placeholder files wholesale, which leaves a bounded blind spot inside them (Risk 7). The alternative is to normalise every example in those four files to a non-digit placeholder form (for example `CR-NNNN`, `AC-N`) so they need not be allowlisted at all, preserving full enforcement — but this expands scope with a new implementation step and edits to the templates and reference guides. The author must choose: accept the Risk 7 blind spot as written, or adopt the normalise-placeholders alternative and add the corresponding step and Affected Components.
+<!-- /review-summary -->
