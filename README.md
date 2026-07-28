@@ -30,6 +30,7 @@ When you install these skills, your AI coding agent gains the same capabilities:
 | [governance](skills/governance/SKILL.md) | Creates ADRs for architectural decisions and CRs for requirement changes |
 | [checkpoint-commit](skills/checkpoint-commit/SKILL.md) | Slash command that creates governance checkpoint commits linked to Change Requests |
 | [checkpoint-read](skills/checkpoint-read/SKILL.md) | Slash command that reads checkpoint commit history to recover context for new sessions |
+| [checkpoint-iterate](skills/checkpoint-iterate/SKILL.md) | Slash command that runs a last-mile iteration session against an implemented Change Request, recording every attempt and its disposition in a ledger |
 
 ### Checkpoint Hooks (Claude Code)
 
