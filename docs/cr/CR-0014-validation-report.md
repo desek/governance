@@ -1,13 +1,13 @@
 # CR-0014 Validation Report
 
 ## Summary
-Requirements: 18/18 | Acceptance Criteria: 12/12 | Tests: 14/18 | Gaps: 4
+Requirements: 18/18 | Acceptance Criteria: 12/12 | Tests: 18/18 | Gaps: 0 | Fixed: 4
 
 Requirements count is FR-1..FR-15 (15) plus NFR-1..NFR-3 (3) = 18, all PASS.
 Acceptance Criteria AC-1..AC-12 all PASS.
-Test Strategy: 13 "Tests to Add" + 1 "Tests to Modify" = 14 specified entries; 4 of the "Tests to Add" entries were never implemented (all four are documentation-content grep tests in `test_reference_boundary.bats`). 14 of 18 specified tests exist and pass. The four missing tests are recorded as gaps.
+Test Strategy: 13 "Tests to Add" + 1 "Tests to Modify" = 14 specified entries; all now implemented. The four previously-missing documentation-content grep tests in `test_reference_boundary.bats` (covering AC-1, AC-2, AC-3, AC-4, and AC-11) have been written and pass. 18 of 18 specified tests exist and pass.
 
-Validation basis: branch `fix/governance-reference-leaks` at HEAD `8eab405`, diffed against `cfcb537` (merge-base with `origin/main`). Quality gate `bats -r tests/` run locally: **21/21 pass, exit 0**. Boundary-failure behavior confirmed by injecting a temporary untracked violation (see AC-5).
+Validation basis: branch `fix/governance-reference-leaks` at HEAD `8eab405`, diffed against `cfcb537` (merge-base with `origin/main`). Gap-fix pass added the four missing tests; quality gate `bats -r tests/` re-run locally after the fix: **25/25 pass, exit 0** (21 prior + 4 new). Boundary-failure behavior confirmed by injecting a temporary untracked violation (see AC-5).
 
 ## Requirement Verification
 
@@ -36,17 +36,17 @@ Validation basis: branch `fix/governance-reference-leaks` at HEAD `8eab405`, dif
 
 | AC # | Description | Status | Evidence |
 |------|-------------|--------|----------|
-| AC-1 | Boundary rule stated in SKILL.md with a link to the guide | PASS | `SKILL.md:22-26` (rule + `#governance-reference-boundary` link). Note: no automated test guards this (see Gaps). |
-| AC-2 | Reference pattern defined; both territories enumerated as lists | PASS | `cr-guide.md:157` (pattern), `:159-167` (permitted list), `:169-175` (prohibited list). No automated test (see Gaps). |
-| AC-3 | Commit metadata named as traceability mechanism; embedding prohibited | PASS | `cr-guide.md:179`. No automated test (see Gaps). |
-| AC-4 | Skill no longer instructs embedding an identifier | PASS | `cr-implementation-workflow.md:223-226`. No automated test (see Gaps). |
+| AC-1 | Boundary rule stated in SKILL.md with a link to the guide | PASS | `SKILL.md:22-26` (rule + `#governance-reference-boundary` link). Guarded by `bats` test 22 (`test_reference_boundary.bats:66`). |
+| AC-2 | Reference pattern defined; both territories enumerated as lists | PASS | `cr-guide.md:157` (pattern), `:159-167` (permitted list), `:169-175` (prohibited list). Guarded by `bats` test 23 (`test_reference_boundary.bats:78`). |
+| AC-3 | Commit metadata named as traceability mechanism; embedding prohibited | PASS | `cr-guide.md:179`. Guarded by `bats` test 23 (`test_reference_boundary.bats:78`). |
+| AC-4 | Skill no longer instructs embedding an identifier | PASS | `cr-implementation-workflow.md:223-226`. Guarded by `bats` test 24 (`test_reference_boundary.bats:92`). |
 | AC-5 | A violation in a prohibited path fails the suite, naming path + identifier | PASS | Injected untracked `ZZ_scratch_violation_probe.md` with `FR-99`; test 1 of the boundary file failed with `not ok 1 ... ZZ_scratch_violation_probe.md: FR-99`; temp file removed, tree clean |
 | AC-6 | Governance corpus not reported as a violation | PASS | `bats` test 19 passes; corpus paths allowlisted at `setup.bash:26-28` |
 | AC-7 | Index test names no specific document | PASS | `test_skill_structure.bats:36` name "llms.txt contains governance corpus entries"; assertion is structural, no identifier |
 | AC-8 | Template metadata fields gone; name/description retained | PASS | `bats` tests 11, 12, 16, 17 pass; `templates/CR.md:1-2` / `templates/ADR.md:1-2` retain `name` + `description` |
 | AC-9 | Templates carry the boundary instruction naming the commit message | PASS | `bats` tests 13, 18 pass |
 | AC-10 | Boundary instruction does not render (inside HTML comment) | PASS | Instruction lives inside the `<!-- ... -->` guideline block of both templates; `test_cr_template.bats:29` / `test_adr_template.bats:29` awk-extract only comment content and assert the instruction is found there |
-| AC-11 | Strip-fields instructions retired; AGENTS.md records the exception | PASS | `SKILL.md:41`, `:69` (no strip instruction); `AGENTS.md:121` records the exception. No automated test (see Gaps). |
+| AC-11 | Strip-fields instructions retired; AGENTS.md records the exception | PASS | `SKILL.md:41`, `:69` (no strip instruction); `AGENTS.md:121` records the exception. Guarded by `bats` test 25 (`test_reference_boundary.bats:105`). |
 | AC-12 | Full suite passes; boundary reports zero violations | PASS | `bats -r tests/` → 21/21, exit 0 |
 
 ## Test Strategy Verification
@@ -62,13 +62,13 @@ Validation basis: branch `fix/governance-reference-leaks` at HEAD `8eab405`, dif
 | `test_adr_template.bats` | `ADR template has no copyright metadata field` | Yes | Yes (line 16) | Yes |
 | `test_adr_template.bats` | `ADR template has no version metadata field` | Yes | Yes (line 20) | Yes |
 | `test_adr_template.bats` | `ADR template states the reference boundary` | Yes | Yes (line 24) | Yes |
-| `test_reference_boundary.bats` | `SKILL.md states the boundary rule and links to the guide` | Yes | **No** | **Missing** — covers AC-1/NFR-3 |
-| `test_reference_boundary.bats` | `cr-guide documents pattern, territories, and commit mechanism` | Yes | **No** | **Missing** — covers AC-2/AC-3 |
-| `test_reference_boundary.bats` | `doc-updater instruction names no governance identifier` | Yes | **No** | **Missing** — covers AC-4 |
-| `test_reference_boundary.bats` | `no strip-fields instruction remains and AGENTS.md records the template exception` | Yes | **No** | **Missing** — covers AC-11 |
+| `test_reference_boundary.bats` | `SKILL.md states the boundary rule and links to the guide` | Yes | Yes (line 66) | Yes — passes; asserts rule text + one-hop guide link (AC-1/NFR-3) |
+| `test_reference_boundary.bats` | `cr-guide documents pattern, territories, and commit mechanism` | Yes | Yes (line 78) | Yes — passes; asserts pattern, both territories, commit mechanism (AC-2/AC-3) |
+| `test_reference_boundary.bats` | `doc-updater instruction names no governance identifier` | Yes | Yes (line 92) | Yes — passes; asserts no leak instruction and no pattern in workflow (AC-4) |
+| `test_reference_boundary.bats` | `no strip-fields instruction remains and AGENTS.md records the template exception` | Yes | Yes (line 105) | Yes — passes; asserts no strip instruction and the recorded exception (AC-11) |
 | `test_skill_structure.bats` | `llms.txt contains CR-0012 entry` → `llms.txt contains governance corpus entries` | Yes (modify) | Yes (line 36) | Yes — renamed and re-asserted structurally |
 
-Specified test entries present and passing: 14/18. Four specified "Tests to Add" rows are absent from the implemented `test_reference_boundary.bats`, which contains only three tests instead of the seven the Test Strategy enumerates for that file.
+Specified test entries present and passing: 18/18. The four previously-absent "Tests to Add" rows have been implemented in `test_reference_boundary.bats` (lines 66, 78, 92, 105), which now contains all seven tests the Test Strategy enumerates for that file. `bats -r tests/` reports 25/25 pass.
 
 ## Diff Coverage
 
@@ -84,7 +84,7 @@ Specified test entries present and passing: 14/18. Four specified "Tests to Add"
 | `tests/governance/test_cr_template.bats` | +18/-0 | FR-10 (tests), FR-11, FR-13, AC-8, AC-9, AC-10 |
 | `tests/governance/test_adr_template.bats` | +18/-0 | FR-10 (tests), FR-11, FR-13, AC-8, AC-9, AC-10 |
 | `tests/governance/test_helpers/setup.bash` | +48/-0 | FR-2, FR-6, NFR-2 |
-| `tests/governance/test_reference_boundary.bats` | +64/-0 | FR-6, FR-7, FR-9, NFR-1, AC-5, AC-6, AC-12 |
+| `tests/governance/test_reference_boundary.bats` | +119/-0 | FR-6, FR-7, FR-9, NFR-1, AC-1, AC-2, AC-3, AC-4, AC-5, AC-6, AC-11, AC-12 |
 | `docs/cr/CR-0014-...implementation.md` | +619/-0 | The CR document itself (governance corpus) |
 
 ### Unmapped changed files
@@ -101,12 +101,14 @@ None. Every changed file maps to at least one requirement, and every changed fil
 
 ## Gaps
 
-1. **Test Strategy row missing — `SKILL.md states the boundary rule and links to the guide`** (covers AC-1, NFR-3). The finalized Test Strategy enumerates this test in `test_reference_boundary.bats`, but the file contains no such test. AC-1 and NFR-3 are met by documentation content (`SKILL.md:22-26`) and verified here by inspection, but the promised automated guard is absent. Suggested minimal fix: add a bats test asserting `SKILL.md` contains the boundary rule text and a markdown link to `cr-guide.md#governance-reference-boundary`.
+None. All four previously-recorded gaps are FIXED.
 
-2. **Test Strategy row missing — `cr-guide documents pattern, territories, and commit mechanism`** (covers AC-2, AC-3). Not present in `test_reference_boundary.bats`. Content is met (`cr-guide.md:151-187`) and verified by inspection. Suggested minimal fix: add a bats test grepping `cr-guide.md` for the pattern definition, both territory lists, and the commit-metadata statement.
+1. **FIXED — `SKILL.md states the boundary rule and links to the guide`** (covers AC-1, NFR-3). Implemented at `tests/governance/test_reference_boundary.bats:66`. Asserts `SKILL.md` states the boundary rule (`Governance Reference Boundary` heading and the `MUST NOT ... written into source code` clause) and contains the one-hop markdown link `cr-guide.md#governance-reference-boundary`. Passes as `bats` test 22.
 
-3. **Test Strategy row missing — `doc-updater instruction names no governance identifier`** (covers AC-4). Not present. Content is met (`cr-implementation-workflow.md:223-226`) and verified by inspection. Suggested minimal fix: add a bats test asserting the doc-updater step does not contain the reference pattern and does not contain "reference the CR ID".
+2. **FIXED — `cr-guide documents pattern, territories, and commit mechanism`** (covers AC-2, AC-3). Implemented at `tests/governance/test_reference_boundary.bats:78`. Asserts the guide contains the verbatim pattern definition (grep `-F` on `REFERENCE_PATTERN`, matching `cr-guide.md:157`), both `Permitted territory` and `Prohibited territory` sections, and the `commit messages, branch names` linking mechanism (`cr-guide.md:165,179`). Passes as `bats` test 23.
 
-4. **Test Strategy row missing — `no strip-fields instruction remains and AGENTS.md records the template exception`** (covers AC-11). Not present. Content is met (`SKILL.md:41`, `:69`; `AGENTS.md:121`) and verified by inspection. Suggested minimal fix: add a bats test asserting `SKILL.md`/`AGENTS.md` carry no omit-those-fields instruction and that `AGENTS.md` records the template exception.
+3. **FIXED — `doc-updater instruction names no governance identifier`** (covers AC-4). Implemented at `tests/governance/test_reference_boundary.bats:92`. Asserts `cr-implementation-workflow.md` no longer contains "reference the CR ID", does contain the replacement "do NOT name the governance" instruction (`:224`), and contains no governance identifier matching `REFERENCE_PATTERN`. Passes as `bats` test 24.
 
-All four gaps are the same class: reviewer-added Test Strategy coverage rows (the CR's "Coverage: 1 (fixed)" note added four grep-based rows for AC-1/2/3/4/11) that were never implemented in `test_reference_boundary.bats`. No Functional or Non-Functional Requirement and no Acceptance Criterion is unmet — every FR, NFR, and AC is satisfied by verifiable file:line content plus, for the behavioral criteria (AC-5, AC-6, AC-12), passing test evidence. The gap is strictly the absence of the four documentation-content regression tests the finalized CR committed to adding.
+4. **FIXED — `no strip-fields instruction remains and AGENTS.md records the template exception`** (covers AC-11). Implemented at `tests/governance/test_reference_boundary.bats:105`. Asserts neither `SKILL.md` nor `AGENTS.md` carries an `(omit|strip|remove).*(copyright|version)` instruction, that `SKILL.md` states "no template metadata" (`:41,:69`), and that `AGENTS.md` records the "explicit exception to the copyright frontmatter rule" for the "two governance templates" (`:121`). Passes as `bats` test 25.
+
+All four fixes are documentation-content regression tests added to the boundary-test machinery file (`test_reference_boundary.bats`, itself allowlisted so it may legitimately embed the pattern). Every assertion targets content that already existed and was verified above by inspection; no assertion passes vacuously. No documentation change was required — the acceptance criteria were already satisfied by content; the gap was strictly the absence of the promised guards, now closed. `bats -r tests/` → 25/25, exit 0.

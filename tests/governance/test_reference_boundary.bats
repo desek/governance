@@ -62,3 +62,58 @@ setup() {
     # Negative case: a hyphenated token without a governed prefix must not match.
     ! printf '%s\n' "FOO-42" | grep -qE "$REFERENCE_PATTERN"
 }
+
+@test "SKILL.md states the boundary rule and links to the guide" {
+    # Documentation-content guard for the boundary rule's entry point: the skill
+    # index must state the rule and reach the full guidance within one link, so
+    # an agent loading the skill encounters it without opening the reference.
+    local skill="${REPO_ROOT}/skills/governance/SKILL.md"
+    # The rule is stated: identifiers must not cross into the implementation.
+    grep -qi "Governance Reference Boundary" "$skill"
+    grep -qi "MUST NOT.*written into source code" "$skill"
+    # A one-hop markdown link to the guide's boundary section is present.
+    grep -q "cr-guide.md#governance-reference-boundary" "$skill"
+}
+
+@test "cr-guide documents pattern, territories, and commit mechanism" {
+    # Documentation-content guard for the full boundary specification: the guide
+    # must define the reference pattern, enumerate both territories as lists, and
+    # name Git commit metadata as the mechanism for linking implementation to doc.
+    local guide="${REPO_ROOT}/skills/governance/reference/cr-guide.md"
+    # The pattern definition appears verbatim (the same string setup.bash greps).
+    grep -qF "$REFERENCE_PATTERN" "$guide"
+    # Both territories are enumerated as their own sections.
+    grep -qi "Permitted territory" "$guide"
+    grep -qi "Prohibited territory" "$guide"
+    # Git commit metadata is named as the permitted linking mechanism.
+    grep -qi "commit messages, branch names" "$guide"
+}
+
+@test "doc-updater instruction names no governance identifier" {
+    # Documentation-content guard for the corrected workflow step: the removed
+    # instruction that directed an identifier into project docs must be gone, and
+    # no governance identifier may appear anywhere in the workflow reference.
+    local wf="${REPO_ROOT}/skills/governance/reference/cr-implementation-workflow.md"
+    # The retired "reference the CR ID" instruction is absent.
+    ! grep -qi "reference the CR ID" "$wf"
+    # The replacement directs describing behavior without naming the doc.
+    grep -qi "do NOT name the governance" "$wf"
+    # No governance identifier appears in the file at all.
+    ! grep -qE "$REFERENCE_PATTERN" "$wf"
+}
+
+@test "no strip-fields instruction remains and AGENTS.md records the template exception" {
+    # Documentation-content guard for the retired strip-these-fields guidance:
+    # neither document may instruct omitting the removed template fields, and
+    # AGENTS.md must record the two templates as a copyright-frontmatter exception.
+    local skill="${REPO_ROOT}/skills/governance/SKILL.md"
+    local agents="${REPO_ROOT}/AGENTS.md"
+    # No surviving instruction tells an agent to omit or strip the removed fields.
+    ! grep -qiE "(omit|strip|remove).*(copyright|version)" "$skill"
+    ! grep -qiE "(omit|strip|remove).*(copyright|version)" "$agents"
+    # The reworded convention states created documents carry no template metadata.
+    grep -qi "no template metadata" "$skill"
+    # AGENTS.md records the two templates as an explicit exception.
+    grep -qi "explicit exception to the copyright frontmatter rule" "$agents"
+    grep -qi "two governance templates" "$agents"
+}
