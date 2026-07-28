@@ -19,6 +19,10 @@ Creates and manages governance documents: ADRs for architectural decisions, CRs 
 | Technical/architectural decision | ADR | [reference/adr-guide.md](reference/adr-guide.md) |
 | Requirement or scope change | CR | [reference/cr-guide.md](reference/cr-guide.md) |
 
+## Governance Reference Boundary
+
+Governance identifiers (the `CR-`, `ADR-`, `FR-`, `NFR-`, and `AC-` prefixes followed by digits) belong in the governance corpus under `docs/` and in Git metadata — commit messages, branch names, and pull request descriptions — and **MUST NOT** be written into source code, test names, or user-facing documentation. To link an implementation back to its governance document, put the identifier in the commit message and describe the behavior itself in the code; see [reference/cr-guide.md#governance-reference-boundary](reference/cr-guide.md#governance-reference-boundary) for the full pattern definition, the permitted and prohibited territories, and the rationale.
+
 ## ADR Workflow
 
 > **Documentation-only task.** Creating an ADR is a documentation-only task. No code compilation, test execution, or linting is required.
