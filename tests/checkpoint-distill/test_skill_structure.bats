@@ -79,10 +79,10 @@ setup() {
     grep -qi 'before the branch merges' "$SKILL_MD"
 }
 
-@test "SKILL.md requires ledger findings to be ranked not copied" {
-    grep -qi 'input, not passthrough' "$SKILL_MD"
-    grep -qi "ledger's closing findings" "$SKILL_MD"
-    grep -qi 'unranked' "$SKILL_MD"
+@test "skill requires ledger findings to be ranked not copied" {
+    skill_package_has 'input, not passthrough'
+    skill_package_has "ledger's closing findings"
+    skill_package_has 'unranked'
 }
 
 @test "SKILL.md requires reading standing instructions first" {
@@ -135,11 +135,11 @@ setup() {
     grep -qi 'commit hash' "$SKILL_MD"
 }
 
-@test "SKILL.md requires narrative output carrying reasoning" {
-    grep -qi 'narrative prose' "$SKILL_MD"
-    grep -qi 'The mechanism' "$SKILL_MD"
-    grep -qi 'The cost of breaking it' "$SKILL_MD"
-    grep -qi 'The history' "$SKILL_MD"
+@test "skill requires narrative output carrying reasoning" {
+    skill_package_has 'narrative prose'
+    skill_package_has 'The mechanism'
+    skill_package_has 'The cost of breaking it'
+    skill_package_has 'The history'
 }
 
 @test "SKILL.md requires discovering the target structure" {
@@ -147,9 +147,9 @@ setup() {
     grep -qi 'never assumed' "$SKILL_MD"
 }
 
-@test "SKILL.md requires correcting contradicted statements" {
-    grep -qi 'corrects that statement in place' "$SKILL_MD"
-    grep -qi 'does not add a new, true statement alongside the stale one' "$SKILL_MD"
+@test "skill requires correcting contradicted statements" {
+    skill_package_has 'corrects that statement in place'
+    skill_package_has 'does not add a new, true statement alongside the stale one'
 }
 
 @test "SKILL.md forbids naming the source document in written guidance" {
@@ -205,9 +205,9 @@ setup() {
     grep -qi 'degrading to the Change Request document alone' "$SKILL_MD"
 }
 
-@test "SKILL.md requires ruled-out candidates to be stated with a reason" {
-    grep -qi 'reported as ruled out, with the reason' "$SKILL_MD"
-    grep -qi 'never dropped silently' "$SKILL_MD"
+@test "skill requires ruled-out candidates to be stated with a reason" {
+    skill_package_has 'reported as ruled out, with the reason'
+    skill_package_has 'never dropped silently'
 }
 
 @test "SKILL.md documents the closing checkpoint commit and landed-or-deferred report" {
@@ -221,6 +221,6 @@ setup() {
     grep -qi 'proposes nothing new' "$SKILL_MD"
 }
 
-@test "SKILL.md requires cross-referencing an existing rule rather than restating it" {
-    grep -qi 'cross-references the existing rule rather than restating it' "$SKILL_MD"
+@test "skill requires cross-referencing an existing rule rather than restating it" {
+    skill_package_has 'cross-references the existing rule rather than restating it'
 }

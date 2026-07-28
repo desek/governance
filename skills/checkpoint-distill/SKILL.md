@@ -116,61 +116,17 @@ Before a single candidate is identified, the skill **MUST** read the project's s
 
 Coverage is rarely all-or-nothing. Where the standing instructions **partially** cover a candidate — they state the rule but not its mechanism, or warn of the foot-gun but not the specific case that triggers it — the candidate is the **uncovered gap**, never the whole topic. The skill proposes the missing piece and cross-references what already exists, rather than restating the covered part.
 
-### The five candidate categories
+### Categories, sourcing, and the ledger
 
-Candidates are drawn from exactly five categories. Every proposal names the category it belongs to, so the reader can weigh it against its kind.
+Candidates are drawn from exactly five categories — undocumented invariants, failure narratives, reusable patterns, foot-guns, and drift — and every candidate **MUST** trace to a specific source artifact by file location or commit hash. An iteration ledger's closing findings are **input to be reconciled and ranked**, never copied through unranked.
 
-1. **Invariants the code now depends on that nothing explains.** A constraint the implementation silently relies on — an ordering, a shared assumption, a contract between two components — that is load-bearing but undocumented, so the next change breaks it without warning.
-2. **Failure narratives.** A path that was tried and abandoned, with the reason it failed. This is the highest-value category and the hardest to reconstruct after the fact: a pattern that worked is visible in the code, but a pattern that was eliminated is visible nowhere, so the next agent attempts it again at full cost unless something marks it as already ruled out.
-3. **Reusable patterns.** A shape or approach that solved the problem well and will recur — worth naming so it is reached for deliberately rather than reinvented.
-4. **Foot-guns that cost real debugging time.** A sharp edge that already consumed a measurable amount of someone's session — a non-obvious ordering, a silent failure mode, a tool that lies about success. The evidence of cost is what qualifies it; a hypothetical hazard that cost nothing is not yet a candidate.
-5. **Drift.** An existing statement in the standing instructions that current reality now contradicts. Drift is not an addition — it is a correction the analysis surfaces, so a stale rule is fixed rather than left to mislead alongside a newer one.
-
-### Every candidate traces to a source
-
-Every candidate **MUST** trace to a specific source artifact, identified by **file location** (path and section, heading, or line) or by **commit hash**. A candidate with no citable origin is not a finding — it is the skill's own inference, and inference is exactly what this analysis exists to replace with evidence.
-
-Where the reasoning behind a candidate **cannot be reconstructed from its sources** — the ledger records that an approach was discarded but not why, or a validation gap is noted without the cause that produced it — the skill **MUST NOT** record the candidate on a guessed rationale. It **MUST** instead query for the missing context and leave the candidate out until the reasoning is supplied. A rule written on an invented "why" is worse than no rule, because it is authoritative and unexamined; the missing reasoning is requested, never inferred.
-
-### The iteration ledger is input, not passthrough
-
-The iteration ledger's closing findings are the richest single input this analysis has, and the most easily mishandled. They are **input to be reconciled and ranked**, never content to be copied through. The skill **MUST NOT** write a ledger's closing findings into the standing instructions unranked.
-
-The distinction is the point of the skill. **The ledger records what one session learned** — unranked, scoped to that session, unreconciled against anything the project already knows. **This skill decides what every future session should know** — which of those findings generalise beyond the session that produced them, which are already documented, and where each one ranks against every other candidate. A single session cannot see whether its own finding generalises or duplicates existing guidance; that judgement requires the wider view this analysis takes. So every ledger finding is treated as a raw candidate: reconciled against the standing instructions, deduplicated, scored, and tiered alongside candidates from every other input — or, where it does not survive that reconciliation, ruled out with its reason stated.
+**Read [references/candidate-categories.md](references/candidate-categories.md)** before identifying candidates, for the full category definitions, the sourcing rule, and why a ledger finding is a raw candidate rather than a conclusion.
 
 ## Scoring and Ranking
 
-### Three scoring dimensions
+Each surviving candidate is scored on **leverage**, **decay risk**, and **the cost of the rule being broken**, then sorted into three tiers: must add, recommended, optional. At equal leverage a failure narrative outranks the other categories. The resulting report is read-only, presents each candidate's what, where, and why, and **MUST** be scannable in about a minute. A candidate ruled out is reported with its reason, never dropped silently.
 
-Each surviving candidate is scored on three dimensions:
-
-1. **Leverage** — how much future work the rule saves or protects. How often the situation it governs recurs, and how many sessions inherit the benefit.
-2. **Decay risk** — how likely the knowledge is to be lost or re-litigated if it is not written down. Reasoning that lives only in a session's memory, or in commits about to be squashed, has high decay risk; a fact already half-visible in the code has less.
-3. **The cost of the rule being broken** — what it costs when a future session violates the constraint unknowingly. A foot-gun that wastes an hour scores below an invariant whose breach corrupts data.
-
-### Three tiers, must-add to optional
-
-The scored candidates are sorted into exactly three tiers, ordered by priority:
-
-1. **Must add** — high leverage, high decay risk, or high cost of breakage. Knowledge whose loss the project cannot afford.
-2. **Recommended** — clearly worth adding, but the project survives a delay.
-3. **Optional** — genuine but marginal; a reader may reasonably decline it.
-
-The tiers exist to keep the must-add set small, so the standing instructions grow slowly enough to stay read. When two candidates carry equivalent leverage but belong to different categories, **a failure narrative outranks the others**. A failure narrative prevents work that has already been proven wasteful — the single most expensive thing a future session can repeat — so at equal leverage it earns the higher tier over an invariant, pattern, or foot-gun of the same weight.
-
-## Analysis Report
-
-The report is read-only output: it presents the tiered candidates and stops, awaiting the per-tier approval specified later. It **MUST** be **scannable in about a minute**. The tiering serves that budget — a reader who trusts the must-add tier can act on it alone — but each entry must also be terse enough to read at a glance.
-
-Every candidate in the report states three things, and no more than it needs to:
-
-- **What it is** — the knowledge in a sentence, and its category.
-- **Where it would live** — the section of the standing instructions it belongs in, or the existing statement it corrects.
-- **Why it matters** — the leverage, and its source citation (file location or commit hash) so the reader can verify the claim against its origin.
-
-### Ruled-out candidates are stated, never dropped
-
-A candidate the analysis considers and decides **not** to propose — because it is already documented, because it does not generalise beyond its session, or because its reasoning could not be reconstructed — **MUST** be reported as ruled out, with the reason it was ruled out. It is never dropped silently. Stating the exclusion and its reason lets the reader catch a wrong call the skill made, and prevents the same candidate from being re-examined from scratch on the next run. A silent omission is indistinguishable from an oversight; a stated one is a decision the reader can review.
+**Read [references/scoring-and-tiers.md](references/scoring-and-tiers.md)** when ranking candidates and composing the report, for the scoring definitions, the tier boundaries, and the report's required shape.
 
 ## Approval
 
@@ -184,31 +140,11 @@ Analysis and application are two separate acts, and the gate between them is the
 
 Once a tier is approved, its candidates are written into the project's standing instructions. **How** they are written is the substance of this phase: a rule recorded badly is re-litigated or stripped, so the writing carries as much weight as the selection.
 
-### Write narrative, never a bare constraint
+### How approved candidates are written
 
-Approved candidates are written as **narrative prose**, not as a list of stripped rules. "Do X" tells a future reader what, not why, and the first time X is inconvenient it is changed or removed as arbitrary. So every rule written carries three things travelling with it:
+Approved candidates are written as **narrative prose**, never as stripped rules. Every rule carries the **mechanism** that makes it work, the **cost** of breaking it, and the **history** of what was tried before it stuck — a reader with only the rule can only guess, and guesses get the rule deleted. The target document's structure is **discovered by reading it**, never assumed. A rule that already exists elsewhere is cross-referenced rather than restated, and a statement current reality contradicts is corrected in place rather than supplemented.
 
-- **The mechanism** — what makes the rule work, the thing it relies on to hold.
-- **The cost of breaking it** — what goes wrong, concretely, when a future session violates it unknowingly.
-- **The history** — what was tried before this rule stuck, and why that earlier approach failed.
-
-A reader who has the mechanism, the cost, and the history can evaluate whether the rule still applies to their situation; a reader who has only the rule can only guess, and guesses get the rule deleted. The reasoning is the load-bearing part, and it is written into the guidance itself, never left behind in the source it came from.
-
-**Worked shape (generic).** A stripped line reads: *"Always resolve the handle before releasing the lock."* The narrative form reads: *"Resolve the handle before releasing the lock. The lock is what guarantees the handle table is stable while you read it (mechanism); release it first and a concurrent writer can recycle the slot, so the handle you resolve points at the wrong object and the corruption surfaces far from here (cost); an earlier version resolved lazily after release to shorten the critical section, and that is exactly the race it introduced (history)."* The rule is the same; only the second form survives someone deciding the lock is held too long.
-
-### Discover the target's structure by reading it
-
-The target document's organising structure is **discovered by reading it**, never assumed. Projects organise standing instructions differently — some by topic, some by workflow stage, some as a flat list, some with a document-wide index or cross-reference convention. The skill reads the target in full and determines its actual shape before writing a word, then places each addition where that shape says it belongs. An addition written to an assumed structure the document does not use is visibly foreign and gets reverted, so nothing about sectioning, indexing, or naming is presumed in advance.
-
-Additions **match the target's existing voice, formatting, and cross-referencing conventions** — the same heading depth, the same list or prose style, the same way it links between related rules — so a distilled addition is indistinguishable in form from what a human author wrote there.
-
-### Cross-reference what already exists, never restate it
-
-Where a rule being written **already appears elsewhere in the target document**, the addition **cross-references the existing rule rather than restating it**, following whatever cross-reference convention the document already uses. Restating a rule in a second location means the two copies drift apart and a reader cannot tell which is authoritative. The reconciliation done during candidate identification already reduced a partially-covered candidate to its uncovered gap; application honours that by linking to the covered part instead of duplicating it.
-
-### Correct drift, do not supplement it
-
-Where the analysis found an existing statement that **current reality now contradicts**, application **corrects that statement in place** — it does not add a new, true statement alongside the stale one. A stale claim left standing actively misleads, and a reader encountering both cannot tell which is current; that is worse than a missing claim. The correction rewrites the contradicted statement to match reality, preserving its surrounding context and voice.
+**Read [references/writing-guidance.md](references/writing-guidance.md)** once a tier is approved and before writing anything, for the full voice rules, the worked shape, and the structure-discovery procedure.
 
 ### The governance reference boundary applies to written guidance
 
