@@ -2,9 +2,9 @@
 name: cr-0016-iterate-ledger
 description: Session ledger for the last-mile iteration session against CR-0016, closing the gap between the delivered checkpoint-distill skill and the skill-authoring specification it must conform to.
 cr: "CR-0016"
-status: "open"
+status: "closed"
 opened: "2026-07-28"
-closed: ""
+closed: "2026-07-28"
 source-branch: "feat/checkpoint-distill"
 source-commit: "ceabd4a"
 worktree: "/Users/desek/Repo/desek/governance"
@@ -34,8 +34,18 @@ worktree: "/Users/desek/Repo/desek/governance"
 
 ### Recommended Patterns
 
-<!-- Empty until close. -->
+**Verify a new skill against the skill-authoring specification, not only against the change request that commissioned it.** A change request is authored by the same party that designs the skill, so validating the skill against it is a closed loop: full conformance proves the implementation matches the design, and says nothing about whether the design met the external specification. The specification's constraints — the token budget, progressive disclosure, the frontmatter rules — are invisible to that loop and go unchecked. Run the specification's own quality gate as a distinct step, at authoring time rather than after merge.
+
+**Measure a document against a token budget in tokens, not lines.** A line count and a token count diverge sharply with prose density: this file passed the 500-line limit at 250 lines while failing the ~5,000-token limit at ~6,880, because long explanatory paragraphs carry far more tokens per line than terse step lists. A line check would have reported the document healthy. Where a budget is expressed in tokens, check it in tokens.
+
+**Split a document on the explanatory-versus-procedural seam.** When a document must shrink, the productive cut is between what to do next and why it works — not an arbitrary line target. The procedural spine stays where the reader acts on it; the rationale moves behind a pointer that names when it is needed. This preserves every word of guidance while shortening what must be read to act, and it leaves the remaining document more readable rather than merely shorter.
+
+**Assert behaviour against the whole package, not against a single file.** A test that greps a literal sentence in one file couples the test to a layout decision rather than to a requirement. When the requirement is that *the skill documents a behaviour*, the assertion belongs against the skill package — the entry document plus its references. Scoping to one file makes a legitimate restructure look like a regression and pressures the author to undo the restructure rather than fix the assertion.
 
 ### Anti-Patterns
 
-<!-- Empty until close. -->
+**Deferring a specification check until after the work merges.** Checking conformance only after delivery means the finding lands as rework on a branch that is already reviewed, or after a squash merge when the reasoning behind each choice is gone. The specification's gate is cheap to run and should gate authoring, not follow it.
+
+**Treating a passing validation as evidence of external conformance.** The validation of this skill recorded zero gaps across every requirement and acceptance criterion, all traced with file and line evidence, while the skill was 38 percent over the specification's token budget. The validation was correct and thorough about the wrong question. A validation report answers "does this match its specification"; it cannot answer "was the specification right", and reading it as though it does creates false confidence precisely where an external standard applies.
+
+**Writing a content assertion as a literal grep against a fixed path.** Five assertions here named one file and one exact sentence. Both couplings are incidental to the requirement, and the file coupling broke the moment progressive disclosure — which the specification actively prescribes — moved the sentence one directory deeper. The test's failure carried no information about correctness, only about layout.
