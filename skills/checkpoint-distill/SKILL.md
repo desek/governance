@@ -4,7 +4,7 @@ description: Slash command that reads the durable artifacts a completed unit of 
 license: Apache-2.0
 metadata:
   copyright: Copyright Daniel Grenemark 2026
-  version: "0.1"
+  version: "0.0"
 ---
 
 # /checkpoint-distill

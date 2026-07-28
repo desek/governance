@@ -4,7 +4,7 @@ description: Slash command that runs a last-mile iteration session against an im
 license: Apache-2.0
 metadata:
   copyright: Copyright Daniel Grenemark 2026
-  version: "0.1"
+  version: "0.0"
 ---
 
 # /checkpoint-iterate
