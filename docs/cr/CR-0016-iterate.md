@@ -17,7 +17,7 @@ worktree: "/Users/desek/Repo/desek/governance"
 * **Governing Change Request:** CR-0016 — delivered the `checkpoint-distill` skill, which promotes the durable artifacts of completed work into the project's standing instructions.
 * **Gap being closed:** The delivered `SKILL.md` was validated against CR-0016's own requirements, but never against the skill-authoring specification. Checking it after the fact found it ~38% over the specification's token budget (~6,880 against a ~5,000 target) with no `references/` directory, so none of the progressive disclosure the specification prescribes is in place. It is the outlier of the five skills in this repository: the next largest is roughly half its size.
 * **Starting point:** branch `feat/checkpoint-distill` at commit `ceabd4a`, working tree `/Users/desek/Repo/desek/governance`
-* **Reopened:** 2026-07-28 at commit `fbc5433`, after a distillation run against this branch surfaced that the analysis does not distinguish knowledge the project owns from workarounds for defects in its dependencies. The distillation below was written at the first close and is revised at the next one.
+* **Continued:** 2026-07-28 at commit `fbc5433`, after a distillation run against this branch surfaced that the analysis does not distinguish knowledge the project owns from workarounds for defects in its dependencies. The ledger is append-only, so continuing after a close is an append and nothing more: the attempt below follows the earlier ones, and the distillation written at the first close stands as the record of what was concluded then. A later close appends its own distillation rather than editing that one.
 
 ## Attempt Ledger
 
