@@ -76,6 +76,10 @@ Use this checklist when creating a Change Request:
 - Number of diagrams
 - Depth of impact assessment
 
+### Implementing an Authored CR
+
+Once a CR exists, [reference/cr-implementation-workflow.md](reference/cr-implementation-workflow.md) provides a project-agnostic agent-team workflow that carries it from review through phased implementation, finalization, validation, gap-fixing, and documentation. It follows the host project's own build, lint, and test conventions.
+
 ## Templates
 
 - **ADR**: [templates/ADR.md](templates/ADR.md)
@@ -87,6 +91,7 @@ For detailed lifecycle information, best practices, and examples:
 
 - **ADR Guide**: [reference/adr-guide.md](reference/adr-guide.md)
 - **CR Guide**: [reference/cr-guide.md](reference/cr-guide.md)
+- **CR Implementation Workflow**: [reference/cr-implementation-workflow.md](reference/cr-implementation-workflow.md) — agent-team workflow for implementing an existing CR
 
 ## Commit Message Format
 
