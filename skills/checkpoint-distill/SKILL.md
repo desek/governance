@@ -172,6 +172,67 @@ Every candidate in the report states three things, and no more than it needs to:
 
 A candidate the analysis considers and decides **not** to propose — because it is already documented, because it does not generalise beyond its session, or because its reasoning could not be reconstructed — **MUST** be reported as ruled out, with the reason it was ruled out. It is never dropped silently. Stating the exclusion and its reason lets the reader catch a wrong call the skill made, and prevents the same candidate from being re-examined from scratch on the next run. A silent omission is indistinguishable from an oversight; a stated one is a decision the reader can review.
 
+## Approval
+
+Analysis and application are two separate acts, and the gate between them is the user. Nothing the analysis produced is written until the user has approved it, and approval is granted **one tier at a time**.
+
+- **Analysis modifies nothing.** Presenting the tiered report is the end of the read-only phase. No file is touched, and the standing instructions are not written, until an approval is given. The run stops at the report and waits.
+- **Approval is per tier.** The user may approve the must-add tier and decline the rest, approve must-add and recommended but not optional, or decline everything. Each tier is accepted or refused on its own, and **only an approved tier is written**. A user who approves one tier while declining another gets exactly the approved tier applied and nothing else.
+- **No invocation writes every tier without selection.** There is no flag, argument, or mode that applies all findings in one step. The gate is always a human choosing the tier, because a wrong rule written into standing instructions is authoritative, unexamined, and inherited by every future session — so skipping the selection is the one shortcut this skill will not offer. This is the same prohibition stated in *Analysis Is Read-Only by Default*; it is restated here because it is the load-bearing constraint of the approval phase.
+
+## Application
+
+Once a tier is approved, its candidates are written into the project's standing instructions. **How** they are written is the substance of this phase: a rule recorded badly is re-litigated or stripped, so the writing carries as much weight as the selection.
+
+### Write narrative, never a bare constraint
+
+Approved candidates are written as **narrative prose**, not as a list of stripped rules. "Do X" tells a future reader what, not why, and the first time X is inconvenient it is changed or removed as arbitrary. So every rule written carries three things travelling with it:
+
+- **The mechanism** — what makes the rule work, the thing it relies on to hold.
+- **The cost of breaking it** — what goes wrong, concretely, when a future session violates it unknowingly.
+- **The history** — what was tried before this rule stuck, and why that earlier approach failed.
+
+A reader who has the mechanism, the cost, and the history can evaluate whether the rule still applies to their situation; a reader who has only the rule can only guess, and guesses get the rule deleted. The reasoning is the load-bearing part, and it is written into the guidance itself, never left behind in the source it came from.
+
+**Worked shape (generic).** A stripped line reads: *"Always resolve the handle before releasing the lock."* The narrative form reads: *"Resolve the handle before releasing the lock. The lock is what guarantees the handle table is stable while you read it (mechanism); release it first and a concurrent writer can recycle the slot, so the handle you resolve points at the wrong object and the corruption surfaces far from here (cost); an earlier version resolved lazily after release to shorten the critical section, and that is exactly the race it introduced (history)."* The rule is the same; only the second form survives someone deciding the lock is held too long.
+
+### Discover the target's structure by reading it
+
+The target document's organising structure is **discovered by reading it**, never assumed. Projects organise standing instructions differently — some by topic, some by workflow stage, some as a flat list, some with a document-wide index or cross-reference convention. The skill reads the target in full and determines its actual shape before writing a word, then places each addition where that shape says it belongs. An addition written to an assumed structure the document does not use is visibly foreign and gets reverted, so nothing about sectioning, indexing, or naming is presumed in advance.
+
+Additions **match the target's existing voice, formatting, and cross-referencing conventions** — the same heading depth, the same list or prose style, the same way it links between related rules — so a distilled addition is indistinguishable in form from what a human author wrote there.
+
+### Cross-reference what already exists, never restate it
+
+Where a rule being written **already appears elsewhere in the target document**, the addition **cross-references the existing rule rather than restating it**, following whatever cross-reference convention the document already uses. Restating a rule in a second location means the two copies drift apart and a reader cannot tell which is authoritative. The reconciliation done during candidate identification already reduced a partially-covered candidate to its uncovered gap; application honours that by linking to the covered part instead of duplicating it.
+
+### Correct drift, do not supplement it
+
+Where the analysis found an existing statement that **current reality now contradicts**, application **corrects that statement in place** — it does not add a new, true statement alongside the stale one. A stale claim left standing actively misleads, and a reader encountering both cannot tell which is current; that is worse than a missing claim. The correction rewrites the contradicted statement to match reality, preserving its surrounding context and voice.
+
+### The governance reference boundary applies to written guidance
+
+Written guidance describes the **practice** and **MUST NOT** name the Change Request, iteration session, or commit that produced it. Standing instructions are prohibited territory under the repository's governance reference boundary, so a distilled rule reads as a standing instruction in its own right, carrying its mechanism, cost, and history without ever citing the `{CR_ID}`, iteration session, or commit hash the analysis traced it to. The source citation lives in the analysis report for the reader's verification; it does not travel into the guidance. This boundary is stated in full under *Governance Reference Boundary* below.
+
+### Never delete; raise pruning as a separate finding
+
+Application **adds and corrects — it never deletes**. The skill **MUST NOT** remove existing content from the standing instructions. Where the analysis believes existing guidance has become obsolete and should be pruned, that removal is **raised as a separate finding for explicit approval**, never performed. Deletion is a distinct decision with its own risk, and it belongs to a human, made deliberately, not folded silently into an addition.
+
+### Destructive Git operations are prohibited
+
+Application creates new commits and never rewrites history. The skill **MUST NOT** perform any destructive Git operation — no `git reset`, `git rebase`, `git commit --amend`, or `git push --force`. This matches the branch-protection and linear-history rules the repository enforces, and is listed again under *Safety Rules* below.
+
+### Close with a checkpoint commit for the governing Change Request
+
+After the approved tiers are written, the skill creates a **checkpoint commit for the governing Change Request**, using the existing checkpoint-commit workflow so the write is linked to the unit of work that produced it. The commit records the change to the standing instructions as a normal, non-destructive commit; it does not amend or squash anything already present.
+
+### Report what landed and what was deferred
+
+The run closes with a **final report** stating what actually happened:
+
+- **What landed** — which tiers were approved and written, and the additions or corrections each produced.
+- **What was deferred** — every tier the user declined, each named with the reason for its deferral, so a later run knows what remains rather than re-deriving it. A deferred tier is a decision on record, not a silent omission.
+
 ## Portability
 
 This skill encodes nothing about the structure, section naming, or subject matter of any particular project, so it is usable unchanged in any repository. It discovers the shape of the target standing instructions by reading them at the time it runs, and it never assumes a fixed sectioning, index, or naming convention. The invocation contract above refers only to concepts every project shares — a unit of work, a default branch, a merge base, a document that either resolves or does not.
