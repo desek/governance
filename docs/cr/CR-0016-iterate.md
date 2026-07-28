@@ -2,9 +2,9 @@
 name: cr-0016-iterate-ledger
 description: Session ledger for the last-mile iteration session against CR-0016, closing the gap between the delivered checkpoint-distill skill and the skill-authoring specification it must conform to.
 cr: "CR-0016"
-status: "closed"
+status: "open"
 opened: "2026-07-28"
-closed: "2026-07-28"
+closed: ""
 source-branch: "feat/checkpoint-distill"
 source-commit: "ceabd4a"
 worktree: "/Users/desek/Repo/desek/governance"
@@ -17,6 +17,7 @@ worktree: "/Users/desek/Repo/desek/governance"
 * **Governing Change Request:** CR-0016 — delivered the `checkpoint-distill` skill, which promotes the durable artifacts of completed work into the project's standing instructions.
 * **Gap being closed:** The delivered `SKILL.md` was validated against CR-0016's own requirements, but never against the skill-authoring specification. Checking it after the fact found it ~38% over the specification's token budget (~6,880 against a ~5,000 target) with no `references/` directory, so none of the progressive disclosure the specification prescribes is in place. It is the outlier of the five skills in this repository: the next largest is roughly half its size.
 * **Starting point:** branch `feat/checkpoint-distill` at commit `ceabd4a`, working tree `/Users/desek/Repo/desek/governance`
+* **Reopened:** 2026-07-28 at commit `fbc5433`, after a distillation run against this branch surfaced that the analysis does not distinguish knowledge the project owns from workarounds for defects in its dependencies. The distillation below was written at the first close and is revised at the next one.
 
 ## Attempt Ledger
 
@@ -28,6 +29,20 @@ worktree: "/Users/desek/Repo/desek/governance"
 * **Verification evidence:** `SKILL.md` went 250 to 186 lines and ~6,880 to ~4,814 tokens, moving from 38 percent over the ~5,000 target to under it. No guidance was deleted; all of it moved, and each of the three reference files is under 100 lines so none requires a table of contents. The governance boundary test passed throughout, and no digit-form identifier exists anywhere in the skill package.
 
     The first check run after the split returned 90 of 95, with five failures. Every one grepped a literal string in `SKILL.md` that had moved into a reference file; all five strings were confirmed still present in the package, so nothing had been lost. The failures were a wrong assumption in the tests rather than a regression in the skill: the requirements say the *skill* must document these behaviours, while the assertions demanded that one specific file carry the sentence. Widening those five assertions to grep the package — `SKILL.md` plus its one-level-deep `references/` — through a shared `skill_package_has` helper returned the suite to 95 of 95.
+* **Disposition:** kept
+
+### Attempt 2 — Classify every candidate as in-project or out-of-project
+
+* **State:** settled
+* **Hypothesis:** The analysis conflates two kinds of knowledge that need different handling. Some candidates describe **this project** — its conventions, its artifacts, knowledge the project owns and can change. Others describe a defect or quirk in something the project **depends on but does not control** — an external tool, a service, a harness capability — where the only available response is to route around it. The second kind is the common case, and it differs in three ways that matter: it expires when the upstream defect is fixed, it cannot be fixed from inside this repository, and written as a permanent project rule it becomes a lie the moment upstream changes.
+
+    Classifying each candidate by origin before it is ranked, and requiring an out-of-project candidate to carry the upstream thing, the observed defect, the workaround, and **how to test whether it is still needed**, should let a reader tell at a glance whether a finding is project knowledge or a dependency workaround — and give the workaround an expiry condition rather than letting it calcify into a rule nobody dares remove.
+* **Surface touched:** `skills/checkpoint-distill/SKILL.md`; `skills/checkpoint-distill/references/candidate-categories.md` and `references/writing-guidance.md`, both extended and their frontmatter descriptions updated to match; `tests/checkpoint-distill/test_skill_structure.bats`.
+* **Verification evidence:** The suite went 95 to 101, with six new assertions covering the classification, the workaround framing, the mandatory re-test condition, the four parts an out-of-project candidate carries, the mixed-cause tiebreak, and the requirement that the report state each candidate's class. The boundary test passed and no digit-form identifier appeared anywhere in the package.
+
+    One assertion failed on first run with grep status 2 rather than a content mismatch: the literal `**MUST**` in the search string is invalid as a regular expression. Replaced with a literal-safe string. This is a property of asserting prose by grep, not of the change under test.
+
+    The token budget was the real finding. The addition pushed `SKILL.md` from ~4,973 to ~5,224 tokens, back over the limit the previous attempt had just brought it under. The space was reclaimed three ways rather than by dropping content: tightening the new section and moving its rationale into the reference; deduplicating the skill's own governance boundary rule, which was stated in full in two places, by applying the skill's own cross-reference-rather-than-restate rule to itself; and trimming a self-referential restatement in the approval section plus an intro paragraph the writing reference now owns. Final state is ~4,973 tokens, exactly where the previous attempt left it, with roughly 27 tokens of headroom.
 * **Disposition:** kept
 
 ## Distillation

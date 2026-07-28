@@ -11,7 +11,7 @@ metadata:
 
 Turns the artifacts of finished work into standing guidance a future session inherits. A coding agent is episodic: each session begins without the context of the last one — what was tried, what failed, what stuck, and why. Standing instructions carry that across the gap, but only if something deliberately puts the knowledge there. This skill reads the durable record a unit of work leaves behind, extracts the constraints, failure narratives, and foot-guns worth keeping, ranks them, and — on explicit per-tier approval — writes them into the project's standing instructions as narrative rather than as a list of bare rules.
 
-A bare rule does not survive contact with inconvenience. "Do X" tells a future reader what, not why, so the first time the constraint is awkward it gets changed or stripped as arbitrary. "We tried Y, it broke for reason Z, so the rule is X" survives, because the reader can evaluate whether Z still applies. The reasoning is the load-bearing part; the rule is a summary of it. That is why this skill writes narrative that carries the mechanism, the cost, and the history behind each rule, and never a stripped constraint.
+A bare rule does not survive contact with inconvenience: "do X" tells a future reader what, not why, so the first time the constraint is awkward it gets stripped as arbitrary. The reasoning is the load-bearing part. That is why this skill writes narrative carrying the mechanism, the cost, and the history behind each rule, never a stripped constraint.
 
 **Usage:**
 
@@ -122,6 +122,19 @@ Candidates are drawn from exactly five categories — undocumented invariants, f
 
 **Read [references/candidate-categories.md](references/candidate-categories.md)** before identifying candidates, for the full category definitions, the sourcing rule, and why a ledger finding is a raw candidate rather than a conclusion.
 
+### Classify every candidate by origin
+
+Before ranking, every candidate **MUST** be classified, and the report **MUST** state the class for each:
+
+- **In-project** — knowledge the project owns and can change. It belongs in the standing instructions and holds until the project itself changes.
+- **Out-of-project** — a defect or quirk in something the project depends on but does not control. The project can only route around it, so the knowledge is a **workaround**, not a rule.
+
+A workaround **expires** when the upstream defect is fixed; written as a permanent rule it becomes false the moment that happens, while reading like settled practice nobody dares remove. Out-of-project candidates are usually the majority, so a report that does not separate them leaves the reader unable to tell their own project's knowledge from scar tissue over someone else's bug.
+
+An out-of-project candidate **MUST** also record the upstream thing, the observed defect, the workaround, and **how to test whether it is still needed** — a workaround with no re-test condition can never be retired.
+
+**Read [references/candidate-categories.md](references/candidate-categories.md)** for the classification rules, the tiebreak when a candidate has both causes, and what an out-of-project entry carries.
+
 ## Scoring and Ranking
 
 Each surviving candidate is scored on **leverage**, **decay risk**, and **the cost of the rule being broken**, then sorted into three tiers: must add, recommended, optional. At equal leverage a failure narrative outranks the other categories. The resulting report is read-only, presents each candidate's what, where, and why, and **MUST** be scannable in about a minute. A candidate ruled out is reported with its reason, never dropped silently.
@@ -134,7 +147,7 @@ Analysis and application are two separate acts, and the gate between them is the
 
 - **Analysis modifies nothing.** Presenting the tiered report is the end of the read-only phase. No file is touched, and the standing instructions are not written, until an approval is given. The run stops at the report and waits.
 - **Approval is per tier.** The user may approve the must-add tier and decline the rest, approve must-add and recommended but not optional, or decline everything. Each tier is accepted or refused on its own, and **only an approved tier is written**. A user who approves one tier while declining another gets exactly the approved tier applied and nothing else.
-- **No invocation writes every tier without selection.** There is no flag, argument, or mode that applies all findings in one step. The gate is always a human choosing the tier, because a wrong rule written into standing instructions is authoritative, unexamined, and inherited by every future session — so skipping the selection is the one shortcut this skill will not offer. This is the same prohibition stated in *Analysis Is Read-Only by Default*; it is restated here because it is the load-bearing constraint of the approval phase.
+- **No invocation writes every tier without selection.** There is no flag, argument, or mode that applies all findings in one step. The gate is always a human choosing the tier, because a wrong rule written into standing instructions is authoritative, unexamined, and inherited by every future session — so skipping the selection is the one shortcut this skill will not offer.
 
 ## Application
 
@@ -148,7 +161,7 @@ Approved candidates are written as **narrative prose**, never as stripped rules.
 
 ### The governance reference boundary applies to written guidance
 
-Written guidance describes the **practice** and **MUST NOT** name the Change Request, iteration session, or commit that produced it. Standing instructions are prohibited territory under the repository's governance reference boundary, so a distilled rule reads as a standing instruction in its own right, carrying its mechanism, cost, and history without ever citing the `{CR_ID}`, iteration session, or commit hash the analysis traced it to. The source citation lives in the analysis report for the reader's verification; it does not travel into the guidance. This boundary is stated in full under *Governance Reference Boundary* below.
+Written guidance describes the **practice** and **MUST NOT** name the Change Request, iteration session, or commit that produced it. The source citation lives in the analysis report for the reader's verification; it does not travel into the guidance. See *Governance Reference Boundary* below for the full rule.
 
 ### Never delete; raise pruning as a separate finding
 

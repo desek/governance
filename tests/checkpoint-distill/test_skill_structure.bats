@@ -224,3 +224,32 @@ setup() {
 @test "skill requires cross-referencing an existing rule rather than restating it" {
     skill_package_has 'cross-references the existing rule rather than restating it'
 }
+
+@test "skill classifies candidates as in-project or out-of-project" {
+    skill_package_has 'in-project'
+    skill_package_has 'out-of-project'
+    skill_package_has 'classified'
+}
+
+@test "skill treats an out-of-project candidate as a workaround, not a rule" {
+    skill_package_has 'workaround'
+    skill_package_has 'never as a standing rule'
+}
+
+@test "skill requires a re-test condition on every out-of-project candidate" {
+    skill_package_has 'how to test whether it is still needed'
+    skill_package_has 'can never be retired'
+}
+
+@test "skill documents what an out-of-project candidate carries" {
+    skill_package_has 'The upstream thing'
+    skill_package_has 'The observed defect'
+}
+
+@test "skill documents the tiebreak when a candidate has both causes" {
+    skill_package_has 'cause that would have to change'
+}
+
+@test "skill requires the report to state each candidate's origin" {
+    skill_package_has 'state the class for each'
+}

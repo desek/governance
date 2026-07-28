@@ -1,6 +1,6 @@
 ---
 name: writing-guidance
-description: How an approved distillation candidate is written into standing instructions — narrative carrying mechanism, cost, and history, placed into a structure discovered by reading the target rather than assumed.
+description: How an approved distillation candidate is written into standing instructions — narrative carrying mechanism, cost, and history, placed into a structure discovered by reading the target rather than assumed, with out-of-project workarounds marked and given a retirement path.
 metadata:
   copyright: Copyright Daniel Grenemark 2026
   version: "0.1"
@@ -41,3 +41,14 @@ Where the analysis found an existing statement that **current reality now contra
 ## What the written guidance must not carry
 
 Written guidance describes the **practice** and **MUST NOT** name the Change Request, iteration session, or commit that produced it. The source citation lives in the analysis report for the reader's verification; it does not travel into the guidance. See the governance reference boundary in `SKILL.md`.
+
+## Writing an out-of-project workaround
+
+A candidate classified as out-of-project is written as a **workaround with an expiry condition**, never as a standing rule. The distinction must survive into the written guidance, because a reader who cannot tell a workaround from a rule will treat both as permanent.
+
+- **Mark it as a workaround where it is written.** The guidance states plainly that the practice compensates for an external defect rather than expressing a project preference. A reader encountering it should immediately know it is not the project's own choice.
+- **Name the upstream thing and the defect** in the guidance itself, so a reader can tell what would have to change for the workaround to become unnecessary.
+- **Carry the re-test condition into the written text.** The check that reveals the defect is fixed belongs beside the workaround, not only in the analysis report. Without it the workaround has no retirement path and will outlive the bug it compensates for.
+- **Keep it separable.** Place workarounds where they can be reviewed and removed as a group — a distinct section, or clearly marked in place — rather than interleaved with rules the project owns. When the upstream fix lands, the reader should be able to find and delete the workaround without re-reading everything.
+
+The mechanism, cost, and history rules above still apply: the mechanism is what the workaround relies on, the cost is what breaks without it, and the history is the defect that made it necessary.
