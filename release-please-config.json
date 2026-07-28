@@ -19,6 +19,12 @@
       "component": "checkpoint-read",
       "include-component-in-tag": true,
       "include-v-in-tag": true
+    },
+    "skills/checkpoint-iterate": {
+      "release-type": "simple",
+      "component": "checkpoint-iterate",
+      "include-component-in-tag": true,
+      "include-v-in-tag": true
     }
   }
 }

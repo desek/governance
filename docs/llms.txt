@@ -18,6 +18,7 @@
 - [CR-0012: Checkpoint Read Slash Command](cr/CR-0012-checkpoint-read-slash-command.md): Add a /checkpoint-read slash command that reads checkpoint commit history to recover context for new sessions
 - [CR-0013: Bats Test Infrastructure](cr/CR-0013-bats-test-infrastructure.md): Add Bats test infrastructure and implement governance template validation tests from CR-0011
 - [CR-0014: Decouple Governance References From Implementation](cr/CR-0014-decouple-governance-references-from-implementation.md): Establish a governance reference boundary so governance identifiers appear only in the governance corpus and Git metadata, strip leak-prone metadata fields from the CR and ADR templates, and enforce the boundary with an automated test
+- [CR-0015: Checkpoint Iterate](cr/CR-0015-checkpoint-iterate.md): Add a /checkpoint-iterate session skill that maintains an attempt ledger against an implemented Change Request, records each attempt with a kept, discarded, or partially-kept disposition, checkpoint-commits code continuously, and distils the session into patterns and anti-patterns
 
 ## Anthropic Documentation
 
