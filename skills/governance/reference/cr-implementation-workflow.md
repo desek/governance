@@ -220,7 +220,10 @@ and run it as a single orchestration turn.
            affected components, error behavior, and any observable side effects (e.g., log
            fields, metrics).
       6. Verify all Mermaid diagrams in updated docs render correctly (valid syntax).
-      7. Do NOT duplicate content already in the CR -- reference the CR ID where appropriate.
+      7. Do NOT duplicate content already in the CR. Describe the implemented behavior on
+         its own terms -- what it does and how to use it -- and do NOT name the governance
+         document it originated from anywhere in the documentation. Provenance belongs in
+         commit metadata, never in the working tree.
       8. /checkpoint-commit {CR_ID} documentation updated for implemented feature
     </instructions>
   </agent>
