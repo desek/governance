@@ -38,7 +38,7 @@ Use this checklist when creating an Architecture Decision Record:
 - [ ] Set status to "proposed"
 ```
 
-**Template frontmatter:** The template file contains its own frontmatter (`name: adr-template`, `description: Template for creating Architecture Decision Records (ADRs).`, and `metadata` fields) that describe the template itself. Do **not** copy these values into created documents. Each ADR must have its own unique `name` and `description` reflecting the specific decision. Created ADR documents **MUST** omit the `metadata.copyright` and `metadata.version` frontmatter fields.
+**Template frontmatter:** A created ADR carries its own `name` and `description` reflecting the specific decision, and no template metadata. The template's `name` and `description` describe the template itself, so replace them; the template carries no other metadata to copy.
 
 **Strict requirements:**
 - File naming: `ADR-NNNN-{title}.md` (four-digit number, lowercase, hyphens)
@@ -66,7 +66,7 @@ Use this checklist when creating a Change Request:
 - [ ] Set status to "proposed"
 ```
 
-**Template frontmatter:** The template file contains its own frontmatter (`name: cr-template`, `description: Template for creating Change Requests (CRs).`, and `metadata` fields) that describe the template itself. Do **not** copy these values into created documents. Each CR must have its own unique `name` and `description` reflecting the specific change request. Created CR documents **MUST** omit the `metadata.copyright` and `metadata.version` frontmatter fields.
+**Template frontmatter:** A created CR carries its own `name` and `description` reflecting the specific change request, and no template metadata. The template's `name` and `description` describe the template itself, so replace them; the template carries no other metadata to copy.
 
 **Strict requirements:**
 - File naming: `CR-NNNN-{title}.md` (four-digit number, lowercase, hyphens)

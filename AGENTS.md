@@ -118,7 +118,7 @@ metadata:
 ---
 ```
 
-**Note:** Governance documents (CRs and ADRs) **MUST** omit the `metadata.copyright` and `metadata.version` fields. Only `name` and `description` are required in their frontmatter.
+**Note:** Governance documents (CRs and ADRs) and the two governance templates (`skills/governance/templates/CR.md` and `skills/governance/templates/ADR.md`) are an explicit exception to the copyright frontmatter rule above: they **MUST NOT** carry the `metadata.copyright` and `metadata.version` fields. Only `name` and `description` are required in their frontmatter. A contributor adding copyright frontmatter to either template is doing the wrong thing.
 
 **TOML files** - Add as first line comment:
 ```toml
