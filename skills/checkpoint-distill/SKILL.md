@@ -106,6 +106,72 @@ The availability report is the load-bearing part of input resolution. It **MUST*
 
 The skill is usable in a project that has neither an iteration ledger nor a validation report. When an optional input does not exist, the run **MUST** proceed on the inputs that do rather than failing — degrading to the Change Request document alone if that is all that resolves. Each absent input is named in the availability report, so degradation is visible rather than silent. The only input whose absence stops the run is the Change Request document in a Change Request scoped run, because there is then no unit of work to analyse; that refusal is governed by the invocation contract above.
 
+## Candidate Identification
+
+Once the inputs are resolved and their availability reported, the skill identifies the knowledge worth promoting. This is the read-only heart of the analysis: nothing is written here, and every candidate that emerges is a proposal for later per-tier approval, not a decision.
+
+### Read the standing instructions in full before proposing anything
+
+Before a single candidate is identified, the skill **MUST** read the project's standing instructions **in their entirety**. Already-documented knowledge must never be proposed again — re-proposing what the reader already has wastes the reader's minute and trains them to skim the report, which defeats the tiering that keeps the report short. Reading first is what makes an analysis idempotent: re-running it over an unchanged scope proposes nothing new, because everything promotable is already present.
+
+Coverage is rarely all-or-nothing. Where the standing instructions **partially** cover a candidate — they state the rule but not its mechanism, or warn of the foot-gun but not the specific case that triggers it — the candidate is the **uncovered gap**, never the whole topic. The skill proposes the missing piece and cross-references what already exists, rather than restating the covered part.
+
+### The five candidate categories
+
+Candidates are drawn from exactly five categories. Every proposal names the category it belongs to, so the reader can weigh it against its kind.
+
+1. **Invariants the code now depends on that nothing explains.** A constraint the implementation silently relies on — an ordering, a shared assumption, a contract between two components — that is load-bearing but undocumented, so the next change breaks it without warning.
+2. **Failure narratives.** A path that was tried and abandoned, with the reason it failed. This is the highest-value category and the hardest to reconstruct after the fact: a pattern that worked is visible in the code, but a pattern that was eliminated is visible nowhere, so the next agent attempts it again at full cost unless something marks it as already ruled out.
+3. **Reusable patterns.** A shape or approach that solved the problem well and will recur — worth naming so it is reached for deliberately rather than reinvented.
+4. **Foot-guns that cost real debugging time.** A sharp edge that already consumed a measurable amount of someone's session — a non-obvious ordering, a silent failure mode, a tool that lies about success. The evidence of cost is what qualifies it; a hypothetical hazard that cost nothing is not yet a candidate.
+5. **Drift.** An existing statement in the standing instructions that current reality now contradicts. Drift is not an addition — it is a correction the analysis surfaces, so a stale rule is fixed rather than left to mislead alongside a newer one.
+
+### Every candidate traces to a source
+
+Every candidate **MUST** trace to a specific source artifact, identified by **file location** (path and section, heading, or line) or by **commit hash**. A candidate with no citable origin is not a finding — it is the skill's own inference, and inference is exactly what this analysis exists to replace with evidence.
+
+Where the reasoning behind a candidate **cannot be reconstructed from its sources** — the ledger records that an approach was discarded but not why, or a validation gap is noted without the cause that produced it — the skill **MUST NOT** record the candidate on a guessed rationale. It **MUST** instead query for the missing context and leave the candidate out until the reasoning is supplied. A rule written on an invented "why" is worse than no rule, because it is authoritative and unexamined; the missing reasoning is requested, never inferred.
+
+### The iteration ledger is input, not passthrough
+
+The iteration ledger's closing findings are the richest single input this analysis has, and the most easily mishandled. They are **input to be reconciled and ranked**, never content to be copied through. The skill **MUST NOT** write a ledger's closing findings into the standing instructions unranked.
+
+The distinction is the point of the skill. **The ledger records what one session learned** — unranked, scoped to that session, unreconciled against anything the project already knows. **This skill decides what every future session should know** — which of those findings generalise beyond the session that produced them, which are already documented, and where each one ranks against every other candidate. A single session cannot see whether its own finding generalises or duplicates existing guidance; that judgement requires the wider view this analysis takes. So every ledger finding is treated as a raw candidate: reconciled against the standing instructions, deduplicated, scored, and tiered alongside candidates from every other input — or, where it does not survive that reconciliation, ruled out with its reason stated.
+
+## Scoring and Ranking
+
+### Three scoring dimensions
+
+Each surviving candidate is scored on three dimensions:
+
+1. **Leverage** — how much future work the rule saves or protects. How often the situation it governs recurs, and how many sessions inherit the benefit.
+2. **Decay risk** — how likely the knowledge is to be lost or re-litigated if it is not written down. Reasoning that lives only in a session's memory, or in commits about to be squashed, has high decay risk; a fact already half-visible in the code has less.
+3. **The cost of the rule being broken** — what it costs when a future session violates the constraint unknowingly. A foot-gun that wastes an hour scores below an invariant whose breach corrupts data.
+
+### Three tiers, must-add to optional
+
+The scored candidates are sorted into exactly three tiers, ordered by priority:
+
+1. **Must add** — high leverage, high decay risk, or high cost of breakage. Knowledge whose loss the project cannot afford.
+2. **Recommended** — clearly worth adding, but the project survives a delay.
+3. **Optional** — genuine but marginal; a reader may reasonably decline it.
+
+The tiers exist to keep the must-add set small, so the standing instructions grow slowly enough to stay read. When two candidates carry equivalent leverage but belong to different categories, **a failure narrative outranks the others**. A failure narrative prevents work that has already been proven wasteful — the single most expensive thing a future session can repeat — so at equal leverage it earns the higher tier over an invariant, pattern, or foot-gun of the same weight.
+
+## Analysis Report
+
+The report is read-only output: it presents the tiered candidates and stops, awaiting the per-tier approval specified later. It **MUST** be **scannable in about a minute**. The tiering serves that budget — a reader who trusts the must-add tier can act on it alone — but each entry must also be terse enough to read at a glance.
+
+Every candidate in the report states three things, and no more than it needs to:
+
+- **What it is** — the knowledge in a sentence, and its category.
+- **Where it would live** — the section of the standing instructions it belongs in, or the existing statement it corrects.
+- **Why it matters** — the leverage, and its source citation (file location or commit hash) so the reader can verify the claim against its origin.
+
+### Ruled-out candidates are stated, never dropped
+
+A candidate the analysis considers and decides **not** to propose — because it is already documented, because it does not generalise beyond its session, or because its reasoning could not be reconstructed — **MUST** be reported as ruled out, with the reason it was ruled out. It is never dropped silently. Stating the exclusion and its reason lets the reader catch a wrong call the skill made, and prevents the same candidate from being re-examined from scratch on the next run. A silent omission is indistinguishable from an oversight; a stated one is a decision the reader can review.
+
 ## Portability
 
 This skill encodes nothing about the structure, section naming, or subject matter of any particular project, so it is usable unchanged in any repository. It discovers the shape of the target standing instructions by reading them at the time it runs, and it never assumes a fixed sectioning, index, or naming convention. The invocation contract above refers only to concepts every project shares — a unit of work, a default branch, a merge base, a document that either resolves or does not.
