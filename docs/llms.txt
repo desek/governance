@@ -17,6 +17,7 @@
 - [CR-0011: Governance Source Traceability](cr/CR-0011-governance-source-traceability.md): Add source branch and commit metadata to CR and ADR templates for traceability and staleness detection
 - [CR-0012: Checkpoint Read Slash Command](cr/CR-0012-checkpoint-read-slash-command.md): Add a /checkpoint-read slash command that reads checkpoint commit history to recover context for new sessions
 - [CR-0013: Bats Test Infrastructure](cr/CR-0013-bats-test-infrastructure.md): Add Bats test infrastructure and implement governance template validation tests from CR-0011
+- [CR-0014: Decouple Governance References From Implementation](cr/CR-0014-decouple-governance-references-from-implementation.md): Establish a governance reference boundary so governance identifiers appear only in the governance corpus and Git metadata, strip leak-prone metadata fields from the CR and ADR templates, and enforce the boundary with an automated test
 
 ## Anthropic Documentation
 

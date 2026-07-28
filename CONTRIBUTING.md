@@ -48,6 +48,18 @@ git checkout -b your-branch-name
 2. Follow the existing code style and conventions
 3. Test your changes thoroughly
 
+### Governance Reference Boundary
+
+Governance identifiers — the `CR-`, `ADR-`, `FR-`, `NFR-`, and `AC-` prefixes followed by digits — belong only in the governance corpus under `docs/` and in Git metadata such as commit messages, branch names, and pull request descriptions. They **MUST NOT** appear in source code, code comments, test names, or user-facing documentation. When you need to link a change to the governance document that motivated it, put the identifier in the commit message and describe the behavior itself in the code or docs.
+
+An automated test enforces this boundary across the whole repository, so a stray identifier in prohibited territory will fail CI. Run the suite locally before opening a pull request:
+
+```bash
+bats -r tests/
+```
+
+On a violation the test prints the offending file path and the matched identifier so it can be located and moved into the commit message. See the governance skill's reference guide for the full pattern definition, the permitted and prohibited territories, and the rationale.
+
 ### Commit Your Changes
 
 This project follows the [Conventional Commits](https://www.conventionalcommits.org/) specification for all commit messages.
