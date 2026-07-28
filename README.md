@@ -21,7 +21,7 @@ What you'll find there:
 - **Clear traceability**: From initial request through implementation, every change is documented with stakeholders, priorities, and target versions
 - **Living documentation**: These aren't theoretical templates—they're actual records of how this skill evolved
 
-When you install these skills, your AI coding agent gains the same capabilities: creating well-structured Architecture Decision Records and Change Requests that keep your project's history clear and your team aligned, plus checkpoint commits to preserve work-in-progress state.
+When you install these skills, your AI coding agent gains the same capabilities: creating well-structured Architecture Decision Records and Change Requests that keep your project's history clear and your team aligned, checkpoint commits to preserve work-in-progress state, and last-mile iteration sessions that record every attempt — including the ones tried and discarded — while closing the gap between a delivered implementation and the behavior actually wanted.
 
 ### Available Skills
 
