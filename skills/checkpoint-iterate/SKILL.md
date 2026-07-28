@@ -72,7 +72,67 @@ On a `status` invocation, report the active session for the given Change Request
 
 ### Step 5: Close
 
-On a `close` invocation, end the session and distil the ledger. A session **MUST NOT** be closed while any entry remains open; report the open entry as requiring a disposition and stop. The full commit protocol and closing distillation are specified in the sections added below.
+On a `close` invocation, end the session and distil the ledger. A session **MUST NOT** be closed while any entry remains open; report the open entry as requiring a disposition and stop. The full commit protocol and closing distillation are specified in the sections below.
+
+## Commit Protocol
+
+Code changes made during a session are committed continuously through the existing checkpoint commit workflow (`/checkpoint-commit`), without waiting to be asked. The session does not invent a parallel commit mechanism; it reuses the checkpoint one and distinguishes its commits by **scoping the identifier**, not by changing the type.
+
+**Every session commit uses the scoped subject form:**
+
+```text
+checkpoint({CR_ID}-iterate): {summary}
+```
+
+The unsuffixed form `checkpoint({CR_ID}): {summary}` **MUST NOT** be used by a session — it is reserved for the core agentic implementation workflow.
+
+**Why the scope is suffixed rather than the type replaced.** Reusing the `checkpoint` type keeps session work visible to the context-recovery history query, whose pattern matches `^checkpoint.*:` — which is correct, because iteration work is part of what a later session needs to recover. The `-iterate` suffix on the scope keeps session work separable from implementation work by a subject-line query alone:
+
+```bash
+git log --grep '^checkpoint(CR-XXXX):'          # core implementation only
+git log --grep '^checkpoint(CR-XXXX-iterate):'  # iteration session only
+git log --grep '^checkpoint.*:'                 # both, the default recovery view
+```
+
+**Code and evidence are committed atomically.** A checkpoint that contains code changes **MUST** also contain, in the same commit, the ledger entry for the attempt it embodies. Change and evidence are never separated across commits.
+
+**A discarded attempt leaves no code.** After the working tree is reverted, its commit touches the ledger alone — still a session checkpoint carrying the same scoped subject, identified by the path it changed rather than by a different subject convention:
+
+```bash
+git log --grep '^checkpoint(CR-XXXX-iterate):' -- docs/cr/CR-XXXX-iterate.md
+```
+
+## Re-hydration and Concurrency
+
+**Re-hydration after context loss.** The ledger lives on disk, so it survives context loss entirely. Recovering a cleared or new session takes exactly **one** user action — the same invocation used to open the session — after which the agent reconstructs state with no further questions:
+
+1. Read the governing Change Request and the full ledger, including **every** settled entry (kept, discarded, and partially-kept alike).
+2. Read the checkpoint commits for that Change Request via the context-recovery history query.
+3. Compare the working tree against the last commit. Uncommitted changes belong to the open entry, if there is one.
+4. Report the recovered state to the user: what has been settled, what approaches were eliminated, and what was in flight.
+5. If an entry is still open, reconcile the uncommitted working-tree changes against it and **request its disposition before starting any new attempt**. Resuming without settling it would fold unjudged work into the next attempt and misattribute it.
+
+Reading the discarded entries matters as much as reading the kept ones: a re-hydrated agent **MUST NOT** re-propose an approach a settled entry records as `discarded` without stating that it was already eliminated and why it is being revisited.
+
+**Concurrency.** Two sessions may run at once, but not in the same working tree. The constraint is Git, not the ledger: the checkpoint staging would otherwise sweep one session's in-flight changes into the other's commit, misattributing work and cross-contaminating both ledgers. Three rules make concurrency safe:
+
+- **One active session per working tree.** A second concurrent session runs in its own Git worktree. This is the primary isolation and the only mechanism that fully separates the two. (Creating the worktree stays with the user; the skill does not create it.)
+- **Scoped staging.** A session stages **only** the paths it touched — its ledger and the files of the attempt in hand — and **MUST NOT** stage the entire working tree. This bounds the damage if two sessions do share a tree.
+- **Explicit identification.** Every invocation names its Change Request; there is no implicit "current session". Where an invocation omits the identifier and more than one ledger is open in the working tree, the skill refuses and lists the open ledgers rather than selecting one.
+
+**Foreign-worktree detection.** The ledger records the working tree it was opened in. A session resumed in a working tree other than the one it records **MUST** be detected and reported to the user, rather than proceeding silently against a different tree.
+
+## Closing
+
+On a `close` invocation, once no entry remains open:
+
+1. **Set the ledger status to closed and record the closing date** in the frontmatter.
+2. **Populate the distillation section**, separating the findings into two lists: what worked, expressed as **recommended patterns**, and what did not, expressed as **anti-patterns**. The anti-patterns are drawn from the discarded entries and state the reason each approach did not work — this is the knowledge that exists nowhere else and the reason the ledger is kept.
+3. **Hand the result to the existing distillation workflow** (`/checkpoint-distill`), which routes durable practices into the project's standing instructions. The session **MUST NOT** define a competing distillation mechanism or a second destination; the ledger is a strictly richer input than commit history because it contains the discarded attempts commit history omits.
+
+> **Prerequisite:** the closing hand-off consumes the existing distillation workflow, which is installed in the environment but is **not** shipped by this repository. The open, iterate, and record loop works without it; only the close-step distillation depends on it being available.
+
+**Governance reference boundary.** Guidance written into the project's standing instructions as a result of distillation **MUST** describe the *practice* and **MUST NOT** name the Change Request or the session that produced it. Standing instructions are prohibited territory for governance identifiers, so distilled guidance names patterns and anti-patterns, never the document or ledger they came from. (The ledger itself lives under `docs/cr/`, which is permitted territory, so it may name its governing Change Request freely.)
 
 ## Safety Rules
 
