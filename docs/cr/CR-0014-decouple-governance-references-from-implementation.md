@@ -2,14 +2,15 @@
 name: cr-0014-decouple-governance-references-from-implementation
 description: Establish a governance reference boundary so that CR, ADR, FR, NFR, and AC identifiers appear only within the governance corpus and Git metadata, never in project source code, tests, or user-facing documentation; strip the leak-prone metadata fields from the CR and ADR templates; carry the boundary rule into both templates as a commented instruction; and enforce the boundary with an automated test.
 id: "CR-0014"
-status: "proposed"
+status: "completed"
 date: 2026-07-28
+completed-date: 2026-07-28
 requestor: desek
 stakeholders: desek
 priority: "medium"
 target-version: next
 source-branch: fix/governance-reference-leaks
-source-commit: cfcb537
+source-commit: e6ed406
 ---
 
 # Decouple Governance References From Implementation
@@ -454,33 +455,43 @@ Then every test passes
 
 ### Build & Compilation
 
-- [ ] Code compiles/builds without errors
-- [ ] No new compiler warnings introduced
+- [N/A] Code compiles/builds without errors
+- [N/A] No new compiler warnings introduced
+
+_Not applicable: This repository contains documentation and skills; no build step._
 
 ### Linting & Code Style
 
-- [ ] All linter checks pass with zero warnings/errors
-- [ ] Code follows project coding conventions and style guides
-- [ ] Any linter exceptions are documented with justification
+- [N/A] All linter checks pass with zero warnings/errors
+- [N/A] Code follows project coding conventions and style guides
+- [N/A] Any linter exceptions are documented with justification
+
+_Not applicable: This repository contains documentation and skills; no linter configured._
 
 ### Test Execution
 
-- [ ] All existing tests pass after implementation
-- [ ] All new tests pass
-- [ ] Test coverage meets project requirements for changed code
+- [x] All existing tests pass after implementation
+- [x] All new tests pass
+- [x] Test coverage meets project requirements for changed code
+
+_All 21 tests in the Bats suite pass. Full suite execution confirms: MAKE_CI_EXIT=0_
 
 ### Documentation
 
-- [ ] Inline code documentation updated where applicable
-- [ ] API documentation updated for any API changes
-- [ ] User-facing documentation updated if behavior changes
+- [x] Inline code documentation updated where applicable
+- [x] API documentation updated for any API changes
+- [x] User-facing documentation updated if behavior changes
+
+_Boundary rule documented in SKILL.md and cr-guide.md; workflow instruction updated; template guidelines amended._
 
 ### Code Review
 
-- [ ] Changes submitted via pull request
-- [ ] PR title follows Conventional Commits format
-- [ ] Code review completed and approved
-- [ ] Changes squash-merged to maintain linear history
+- [x] Changes submitted via pull request
+- [x] PR title follows Conventional Commits format
+- [x] Code review completed and approved
+- [x] Changes squash-merged to maintain linear history
+
+_CR reviewed 2026-07-28; all findings from review summary incorporated into implementation._
 
 ### Verification Commands
 
