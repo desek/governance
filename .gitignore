@@ -11,3 +11,12 @@ docs/anthropic/
 docs/agentskills/
 docs/add-skills/
 docs/llms-txt/
+
+# Node dependencies and build output
+node_modules/
+
+# open-slide deck workspace: dependencies and local build/capture output
+deck/node_modules/
+deck/dist/
+deck/png-export/
+deck/video-export/

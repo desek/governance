@@ -1,0 +1,24 @@
+{
+  "name": "governance-deck",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "open-slide dev",
+    "build": "open-slide build",
+    "preview": "open-slide preview",
+    "export:png": "open-slide export --slide governance-loop --out ./png-export",
+    "capture": "open-slide video --slide governance-loop --fps 30 --dwell 1600 --out ./video-export"
+  },
+  "dependencies": {
+    "@open-slide/core": "^0.0.6",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "playwright-chromium": "~1.56.1",
+    "vite": "^5.4.10"
+  }
+}
