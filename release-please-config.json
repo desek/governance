@@ -25,6 +25,12 @@
       "component": "checkpoint-iterate",
       "include-component-in-tag": true,
       "include-v-in-tag": true
+    },
+    "skills/checkpoint-distill": {
+      "release-type": "simple",
+      "component": "checkpoint-distill",
+      "include-component-in-tag": true,
+      "include-v-in-tag": true
     }
   }
 }

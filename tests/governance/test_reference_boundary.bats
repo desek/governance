@@ -34,7 +34,7 @@ setup() {
         # report names both the file and the offending token.
         identifier="$(printf '%s\n' "$line" | grep -oE "$REFERENCE_PATTERN" | head -n1)"
         violations+=("${rel_path}: ${identifier}")
-    done < <(cd "$REPO_ROOT" && grep -rnEI "$REFERENCE_PATTERN" . --exclude-dir=.git)
+    done < <(cd "$REPO_ROOT" && grep -rnEI "$REFERENCE_PATTERN" . --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=out)
 
     if [ "${#violations[@]}" -ne 0 ]; then
         echo "Governance reference boundary violated in ${#violations[@]} location(s):"

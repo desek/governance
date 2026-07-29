@@ -4,7 +4,7 @@ description: Slash command that runs a last-mile iteration session against an im
 license: Apache-2.0
 metadata:
   copyright: Copyright Daniel Grenemark 2026
-  version: "0.1"
+  version: "0.0"
 ---
 
 # /checkpoint-iterate
@@ -130,7 +130,7 @@ On a `close` invocation, once no entry remains open:
 2. **Populate the distillation section**, separating the findings into two lists: what worked, expressed as **recommended patterns**, and what did not, expressed as **anti-patterns**. The anti-patterns are drawn from the discarded entries and state the reason each approach did not work — this is the knowledge that exists nowhere else and the reason the ledger is kept.
 3. **Hand the result to the existing distillation workflow** (`/checkpoint-distill`), which routes durable practices into the project's standing instructions. The session **MUST NOT** define a competing distillation mechanism or a second destination; the ledger is a strictly richer input than commit history because it contains the discarded attempts commit history omits.
 
-> **Prerequisite:** the closing hand-off consumes the existing distillation workflow, which is installed in the environment but is **not** shipped by this repository. The open, iterate, and record loop works without it; only the close-step distillation depends on it being available.
+> **Prerequisite:** the closing hand-off consumes the distillation workflow, which this repository ships as a sibling skill. Installing this skill on its own still gives a working open, iterate, and record loop; only the close-step hand-off needs the distillation skill present alongside it.
 
 **Governance reference boundary.** Guidance written into the project's standing instructions as a result of distillation **MUST** describe the *practice* and **MUST NOT** name the Change Request or the session that produced it. Standing instructions are prohibited territory for governance identifiers, so distilled guidance names patterns and anti-patterns, never the document or ledger they came from. (The ledger itself lives under `docs/cr/`, which is permitted territory, so it may name its governing Change Request freely.)
 
