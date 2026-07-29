@@ -57,18 +57,26 @@ jobs:
       - name: Verify the page renders
         run: npm run check:single
 
+      # The standalone file has no router, so unlike the page above it opens
+      # straight from disk. open-slide only offers this export through its UI,
+      # so the script drives the browser that is already installed.
+      - name: Export standalone HTML
+        run: npm run export:html
+
       - name: Publish to docs/deck
-        run: cp dist-single/index.html ../docs/deck/index.html
+        run: |
+          cp dist-single/index.html ../docs/deck/index.html
+          cp html-export/checkpoint-distill.html ../docs/deck/checkpoint-distill.html
 
       - name: Commit if changed
         working-directory: .
         run: |
-          if git diff --quiet -- docs/deck/index.html; then
-            echo "docs/deck/index.html already up to date"
+          if git diff --quiet -- docs/deck/; then
+            echo "docs/deck/ already up to date"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/deck/index.html
-          git commit -m "docs(deck): rebuild deck page from deck source"
+          git add docs/deck/index.html docs/deck/checkpoint-distill.html
+          git commit -m "docs(deck): rebuild deck artifacts from deck source"
           git push

@@ -19,6 +19,7 @@ node_modules/
 deck/node_modules/
 deck/dist/
 deck/dist-single/
+deck/html-export/
 deck/png-export/
 deck/video-export/
 

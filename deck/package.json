@@ -10,7 +10,8 @@
     "export:png": "open-slide export --slide checkpoint-distill --out ./png-export",
     "capture": "open-slide video --slide checkpoint-distill --fps 30 --dwell 1600 --out ./video-export",
     "build:single": "node build.singlefile.mjs",
-    "check:single": "node check.singlefile.mjs"
+    "check:single": "node check.singlefile.mjs",
+    "export:html": "node export.html.mjs"
   },
   "dependencies": {
     "@open-slide/core": "^1.17.1",

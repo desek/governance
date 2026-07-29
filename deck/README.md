@@ -37,6 +37,7 @@ npm run dev            # author with hot reload
 npm run build          # static site → dist/
 npm run build:single   # one self-contained HTML file → dist-single/
 npm run check:single   # render that file headlessly and assert it is not blank
+npm run export:html    # standalone, openable HTML file → html-export/
 npm run export:png     # one PNG per page → png-export/
 npm run capture        # single MP4 of the whole deck → video-export/
 ```
@@ -86,6 +87,32 @@ npm install --no-save /path/to/open-slide/packages/core
 Everything else the deck needs, `MorphElement` and `useIsActivePage` included,
 is in the published version it pins. Capture also needs `ffmpeg` on `PATH` and
 a Chromium for Playwright (`npx playwright install chromium`).
+
+## Three artifacts, three jobs
+
+`docs/deck/` holds all three. They are not redundant.
+
+| File | Job | Motion |
+|---|---|---|
+| `index.html` | the hosted page, full open-slide viewer | live |
+| `checkpoint-distill.html` | standalone, opens from disk | settled states only |
+| `checkpoint-distill.mp4` | the walkthrough as film | full |
+
+The standalone file comes from open-slide's own HTML export, which renders every
+page through React, keeps the markup, inlines the readable CSS, and ships a few
+lines of vanilla JavaScript for scale-to-fit and arrow-key navigation. It has no
+router, which is precisely why it opens over `file://` when the hosted page
+cannot.
+
+What it loses is motion. Pages are captured as markup and revealed by toggling
+`hidden`, so entrance animations and the morph transitions between pages are
+gone. Each page shows its settled state, which is the honest end of the
+animation rather than a broken frame: on the merge page, for instance, the six
+checkpoint commits have already crushed away. Reach for the MP4 when the motion
+is the argument.
+
+open-slide exposes this export only through its UI, so `export.html.mjs` drives
+the real browser and catches the download. There is no CLI command to call.
 
 ## The page must be served, not opened
 

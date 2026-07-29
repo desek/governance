@@ -34,6 +34,7 @@ if [[ ! -f "${DECK_DIR}/index.html" ]]; then
 fi
 
 echo "deck  → http://127.0.0.1:${PORT}/s/${SLIDE_ID}"
+echo "file  → ${DECK_DIR}/${SLIDE_ID}.html  (standalone, opens without a server)"
 echo "video → ${DECK_DIR}/${SLIDE_ID}.mp4"
 echo "ctrl-c to stop"
 
