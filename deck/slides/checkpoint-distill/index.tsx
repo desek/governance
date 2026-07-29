@@ -26,6 +26,14 @@
  * two renders read as one piece of work.
  */
 
+// Geist ships as font files rather than a stylesheet link, so the woff2 travels
+// inside the exported artifact instead of being fetched from Google's CDN at
+// view time. The export is meant to be opened from disk, and a webfont request
+// it cannot make is a silent fallback to system faces that shifts every
+// measured layout. Variable rather than static: one file covers 100 to 900,
+// which is fewer bytes than the three static weights this deck uses.
+import '@fontsource-variable/geist';
+import '@fontsource-variable/geist-mono';
 import {
   type DesignSystem,
   MorphElement,
@@ -51,8 +59,8 @@ const C = {
   discarded: '#f85149',
 } as const;
 
-const SANS = '"Geist", -apple-system, BlinkMacSystemFont, system-ui, sans-serif';
-const MONO = '"Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace';
+const SANS = '"Geist Variable", -apple-system, BlinkMacSystemFont, system-ui, sans-serif';
+const MONO = '"Geist Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace';
 
 /** Type scale, derived from the 1080-wide baseline scaled to the 1920 canvas. */
 const T = { section: 103, body: 62, mono: 32, small: 27, label: 26 } as const;
@@ -77,7 +85,10 @@ export const design: DesignSystem = {
  * which is also what a still export reads.
  */
 const css = `
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&family=Geist+Mono:wght@400;500&display=swap');
+/* Geist and Geist Mono: Copyright 2024 The Geist Project Authors
+   (https://github.com/vercel/geist-font), licensed under the SIL Open Font
+   License 1.1. Full text in deck/licenses/. This notice travels with the
+   embedded font data into the exported artifact, as the OFL requires. */
 
 @keyframes gRise { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes gSlide { from { opacity: 0; transform: translateX(-26px); } to { opacity: 1; transform: translateX(0); } }

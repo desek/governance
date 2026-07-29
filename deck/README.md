@@ -21,6 +21,7 @@ design drifting apart; there is now a single source.
 ```
 deck/
   slides/checkpoint-distill/index.tsx   the deck — one file, by open-slide convention
+  licenses/                             OFL texts for the embedded fonts
   open-slide.config.ts
   package.json
 ```
@@ -111,10 +112,21 @@ openable file. That is the build's whole remaining job.
 open-slide exposes this export only through its UI, so `export.html.mjs` drives
 the real browser and catches the download. There is no CLI command to call.
 
-## The fonts are not bundled
+## The fonts are embedded
 
-The deck pulls Geist and Geist Mono from `fonts.googleapis.com` through an
-`@import` in its stylesheet, so the "self-contained" page is self-contained
-apart from its typography: opened without a network it falls back to system
-faces and every measured layout shifts. Vendoring the woff2 files through
-`@fontsource` would close this; nothing depends on the `@import` staying.
+Geist and Geist Mono ship inside the artifact as variable woff2, pulled in
+through `@fontsource-variable/*` rather than a `fonts.googleapis.com` stylesheet
+link. A file meant to be opened from disk cannot make a webfont request, and the
+failure is silent: type falls back to system faces and every measured layout
+shifts, with nothing logged.
+
+Variable rather than static, because one file spans weight 100 to 900 and costs
+less than the three static weights the deck uses. Verified pixel-identical to
+the CDN rendering, and verified offline: with the network disabled the export
+loads `Geist Variable` and `Geist Mono Variable` and makes no external request.
+
+Both faces are SIL Open Font License 1.1, which permits embedding and
+redistribution provided the notice and licence travel with the fonts. Neither
+declares a Reserved Font Name. The full texts are vendored under `licenses/`,
+and a short notice sits in the deck stylesheet so it is embedded in the exported
+HTML beside the font data.
