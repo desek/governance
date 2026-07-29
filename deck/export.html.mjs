@@ -42,7 +42,18 @@ if (!existsSync(path.join(sourceDir, 'index.html'))) {
   process.exit(1);
 }
 
-const CONTENT_TYPES = { '.html': 'text/html', '.ico': 'image/x-icon' };
+// A browser refuses to execute a module script served as octet-stream, so a
+// multi-file build needs real types for its chunks, not just for the document.
+const CONTENT_TYPES = {
+  '.html': 'text/html',
+  '.js': 'text/javascript',
+  '.css': 'text/css',
+  '.ico': 'image/x-icon',
+  '.woff2': 'font/woff2',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+};
 
 /**
  * Serves the built directory with SPA fallback so client-side routes resolve.

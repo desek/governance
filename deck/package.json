@@ -6,12 +6,12 @@
   "scripts": {
     "dev": "open-slide dev",
     "build": "open-slide build",
-    "preview": "open-slide preview",
-    "export:png": "open-slide export --slide checkpoint-distill --out ./png-export",
-    "capture": "open-slide video --slide checkpoint-distill --fps 30 --dwell 1600 --out ./video-export",
     "build:single": "node build.singlefile.mjs",
-    "check:single": "node check.singlefile.mjs",
-    "export:html": "node export.html.mjs"
+    "preview": "open-slide preview",
+    "export:html": "node export.html.mjs",
+    "check:export": "node check.export.mjs",
+    "export:png": "open-slide export --slide checkpoint-distill --out ./png-export",
+    "capture": "open-slide video --slide checkpoint-distill --fps 30 --dwell 1600 --out ./video-export"
   },
   "dependencies": {
     "@open-slide/core": "^1.17.1",
