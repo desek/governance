@@ -87,6 +87,28 @@ Everything else the deck needs, `MorphElement` and `useIsActivePage` included,
 is in the published version it pins. Capture also needs `ffmpeg` on `PATH` and
 a Chromium for Playwright (`npx playwright install chromium`).
 
+## The page must be served, not opened
+
+Double-clicking `docs/deck/index.html` shows the deck's not-found page. That is
+not a build defect and no flag fixes it.
+
+open-slide builds a single-page app on React Router's `BrowserRouter`, which
+routes by URL path. A `file://` document has origin `null`, and Chrome refuses
+any path-changing `pushState` or `replaceState` there with a `SecurityError`, so
+the app can never reach `/s/checkpoint-distill` and falls through to not-found.
+Only a hash-based router would work over `file://`, and open-slide does not use
+one. The multi-file build had the same problem in a different costume: it
+referenced `/assets/...` absolutely, which over `file://` resolves against the
+filesystem root and loads nothing at all.
+
+Serve it instead:
+
+```bash
+.agents/scripts/serve-deck.sh        # → http://127.0.0.1:8080/s/checkpoint-distill
+```
+
+The MP4 next to it has no such constraint and plays from disk.
+
 ## The fonts are not bundled
 
 The deck pulls Geist and Geist Mono from `fonts.googleapis.com` through an
