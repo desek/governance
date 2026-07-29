@@ -1,0 +1,74 @@
+# Copyright Daniel Grenemark 2026
+#
+# Rebuilds the committed deck page whenever the deck source changes.
+#
+# Only the HTML half is automated. The video under docs/deck/ is still captured
+# by hand, because `open-slide video` is not in any published release of
+# @open-slide/core; see the tracking issue for the MP4 half.
+name: Docs Deck
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "deck/**"
+      - ".github/workflows/docs-deck.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: docs-deck
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and publish deck page
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: deck
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: deck/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # The smoke check opens the built page in a real browser, so the browser
+      # has to be present. --with-deps pulls the shared libraries the bare
+      # runner image lacks.
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Build single-file deck
+        run: npm run build:single
+
+      # A broken deck still builds successfully and exits 0. Rendering it is the
+      # only check that distinguishes a working page from a blank one.
+      - name: Verify the page renders
+        run: npm run check:single
+
+      - name: Publish to docs/deck
+        run: cp dist-single/index.html ../docs/deck/index.html
+
+      - name: Commit if changed
+        working-directory: .
+        run: |
+          if git diff --quiet -- docs/deck/index.html; then
+            echo "docs/deck/index.html already up to date"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/deck/index.html
+          git commit -m "docs(deck): rebuild deck page from deck source"
+          git push

@@ -7,11 +7,13 @@
     "dev": "open-slide dev",
     "build": "open-slide build",
     "preview": "open-slide preview",
-    "export:png": "open-slide export --slide governance-loop --out ./png-export",
-    "capture": "open-slide video --slide governance-loop --fps 30 --dwell 1600 --out ./video-export"
+    "export:png": "open-slide export --slide checkpoint-distill --out ./png-export",
+    "capture": "open-slide video --slide checkpoint-distill --fps 30 --dwell 1600 --out ./video-export",
+    "build:single": "node build.singlefile.mjs",
+    "check:single": "node check.singlefile.mjs"
   },
   "dependencies": {
-    "@open-slide/core": "^0.0.6",
+    "@open-slide/core": "^1.17.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
@@ -19,6 +21,7 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "playwright-chromium": "~1.56.1",
-    "vite": "^5.4.10"
+    "vite": "^5.4.10",
+    "vite-plugin-singlefile": "^2.3.0"
   }
 }
