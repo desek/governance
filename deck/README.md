@@ -20,7 +20,7 @@ design drifting apart; there is now a single source.
 
 ```
 deck/
-  slides/governance-loop/index.tsx   the deck — one file, by open-slide convention
+  slides/checkpoint-distill/index.tsx   the deck — one file, by open-slide convention
   open-slide.config.ts
   package.json
 ```
@@ -49,7 +49,7 @@ and look at frames across a boundary, not at settled pages.
 
 ## Publishing an update
 
-1. Edit `slides/governance-loop/index.tsx`.
+1. Edit `slides/checkpoint-distill/index.tsx`.
 2. `npm run export:png` and read every changed page.
 3. `npm run capture`, then diff the first and last frames — the loop closes when
    the per-channel difference stays near zero. The seam is the one defect nobody

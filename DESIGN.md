@@ -124,7 +124,7 @@ workflow. Its register is **instrument diagram**: something measured and machine
 rather than illustrated. The viewer should feel they are reading an engineering
 readout that happens to be beautiful, not watching a marketing animation.
 
-It is mastered as an open-slide deck at `deck/slides/governance-loop/`, and the
+It is mastered as an open-slide deck at `deck/slides/checkpoint-distill/`, and the
 video is a capture of that deck rather than a separate artifact. There is one
 source: the deck. A previous Remotion implementation was retired once open-slide
 could capture a deck frame by frame, because two renderers meant two versions of

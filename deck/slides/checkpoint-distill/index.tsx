@@ -1,5 +1,5 @@
 /**
- * Governance loop — a capture-first deck.
+ * checkpoint-distill — a capture-first deck.
  *
  * This is a *loop variant*: a deck authored to be recorded rather than
  * presented. Three consequences follow, and they are what separate this file
@@ -1042,7 +1042,7 @@ Reset.transition = {
 } satisfies SlideTransition;
 
 export const meta: SlideMeta = {
-  title: 'Governance loop',
+  title: 'checkpoint-distill',
   createdAt: '2026-07-28T21:00:00.000Z',
 };
 
