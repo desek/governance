@@ -662,7 +662,7 @@ function Commit() {
   );
 }
 
-/** Step two: the ledger, and the discarded attempt that exists nowhere else. */
+/** Step two: the roll-forward ledger, and the superseded attempt that exists nowhere else. */
 function Iterate() {
   return (
     <Frame station={2}>
@@ -677,7 +677,7 @@ function Iterate() {
             { text: 'session opened' },
             { text: 'you name what to try' },
             { text: 'the agent changes code, runs checks' },
-            { text: 'you rule: keep · discard · keep part', tone: C.text },
+            { text: 'the agent records it — you drive the pace', tone: C.text },
           ]}
         />
         <FilePanel
@@ -686,16 +686,15 @@ function Iterate() {
           path="docs/cr/CR-XXXX-iterate.md"
           lines={[
             { text: '## Attempt 1', tone: C.dim },
-            { text: '  widen the cache key' },
-            { text: '  disposition: discarded', tone: C.discarded },
-            { text: '  why: invalidation storms under load', tone: C.discarded },
+            { text: '  change: widen the cache key' },
+            { text: '  evidence: invalidation storms under load', tone: C.discarded },
             { text: '## Attempt 2', tone: C.dim },
-            { text: '  move the guard earlier' },
-            { text: '  disposition: partially-kept', tone: C.partial },
+            { text: '  change: move the guard earlier' },
+            { text: '  supersedes 1: no storms, cache holds', tone: C.kept },
           ]}
         />
       </div>
-      <Note delay={2950}>→ the discarded attempt is written down. it exists nowhere else.</Note>
+      <Note delay={2950}>→ the superseded attempt is written down. it exists nowhere else.</Note>
     </Frame>
   );
 }

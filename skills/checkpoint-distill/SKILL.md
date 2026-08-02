@@ -80,7 +80,7 @@ git log --grep '^checkpoint(CR-XXXX-iterate):'
 git log --grep '^checkpoint(CR-XXXX\(-iterate\)\?):'
 ```
 
-The iteration-session commits carry the hypotheses, discarded attempts, and partial-keep reasoning that the plain implementation commits do not, so omitting the `-iterate` scope would drop the highest-value commit-borne material. Gathering for an identifier **MUST** match both scopes.
+The iteration-session commits carry the hypotheses, superseded attempts, and iteration reasoning that the plain implementation commits do not, so omitting the `-iterate` scope would drop the highest-value commit-borne material. Gathering for an identifier **MUST** match both scopes.
 
 ### Branch scope: the commit range delimited by the merge base
 
@@ -118,9 +118,9 @@ Coverage is rarely all-or-nothing. Where the standing instructions **partially**
 
 ### Categories, sourcing, and the ledger
 
-Candidates are drawn from exactly five categories — undocumented invariants, failure narratives, reusable patterns, foot-guns, and drift — and every candidate **MUST** trace to a specific source artifact by file location or commit hash. An iteration ledger's closing findings are **input to be reconciled and ranked**, never copied through unranked.
+Candidates are drawn from exactly five categories — undocumented invariants, failure narratives, reusable patterns, foot-guns, and drift — and every candidate **MUST** trace to a specific source artifact by file location or commit hash. An iteration ledger's candidates are **sourced from its entries**: each entry is a raw candidate to be reconciled and ranked, and an entry a later entry superseded is **failure-narrative material**. Nothing is copied through unranked. A ledger carrying no findings section is normal — its entries are the whole input — and a legacy ledger that still carries one is read as raw candidate material rather than as a conclusion.
 
-**Read [references/candidate-categories.md](references/candidate-categories.md)** before identifying candidates, for the full category definitions, the sourcing rule, and why a ledger finding is a raw candidate rather than a conclusion.
+**Read [references/candidate-categories.md](references/candidate-categories.md)** before identifying candidates, for the full category definitions, the sourcing rule, why a superseded entry is failure-narrative material, and how a legacy ledger's findings section is read as raw candidate material rather than as a conclusion.
 
 ### Classify every candidate by origin
 

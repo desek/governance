@@ -98,9 +98,9 @@ After all phases are complete, run a finalization pass to ensure everything is c
 
 ### Step 6: Iterate the last mile (optional)
 
-A Change Request is written before the code exists, so the delivered implementation is usually approximately right rather than exactly right. Closing that final gap is an interactive loop: you name what to try next, the agent makes the change and reports the evidence, you render the verdict. When you have looked at the finalized result and judged it not yet right, open a **last-mile iteration session** to work that gap while it is recorded rather than forgotten.
+A Change Request is written before the code exists, so the delivered implementation is usually approximately right rather than exactly right. Closing that final gap is an interactive loop you drive: you name what to try next, the agent makes the change and reports what it observed, you name the next thing to try. When you have looked at the finalized result and judged it not yet right, open a **last-mile iteration session** to work that gap while it is recorded rather than forgotten.
 
-The session is opt-in and user-initiated — it is never started automatically. It maintains a ledger beside the Change Request that records every attempt, including the ones that were tried and abandoned, which are the observations the commit history alone would lose.
+The session is opt-in and user-initiated — it is never started automatically. It maintains a **roll-forward ledger** beside the Change Request that records every change, including the approaches a later change superseded, which are the observations the commit history alone would lose.
 
 #### 6a. Open a session
 
@@ -113,22 +113,21 @@ The agent creates a ledger at `docs/cr/CR-XXXX-iterate.md` (or resumes the open 
 
 #### 6b. Iterate
 
-Name each thing to try. The agent makes the change, runs the tests, and reports the evidence before asking for your verdict. You render the verdict; the agent records it and commits:
+Name each thing to try. The agent makes the change, runs the tests, records what it observed, and commits — then waits for your next instruction. It does not pause to ask for a verdict. The ledger follows a roll-forward model with three properties:
 
-- **kept** — the attempt worked and survives in full.
-- **discarded** — the attempt did not work and is reverted in the working tree; the ledger entry is retained as anti-pattern evidence.
-- **partially-kept** — part survives; the entry records which part was kept and which was reverted.
+- **Kept is implicit** — a change left in the working tree stands; nothing confirms the ordinary outcome.
+- **Supersession is explicit** — when a later change undoes or replaces earlier work, the new entry names the earlier entry it supersedes and why. The earlier entry is never edited or deleted; it is the record of an approach that was tried.
+- **What stands is derived** — the ledger's current-state summary is read forward from the entries, honouring supersessions, rather than maintained by hand.
 
 Each session commit uses the scoped subject `checkpoint(CR-XXXX-iterate): {summary}`, so session work stays visible to `/checkpoint-read` while remaining separable from the core implementation commits. The ledger survives context loss: after a `/clear`, the same invocation re-hydrates the session from the ledger alone.
 
-#### 6c. Close and distil
+#### 6c. Stop when the gap is closed
 
-When the gap is closed, close the session. The agent distils the ledger into recommended patterns and anti-patterns, which then become one of the inputs to the distillation stage (Step 7) rather than being written into the standing instructions directly.
+There is nothing to close. The session ends when you stop naming things to try, and the ledger is complete because its last entry is its last entry. No sub-command marks it, and none needs to: the ledger is a tracked document, so what was recorded is in the file and when each entry landed is in `git log`. Ask the agent what the session has done and it reads the ledger back to you.
 
-**Prompt:**
-> /checkpoint-iterate close CR-XXXX
+The session draws no conclusions from its own ledger and hands off to no other skill. The ledger holds what was done, why, and what stands; that is a complete input for the distillation stage (Step 7), which you run deliberately when you choose to.
 
-Use `/checkpoint-iterate status CR-XXXX` at any point to report the active session, its attempt count, and its dispositions so far. See the [checkpoint-iterate skill](skills/checkpoint-iterate/SKILL.md) for the full protocol, including concurrency rules for running sessions in separate Git worktrees.
+See the [checkpoint-iterate skill](skills/checkpoint-iterate/SKILL.md) for the full protocol, including concurrency rules for running sessions in separate Git worktrees.
 
 ### Step 7: Distil the session into standing instructions (optional)
 

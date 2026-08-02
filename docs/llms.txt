@@ -20,6 +20,7 @@
 - [CR-0014: Decouple Governance References From Implementation](cr/CR-0014-decouple-governance-references-from-implementation.md): Establish a governance reference boundary so governance identifiers appear only in the governance corpus and Git metadata, strip leak-prone metadata fields from the CR and ADR templates, and enforce the boundary with an automated test
 - [CR-0015: Checkpoint Iterate](cr/CR-0015-checkpoint-iterate.md): Add a /checkpoint-iterate session skill that maintains an attempt ledger against an implemented Change Request, records each attempt with a kept, discarded, or partially-kept disposition, checkpoint-commits code continuously, and distils the session into patterns and anti-patterns
 - [CR-0016: Checkpoint Distill](cr/CR-0016-checkpoint-distill.md): Add a /checkpoint-distill skill that reads the durable artifacts of a completed Change Request, ranks the knowledge worth keeping by leverage against decay risk, and on per-tier approval writes it into the project's standing instructions as narrative carrying the reasoning behind each rule
+- [CR-0017: Tune Iterate and Distill](cr/CR-0017-tune-iterate-and-distill.md): Retune the iteration session around a roll-forward ledger that records what was done, why, and what stands, drop the per-attempt disposition ceremony, and decouple it from distillation so the iteration skill only records and the distillation skill alone draws conclusions
 
 ## Anthropic Documentation
 

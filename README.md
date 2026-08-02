@@ -21,7 +21,7 @@ What you'll find there:
 - **Clear traceability**: From initial request through implementation, every change is documented with stakeholders, priorities, and target versions
 - **Living documentation**: These aren't theoretical templates—they're actual records of how this skill evolved
 
-When you install these skills, your AI coding agent gains the same capabilities: creating well-structured Architecture Decision Records and Change Requests that keep your project's history clear and your team aligned, checkpoint commits to preserve work-in-progress state, and last-mile iteration sessions that record every attempt — including the ones tried and discarded — while closing the gap between a delivered implementation and the behavior actually wanted.
+When you install these skills, your AI coding agent gains the same capabilities: creating well-structured Architecture Decision Records and Change Requests that keep your project's history clear and your team aligned, checkpoint commits to preserve work-in-progress state, and last-mile iteration sessions that record every change in a roll-forward ledger, including the approaches a later change superseded, while closing the gap between a delivered implementation and the behavior actually wanted.
 
 ### Available Skills
 
@@ -30,7 +30,7 @@ When you install these skills, your AI coding agent gains the same capabilities:
 | [governance](skills/governance/SKILL.md) | Creates ADRs for architectural decisions and CRs for requirement changes |
 | [checkpoint-commit](skills/checkpoint-commit/SKILL.md) | Slash command that creates governance checkpoint commits linked to Change Requests |
 | [checkpoint-read](skills/checkpoint-read/SKILL.md) | Slash command that reads checkpoint commit history to recover context for new sessions |
-| [checkpoint-iterate](skills/checkpoint-iterate/SKILL.md) | Slash command that runs a last-mile iteration session against an implemented Change Request, recording every attempt and its disposition in a ledger |
+| [checkpoint-iterate](skills/checkpoint-iterate/SKILL.md) | Slash command that runs a last-mile iteration session against an implemented Change Request, recording each change in a roll-forward ledger as what was done, why it was tried, and what the evidence showed, and noting where a later change supersedes an earlier one |
 | [checkpoint-distill](skills/checkpoint-distill/SKILL.md) | Slash command that distils the durable artifacts of completed work into ranked, per-tier-approved additions to the project's standing instructions |
 
 ### Checkpoint Hooks (Claude Code)
