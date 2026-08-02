@@ -2,6 +2,6 @@
   "skills/governance": "1.4.0",
   "skills/checkpoint-commit": "1.0.0",
   "skills/checkpoint-read": "1.0.0",
-  "skills/checkpoint-iterate": "1.0.0",
+  "skills/checkpoint-iterate": "1.1.0",
   "skills/checkpoint-distill": "1.1.0"
 }

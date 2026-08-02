@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/desek/governance/compare/checkpoint-iterate-v1.0.0...checkpoint-iterate-v1.1.0) (2026-08-02)
+
+
+### Features
+
+* retune the iteration session around a roll-forward ledger and decouple it from distillation ([89a7b8f](https://github.com/desek/governance/commit/89a7b8f2daaeacbbcb10d6e3867fd93d7db9252c))
+
 ## 1.0.0 (2026-07-29)
 
 
