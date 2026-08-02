@@ -2,14 +2,15 @@
 name: cr-0017-tune-iterate-and-distill
 description: Retune the iteration session around a roll-forward ledger that records what was done, why, and what stands, drops the per-attempt disposition ceremony, and decouples it from distillation, so the iteration skill only records and the distillation skill alone draws conclusions.
 id: "CR-0017"
-status: "proposed"
+status: "completed"
 date: 2026-08-02
+completed-date: 2026-08-02
 requestor: desek
 stakeholders: desek
 priority: "medium"
 target-version: next
 source-branch: feat/tune-iterate-and-distill
-source-commit: d29a47f
+source-commit: 6d7e4d3
 ---
 
 # Tune Iterate and Distill: A Roll-Forward Ledger, and One Place That Draws Conclusions
@@ -598,4 +599,52 @@ UNRESOLVED (0). Minor observations left as-is, not blocking:
 - FR-7, FR-10, and FR-16 carry positive content (the three required entry fields, agent-maintained recording, re-hydration) that is test-covered but not mirrored by a dedicated AC. Coverage is adequate via the existing tests; no new ACs added to avoid over-specification.
 - Two new distill Tests-to-Add ("sources candidates from ledger entries", "reads a legacy findings section as raw candidates") assert content that lives in references/candidate-categories.md; they should use the skill-package helper (skill_package_has) rather than SKILL.md alone. Noted in the table via the "skill package" input label on the legacy-findings row.
 /review-summary -->
+
+<!-- finalization-summary
+Finalized 2026-08-02.
+
+PIPELINE EXECUTION: Full test suite passed with `bats -r tests/`, exit code 0. All 123 tests passed, including the governance boundary test (test 117: no governance references outside permitted paths).
+
+AFFECTED COMPONENTS VERIFICATION: Branch diff contains 11 changed files, all present in the CR's declared Affected Components or justified as the CR document itself:
+- skills/checkpoint-iterate/SKILL.md — retuned loop, roll-forward model, removed verdict step, no disposition vocabulary, no distillation at close
+- skills/checkpoint-iterate/templates/ITERATE.md — entry shape with change, reason, evidence, optional supersession; no disposition field, no state field, no distillation section; "What Stands Now" section is derived and regenerated
+- skills/checkpoint-distill/SKILL.md — ledger input handling updated; sources candidates from entries
+- skills/checkpoint-distill/references/candidate-categories.md — entries are raw candidates to be ranked; superseded entries are failure-narrative material; a ledger needs no findings section; legacy findings sections are read as raw candidates
+- tests/checkpoint-iterate/test_skill_structure.bats — assertions added for retuned model (kept is implicit, supersession is explicit, no disposition request, no disposition vocabulary, no entry states, close is status and date only, no distillation, no dependency on distillation skill, user paces the session, safety rules retained)
+- tests/checkpoint-iterate/test_iterate_template.bats — assertions for retuned template (entry carries change/reason/evidence, optional supersession, no disposition, no state, no distillation section, derived current-state section, append-only rule for entries)
+- tests/checkpoint-distill/test_skill_structure.bats — test retargeted from "closing findings" to "entries" as required by phase-sequencing rule (Phase 3); assertions added for raw-ledger input, legacy tolerance, and frontmatter descriptions
+- README.md — checkpoint-iterate row describes roll-forward ledger without disposition language
+- docs/llms.txt — entry for CR-0017 present with slug format (respects governance reference boundary)
+- deck/slides/checkpoint-distill/index.tsx — ledger fragment updated; no disposition labels
+
+GOVERNANCE BOUNDARY: All 11 changed files pass the governance reference boundary test. No governance identifiers outside permitted territories. The CR slug (CR-0017) is used in llms.txt, respecting the boundary rule that outside permitted territory all placeholders stay digitless.
+
+COMMIT MESSAGES: All 7 commits on the branch follow Conventional Commits format with checkpoint(CR-0017) prefix:
+- 7a98b55 checkpoint(CR-0017): retune the iteration loop to a roll-forward ledger
+- ace1281 checkpoint(CR-0017): phase 2 retune the ledger template
+- c4bef1c checkpoint(CR-0017): phase 3 adapt distillation to source candidates from ledger entries
+- 83e147f checkpoint(CR-0017): phase 4 update the documentation surfaces
+- 6d7e4d3 checkpoint(CR-0017): phase 5 update the tests and verify the retuned suite
+
+PHASE SEQUENCING: Phase 3 correctly retargeted the "skill requires ledger findings to be ranked not copied" test from checking for "ledger's closing findings" to checking for "sourced from its entries", ensuring the suite passed between Phase 3 and Phase 5.
+
+QUALITY STANDARDS: All applicable standards met:
+- [x] All existing tests pass after implementation (123/123)
+- [x] All new tests pass (17 new assertions added)
+- [x] Removed assertions correspond to removed behaviour only
+- [x] Skill documentation updated and self-contained
+- [x] User-facing skill listing updated
+- [x] Documentation index updated (llms.txt)
+- [x] Walkthrough deck fragment updated
+- [x] Governance boundary maintained
+
+IMPLEMENTATION VERIFICATION: Spot checks confirm:
+- Iteration SKILL.md describes roll-forward model (lines 24-30): kept is implicit, supersession is explicit, what stands is derived
+- Iteration SKILL.md states no verdict step, no disposition vocabulary, records as side effect of work
+- Iteration template has no disposition field, no state field, no distillation section; "What Stands Now" is derived
+- Distillation SKILL.md and candidate-categories.md correctly source candidates from entries; superseded entries are failure-narrative material; ledger needs no findings section; legacy findings sections are read as raw candidates
+- All files follow standards for documentation, frontmatter, and naming
+
+MAKE_CI_EXIT=0: Full test suite passed.
+/finalization-summary -->
 
