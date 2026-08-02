@@ -253,3 +253,49 @@ setup() {
 @test "skill requires the report to state each candidate's origin" {
     skill_package_has 'state the class for each'
 }
+
+# --- Raw-ledger input handling (CR-XXXX) -------------------------------------
+# The retuned iteration ledger carries entries rather than a findings section.
+# These assertions grep the whole skill package (SKILL.md plus references/),
+# because the sourcing and legacy-tolerance prose legitimately lives in
+# references/candidate-categories.md under progressive disclosure.
+
+@test "SKILL.md sources candidates from ledger entries" {
+    skill_package_has 'sourced from its entries'
+    skill_package_has 'each entry is a raw candidate'
+}
+
+@test "SKILL.md treats a superseded entry as failure-narrative material" {
+    skill_package_has 'failure-narrative material'
+    skill_package_has 'superseded'
+}
+
+@test "SKILL.md requires no findings section in the ledger" {
+    skill_package_has 'no findings section is normal'
+}
+
+@test "SKILL.md reads a legacy findings section as raw candidates" {
+    skill_package_has 'raw candidate material rather than as a conclusion'
+    skill_package_has 'legacy'
+}
+
+@test "llms.txt carries this Change Request's entry" {
+    # The documentation index gains this Change Request's entry. Match by the CR
+    # slug in the linked filename rather than by its digit-form
+    # identifier, which this test file must not contain under the boundary rule.
+    grep -q 'tune-iterate-and-distill' "${REPO_ROOT}/docs/llms.txt"
+}
+
+@test "deck ledger fragment shows no disposition" {
+    # The walkthrough deck fragment drops disposition labels: no disposition
+    # label and no keep-discard-keep-part verdict line.
+    ! grep -qi 'disposition' "${REPO_ROOT}/deck/slides/checkpoint-distill/index.tsx"
+    ! grep -qi 'verdict' "${REPO_ROOT}/deck/slides/checkpoint-distill/index.tsx"
+}
+
+@test "SKILL.md frontmatter description matches the retuned input handling" {
+    # The distill frontmatter reflects the raw-ledger input: it does not require
+    # a session-written findings section.
+    desc="$(grep '^description:' "$SKILL_MD")"
+    ! echo "$desc" | grep -qiE 'findings section|disposition|patterns and anti-patterns'
+}

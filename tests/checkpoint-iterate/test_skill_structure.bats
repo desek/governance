@@ -79,10 +79,16 @@ setup() {
 }
 
 @test "SKILL.md forbids silently retrying an eliminated approach" {
+    # Retuned to the roll-forward model: the prohibition binds to an approach a
+    # later entry records as SUPERSEDED, not to a discarded disposition.
+    grep -qi 'records as superseded' "$SKILL_MD"
     grep -qi 'already eliminated and why it is being revisited' "$SKILL_MD"
 }
 
 @test "SKILL.md assigns recording to the agent" {
+    # Retuned Role Split: the agent writes the entry and commits as a side effect
+    # of the work, not as a separate verdict-then-write step.
+    grep -qi 'side effect of that work' "$SKILL_MD"
     grep -qi 'writes the ledger entry and creates the commit' "$SKILL_MD"
     grep -qi 'the agent is the recorder' "$SKILL_MD"
 }
@@ -95,6 +101,10 @@ setup() {
     grep -qi 'Re-hydration after context loss' "$SKILL_MD"
     grep -qi 'Read the governing Change Request and the full ledger' "$SKILL_MD"
     grep -qi 'Read the checkpoint commits for that Change Request' "$SKILL_MD"
+    # Retuned recovery: uncommitted work is recorded as an entry, not reconciled
+    # as an open entry, since entry states no longer exist.
+    grep -qi 'record them as an entry' "$SKILL_MD"
+    grep -qi 'do not adjudicate' "$SKILL_MD"
 }
 
 @test "SKILL.md requires worktree isolation for concurrent sessions" {
@@ -114,4 +124,84 @@ setup() {
 
 @test "SKILL.md reserves the unsuffixed form for the implementation workflow" {
     grep -qi 'reserved for the core agentic implementation workflow' "$SKILL_MD"
+}
+
+# --- Roll-forward model assertions (CR-XXXX) ---------------------------------
+# The retuned iteration session replaces the disposition machinery with a
+# roll-forward ledger. The tests below pin each load-bearing property of that
+# model, so a behaviour silently reverted to the old disposition form fails.
+
+@test "SKILL.md states that a change left in the tree is kept" {
+    grep -qi 'Kept is implicit' "$SKILL_MD"
+    grep -qi 'left in the working tree stands' "$SKILL_MD"
+}
+
+@test "SKILL.md documents supersession naming the earlier entry" {
+    grep -qi 'names the earlier entry it supersedes' "$SKILL_MD"
+    grep -qi 'why the earlier work no longer stands' "$SKILL_MD"
+}
+
+@test "SKILL.md forbids editing a superseded entry" {
+    grep -qiE 'MUST NOT.*edit, rewrite, or delete an earlier entry' "$SKILL_MD"
+}
+
+@test "SKILL.md requests no disposition from the user" {
+    grep -qi 'does not pause to ask for a verdict, a disposition, or a classification' "$SKILL_MD"
+}
+
+@test "SKILL.md defines no disposition vocabulary" {
+    # Genuine absence: the retuned skill defines no required entry field valued
+    # kept, discarded, or partially-kept. If the three-word vocabulary were
+    # reintroduced as a required field it would surface here.
+    ! grep -qi 'partially-kept' "$SKILL_MD"
+    ! grep -qi 'kept, discarded' "$SKILL_MD"
+}
+
+@test "SKILL.md defines no open or settled entry state" {
+    # Genuine absence: entry states are gone. "open" legitimately survives for a
+    # session's status, but no entry carries a settled state.
+    ! grep -qi 'settled' "$SKILL_MD"
+    ! grep -qi 'open or settled' "$SKILL_MD"
+}
+
+@test "SKILL.md documents a close of status and date only" {
+    grep -qi 'setting the ledger status to closed and recording the closing date' "$SKILL_MD"
+    grep -qi 'nothing further' "$SKILL_MD"
+}
+
+@test "SKILL.md performs no distillation" {
+    grep -qi 'writes no patterns, no anti-patterns, and no distillation' "$SKILL_MD"
+}
+
+@test "SKILL.md declares no dependency on the distillation skill" {
+    grep -qi 'neither invokes nor depends on any other skill' "$SKILL_MD"
+    # Genuine absence: the close-time hand-off is gone, so the sibling skill is
+    # not named anywhere in the workflow.
+    ! grep -qi 'checkpoint-distill' "$SKILL_MD"
+}
+
+@test "SKILL.md states the session is paced by the user" {
+    grep -qi 'until the user says the session is done' "$SKILL_MD"
+}
+
+@test "SKILL.md retains the safety rules" {
+    grep -qi 'destructive Git operations' "$SKILL_MD"
+    grep -qi 'refuse to open a session against a Change Request whose document does not exist' "$SKILL_MD"
+    grep -qi 'One active session per working tree' "$SKILL_MD"
+    grep -qi 'Scoped staging' "$SKILL_MD"
+    grep -qi 'Foreign-worktree detection' "$SKILL_MD"
+}
+
+@test "README iterate row describes no disposition" {
+    # The user-facing listing drops disposition language. Isolate the
+    # checkpoint-iterate row and assert it carries no disposition wording.
+    row="$(grep 'checkpoint-iterate' "${REPO_ROOT}/README.md")"
+    ! echo "$row" | grep -qiE 'disposition|discarded|partially-kept'
+}
+
+@test "SKILL.md frontmatter description omits disposition and distillation" {
+    # The retuned frontmatter no longer names the removed behaviour: no
+    # disposition vocabulary and no session distillation.
+    desc="$(grep '^description:' "$SKILL_MD")"
+    ! echo "$desc" | grep -qiE 'disposition|discarded|partially-kept|distil'
 }
