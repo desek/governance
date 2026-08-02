@@ -2,9 +2,7 @@
 name: iterate-ledger
 description: Session ledger for a last-mile iteration session against an implemented Change Request. Records each attempt as what changed, why it was tried, and the evidence observed, names any earlier entry a later one supersedes, and derives what currently stands from the entries.
 cr: "CR-XXXX"
-status: "{open | closed}"
 opened: "{YYYY-MM-DD when the session was opened}"
-closed: "{YYYY-MM-DD when the session was closed, blank while open}"
 source-branch: "{Git branch the session started from, from `git rev-parse --abbrev-ref HEAD`}"
 source-commit: "{short commit hash the session started from, from `git rev-parse --short HEAD`}"
 worktree: "{absolute path of the working tree the session was opened in, from `git rev-parse --show-toplevel`}"
@@ -34,11 +32,14 @@ rather than classifies it.
 
 APPEND-ONLY (entries). Entries are append-only within a session. Never delete,
 rewrite, or overwrite an earlier entry, even when a later entry supersedes it. A
-superseded attempt is retained in full for the life of the session and beyond
-close: it is the record of an approach that was tried, which exists nowhere
-else, and removing it defeats the purpose of the ledger. The "What Stands Now"
-section below is the sole exception to append-only — it is regenerated, not
-appended.
+superseded attempt is retained in full: it is the record of an approach that was
+tried, which exists nowhere else, and removing it defeats the purpose of the
+ledger. The "What Stands Now" section below is the sole exception to append-only
+— it is regenerated, not appended.
+
+NO LIFECYCLE. There is no status field and no closing date, because no command
+sets one. The session ends when the user stops iterating; the last entry is the
+last entry, and `git log` on this file says when each one landed.
 
 FRONTMATTER. No `metadata.copyright` or `metadata.version` field appears in this
 frontmatter, consistent with the convention for documents under `docs/cr/`.

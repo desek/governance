@@ -121,14 +121,13 @@ Name each thing to try. The agent makes the change, runs the tests, records what
 
 Each session commit uses the scoped subject `checkpoint(CR-XXXX-iterate): {summary}`, so session work stays visible to `/checkpoint-read` while remaining separable from the core implementation commits. The ledger survives context loss: after a `/clear`, the same invocation re-hydrates the session from the ledger alone.
 
-#### 6c. Close
+#### 6c. Stop when the gap is closed
 
-When the gap is closed, close the session. Closing sets the ledger status to closed and records the closing date, and nothing further — the session draws no conclusions from its own ledger and hands off to no other skill. A completed ledger holds what was done, why, and what stands; that is a complete input for the distillation stage (Step 7), which you run deliberately when you choose to.
+There is nothing to close. The session ends when you stop naming things to try, and the ledger is complete because its last entry is its last entry. No sub-command marks it, and none needs to: the ledger is a tracked document, so what was recorded is in the file and when each entry landed is in `git log`. Ask the agent what the session has done and it reads the ledger back to you.
 
-**Prompt:**
-> /checkpoint-iterate close CR-XXXX
+The session draws no conclusions from its own ledger and hands off to no other skill. The ledger holds what was done, why, and what stands; that is a complete input for the distillation stage (Step 7), which you run deliberately when you choose to.
 
-Use `/checkpoint-iterate status CR-XXXX` at any point to report the active session and the entries it has recorded so far, including which earlier entries a later entry superseded. See the [checkpoint-iterate skill](skills/checkpoint-iterate/SKILL.md) for the full protocol, including concurrency rules for running sessions in separate Git worktrees.
+See the [checkpoint-iterate skill](skills/checkpoint-iterate/SKILL.md) for the full protocol, including concurrency rules for running sessions in separate Git worktrees.
 
 ### Step 7: Distil the session into standing instructions (optional)
 

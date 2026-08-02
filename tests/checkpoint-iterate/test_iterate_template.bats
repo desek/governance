@@ -19,8 +19,11 @@ setup() {
     grep -q '^cr:' "$ITERATE_TEMPLATE"
 }
 
-@test "iterate template has status field" {
-    grep -q '^status:' "$ITERATE_TEMPLATE"
+@test "iterate template has no lifecycle status or closing date" {
+    # Genuine absence: no command sets either field, so carrying them would
+    # leave every ledger permanently and misleadingly "open".
+    ! grep -q '^status:' "$ITERATE_TEMPLATE"
+    ! grep -q '^closed:' "$ITERATE_TEMPLATE"
 }
 
 @test "iterate template has source-branch and source-commit fields" {

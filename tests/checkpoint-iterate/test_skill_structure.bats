@@ -45,12 +45,17 @@ setup() {
     grep -q 'checkpoint-iterate' "${REPO_ROOT}/README.md"
 }
 
-@test "SKILL.md documents all three invocation forms" {
-    # Open/resume, close, and status must each be specified. The open form is the
-    # bare invocation with an identifier; close and status are named sub-commands.
-    grep -q 'checkpoint-iterate close' "$SKILL_MD"
-    grep -q 'checkpoint-iterate status' "$SKILL_MD"
+@test "SKILL.md documents the single invocation form" {
+    # One invocation: the bare form with an identifier, which opens or resumes.
     grep -qi 'Opens a session' "$SKILL_MD"
+}
+
+@test "SKILL.md defines no close or status sub-command" {
+    # Genuine absence. Neither sub-command reports anything the tracked ledger
+    # and its Git history do not already hold, so both cost a command to
+    # remember and return nothing for it.
+    ! grep -q 'checkpoint-iterate close' "$SKILL_MD"
+    ! grep -q 'checkpoint-iterate status' "$SKILL_MD"
 }
 
 @test "SKILL.md documents refusing a missing Change Request" {
@@ -69,7 +74,7 @@ setup() {
 }
 
 @test "SKILL.md documents refusing an ambiguous invocation" {
-    grep -qi 'list the open ledgers' "$SKILL_MD"
+    grep -qi 'list the ledgers found' "$SKILL_MD"
     grep -qi 'rather than guessing which session is meant' "$SKILL_MD"
 }
 
@@ -164,9 +169,11 @@ setup() {
     ! grep -qi 'open or settled' "$SKILL_MD"
 }
 
-@test "SKILL.md documents a close of status and date only" {
-    grep -qi 'setting the ledger status to closed and recording the closing date' "$SKILL_MD"
-    grep -qi 'nothing further' "$SKILL_MD"
+@test "SKILL.md ends the session without a closing ceremony" {
+    # The session ends when the user stops. The record of that is the ledger
+    # itself plus its Git history, not a status field a command must set.
+    grep -qi 'The session ends when the user stops' "$SKILL_MD"
+    grep -qi 'Nothing marks it closed' "$SKILL_MD"
 }
 
 @test "SKILL.md performs no distillation" {

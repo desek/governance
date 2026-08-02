@@ -1,6 +1,6 @@
 ---
 name: checkpoint-iterate
-description: Slash command that runs a last-mile iteration session against an implemented Change Request. Opens a roll-forward ledger, records each change with what was done, why it was tried, and what the evidence showed, notes where a later change supersedes an earlier one, and checkpoint-commits code continuously. Trigger with /checkpoint-iterate [CR-XXXX], /checkpoint-iterate close CR-XXXX, or /checkpoint-iterate status CR-XXXX.
+description: Slash command that runs a last-mile iteration session against an implemented Change Request. Opens a roll-forward ledger, records each change with what was done, why it was tried, and what the evidence showed, notes where a later change supersedes an earlier one, and checkpoint-commits code continuously. Trigger with /checkpoint-iterate CR-XXXX.
 license: Apache-2.0
 metadata:
   copyright: Copyright Daniel Grenemark 2026
@@ -16,8 +16,8 @@ Runs an **iteration session** that closes the last-mile gap between an implement
 | Invocation | Effect |
 |---|---|
 | `/checkpoint-iterate CR-XXXX` | Opens a session against that Change Request, or resumes one already open |
-| `/checkpoint-iterate close CR-XXXX` | Closes the active session by setting its status and closing date |
-| `/checkpoint-iterate status CR-XXXX` | Reports the active session and the entries it has recorded so far |
+
+That is the whole surface. There is **no** close sub-command and **no** status sub-command, because neither would tell anyone anything the repository does not already hold. The ledger is a tracked document with a Git history: what the session has recorded is in the file, and when each entry landed is in `git log`. A session ends when the user stops iterating, which needs no ceremony to announce.
 
 Every invocation **MUST** identify its governing Change Request. There is no implicit "current session".
 
@@ -46,18 +46,18 @@ Follow these steps in order.
 
 ### Step 1: Resolve and Validate the Governing Change Request
 
-Read the identifier from `$ARGUMENTS` (for `close` and `status`, it follows the sub-command word).
+Read the identifier from `$ARGUMENTS`.
 
 - Confirm the governing Change Request document exists at `docs/cr/{CR_ID}-*.md`.
 - **If the document does not exist:** refuse to open a session against a Change Request whose document does not exist, report which identifier could not be resolved, and **STOP**. No ledger is created for an unresolved identifier.
-- **If the identifier is omitted** and more than one ledger is open in the working tree: refuse to act, list the open ledgers, and **STOP** rather than guessing which session is meant.
+- **If the identifier is omitted** and more than one ledger exists in the working tree: refuse to act, list the ledgers found, and **STOP** rather than guessing which session is meant.
 
 ### Step 2: Create or Resume the Ledger
 
 Check for an existing ledger at `docs/cr/{CR_ID}-iterate.md`.
 
-- **If none exists:** create it from the bundled template at `templates/ITERATE.md`. Record in its frontmatter the governing Change Request, an open status, the start date, the branch and commit the session starts from, and the working tree it was opened in.
-- **If one exists and is open:** resume it. Append to the existing ledger — **MUST NOT** recreate, rewrite, or remove any previously recorded entry. Resuming reconstructs session state without asking the user further questions.
+- **If none exists:** create it from the bundled template at `templates/ITERATE.md`. Record in its frontmatter the governing Change Request, the start date, the branch and commit the session starts from, and the working tree it was opened in. The ledger carries no lifecycle status, because nothing sets one.
+- **If one exists:** resume it. Append to the existing ledger — **MUST NOT** recreate, rewrite, or remove any previously recorded entry. Resuming reconstructs session state without asking the user further questions. A ledger the user stopped iterating on months ago resumes exactly like one abandoned an hour ago: the entries say what stands, and appending to them is the only thing a session ever does.
 
 When resuming, before proposing any new change the agent reads the governing Change Request and every entry in the ledger, then reports the recovered state: what stands now, and which approaches an entry records as superseded. An approach an earlier entry records as superseded **MUST NOT** be proposed again without stating that it was already eliminated and why it is being revisited.
 
@@ -72,13 +72,9 @@ The loop has four movements, and the user paces it. Repeat until the user says t
 
 The agent does not pause to ask for a verdict, a disposition, or a classification: anything left in the working tree is kept, and the only reversal the ledger records is a later entry superseding an earlier one. A superseded entry is never deleted from the ledger — retaining it is the entire point, because it is the failure narrative that exists nowhere else.
 
-### Step 4: Status
+**The session ends when the user stops.** Nothing marks it closed, and nothing needs to: the last entry is the last entry, and `git log` says when it landed. Asked at any point what the session has done, the agent answers by reading the ledger it is already maintaining, which is the same answer a status command would have produced at the cost of a command to remember.
 
-On a `status` invocation, report the active session for the given Change Request and the entries it has recorded, including which earlier entries a later entry superseded. Read-only: report state without modifying the ledger or Git.
-
-### Step 5: Close
-
-On a `close` invocation, end the session. Closing consists of setting the ledger status to closed and recording the closing date in the frontmatter, and nothing further. The session draws no conclusions from its own ledger: it writes no patterns, no anti-patterns, and no distillation, and it neither invokes nor depends on any other skill at close. A completed ledger holds what was done, why, and what stands, and that is a complete input for a later, deliberate distillation the user runs when they choose to.
+The session draws no conclusions from its own ledger: it writes no patterns, no anti-patterns, and no distillation, and it neither invokes nor depends on any other skill. A ledger holds what was done, why, and what stands, and that is a complete input for a later, deliberate distillation the user runs when they choose to.
 
 ## Commit Protocol
 
@@ -123,7 +119,7 @@ Reading the superseded entries matters as much as reading the rest: a re-hydrate
 
 - **One active session per working tree.** A second concurrent session runs in its own Git worktree. This is the primary isolation and the only mechanism that fully separates the two. (Creating the worktree stays with the user; the skill does not create it.)
 - **Scoped staging.** A session stages **only** the paths it touched — its ledger and the files of the change in hand — and **MUST NOT** stage the entire working tree. This bounds the damage if two sessions do share a tree.
-- **Explicit identification.** Every invocation names its Change Request; there is no implicit "current session". Where an invocation omits the identifier and more than one ledger is open in the working tree, the skill refuses and lists the open ledgers rather than selecting one.
+- **Explicit identification.** Every invocation names its Change Request; there is no implicit "current session". Where an invocation omits the identifier and more than one ledger exists in the working tree, the skill refuses and lists the ledgers found rather than selecting one.
 
 **Foreign-worktree detection.** The ledger records the working tree it was opened in. A session resumed in a working tree other than the one it records **MUST** be detected and reported to the user, rather than proceeding silently against a different tree.
 
