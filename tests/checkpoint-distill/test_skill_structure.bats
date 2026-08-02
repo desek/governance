@@ -79,9 +79,9 @@ setup() {
     grep -qi 'before the branch merges' "$SKILL_MD"
 }
 
-@test "skill requires ledger findings to be ranked not copied" {
-    skill_package_has 'input, not passthrough'
-    skill_package_has "ledger's closing findings"
+@test "skill requires ledger entries to be ranked not copied" {
+    skill_package_has 'sourced from its entries'
+    skill_package_has 'raw candidate'
     skill_package_has 'unranked'
 }
 

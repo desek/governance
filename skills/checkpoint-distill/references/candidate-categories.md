@@ -1,6 +1,6 @@
 ---
 name: candidate-categories
-description: The five categories a distillation candidate may belong to, the source-tracing rule every candidate must satisfy, how an iteration ledger's closing findings are treated as input rather than passthrough, and how a candidate is classified as in-project knowledge or an out-of-project workaround.
+description: The five categories a distillation candidate may belong to, the source-tracing rule every candidate must satisfy, how an iteration ledger's entries are treated as input rather than passthrough, and how a candidate is classified as in-project knowledge or an out-of-project workaround.
 metadata:
   copyright: Copyright Daniel Grenemark 2026
   version: "0.1"
@@ -26,13 +26,21 @@ Every candidate **MUST** trace to a specific source artifact, identified by **fi
 
 Where the reasoning behind a candidate **cannot be reconstructed from its sources** — the ledger records that an approach was discarded but not why, or a validation gap is noted without the cause that produced it — the skill **MUST NOT** record the candidate on a guessed rationale. It **MUST** instead query for the missing context and leave the candidate out until the reasoning is supplied. A rule written on an invented "why" is worse than no rule, because it is authoritative and unexamined; the missing reasoning is requested, never inferred.
 
-## The iteration ledger is input, not passthrough
+## The iteration ledger's entries are input, not passthrough
 
-The iteration ledger's closing findings are the richest single input this analysis has, and the most easily mishandled. They are **input to be reconciled and ranked**, never content to be copied through. The skill **MUST NOT** write a ledger's closing findings into the standing instructions unranked.
+A completed iteration ledger records a session as a forward-running list of **entries**: what each attempt changed, why it was tried, and what the evidence showed, with a later entry naming any earlier entry it supersedes. Those entries are the richest single input this analysis has, and the most easily mishandled. They are **input to be reconciled and ranked**, never content to be copied through. The skill **MUST NOT** write a ledger's entries into the standing instructions unranked.
 
-The distinction is the point of the skill. **The ledger records what one session learned** — unranked, scoped to that session, unreconciled against anything the project already knows. **This skill decides what every future session should know** — which of those findings generalise beyond the session that produced them, which are already documented, and where each one ranks against every other candidate. A single session cannot see whether its own finding generalises or duplicates existing guidance; that judgement requires the wider view this analysis takes.
+A **superseded entry** is the highest-value material here. It records an approach that was tried and then undone, which is exactly a failure narrative, and the scoring already ranks a failure narrative above other categories of equal leverage. The superseding entry states why the earlier approach no longer stands, so the reasoning that eliminated it travels with the candidate — material visible nowhere else once the session is over.
 
-So every ledger finding is treated as a raw candidate: reconciled against the standing instructions, deduplicated, scored, and tiered alongside candidates from every other input — or, where it does not survive that reconciliation, ruled out with its reason stated.
+The distinction is the point of the skill. **The ledger records what one session did** — its entries scoped to that session, unreconciled against anything the project already knows. **This skill decides what every future session should know** — which of those entries generalise beyond the session that produced them, which are already documented, and where each one ranks against every other candidate. A single session cannot see whether its own entry generalises or duplicates existing guidance; that judgement requires the wider view this analysis takes.
+
+So every entry is treated as a raw candidate: reconciled against the standing instructions, deduplicated, scored, and tiered alongside candidates from every other input — or, where it does not survive that reconciliation, ruled out with its reason stated.
+
+### A ledger needs no findings section, and a legacy one is still read
+
+A retuned ledger carries **no** distillation, patterns, or anti-patterns section: its entries are the whole input, and the absence of a findings section is the normal state rather than a sign the ledger is malformed. The skill proceeds on the entries and does not report the ledger as incomplete.
+
+A ledger written under the **previous** format still carries a Distillation section with its own patterns and anti-patterns. That section is read without migration, as **raw candidate material to be ranked** — exactly like an entry — never as a conclusion to be copied through unranked. A legacy findings section is a session's own draft conclusion, drawn with the least context; this analysis re-derives from it rather than trusting it.
 
 ## Origin: in-project or out-of-project
 
