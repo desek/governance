@@ -57,16 +57,31 @@ and look at frames across a boundary, not at settled pages.
 
 ## Publishing an update
 
-The page half is automated: pushing deck changes to `main` runs the Docs Deck
-workflow, which re-exports `docs/deck/checkpoint-distill.html` and commits it
-back. The video half is still manual.
+Both halves are committed by hand. The Docs Deck workflow checks the page half
+rather than producing it: on a pull request touching `deck/` it rebuilds the
+export and fails when `docs/deck/checkpoint-distill.html` does not match, so a
+stale export cannot reach `main` unnoticed.
+
+The workflow used to rebuild on `main` and push the result. It cannot: the
+default branch ruleset requires every change to arrive through a pull request,
+and the Actions token has no bypass for it. A user-owned repository cannot grant
+one, because the bypass list offers repository roles, deploy keys, and installed
+GitHub Apps, and the Actions token is none of those. The push was rejected with
+`GH013` while the workflow otherwise looked healthy, which left the export stale
+and said nothing about it.
 
 1. Edit `slides/checkpoint-distill/index.tsx`.
 2. `npm run export:png` and read every changed page.
 3. `npm run capture`, then diff the first and last frames. The loop closes when
    the per-channel difference stays near zero. The seam is the one defect nobody
    notices until it ships.
-4. Copy the MP4 into `docs/deck/` and commit it. The page re-exports itself.
+4. Copy the MP4 into `docs/deck/` and commit it.
+5. Rebuild the page export and commit it in the same pull request:
+
+   ```bash
+   npm run build:single && npm run export:html && npm run check:export
+   cp html-export/checkpoint-distill.html ../docs/deck/checkpoint-distill.html
+   ```
 
 ## Tooling caveat
 
