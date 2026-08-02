@@ -68,10 +68,6 @@ setup() {
     grep -qi 'spawned by the implementation pipeline' "$SKILL_MD"
 }
 
-@test "SKILL.md forbids closing while an entry is open" {
-    grep -qi 'be closed while any entry remains open' "$SKILL_MD"
-}
-
 @test "SKILL.md documents refusing an ambiguous invocation" {
     grep -qi 'list the open ledgers' "$SKILL_MD"
     grep -qi 'rather than guessing which session is meant' "$SKILL_MD"
@@ -91,9 +87,8 @@ setup() {
     grep -qi 'the agent is the recorder' "$SKILL_MD"
 }
 
-@test "SKILL.md requires evidence before disposition" {
-    grep -qi 'report evidence before requesting a disposition' "$SKILL_MD"
-    grep -qi 'disposition is requested, so the verdict is rendered against observed behaviour' "$SKILL_MD"
+@test "SKILL.md records the evidence the entry observed" {
+    grep -qi 'what the evidence showed' "$SKILL_MD"
 }
 
 @test "SKILL.md documents the re-hydration procedure" {

@@ -1,6 +1,6 @@
 ---
 name: checkpoint-iterate
-description: Slash command that runs a last-mile iteration session against an implemented Change Request. Opens an attempt ledger, records every attempt with an explicit kept, discarded, or partially-kept disposition, checkpoint-commits code continuously, and closes by distilling the session into patterns and anti-patterns. Trigger with /checkpoint-iterate [CR-XXXX], /checkpoint-iterate close CR-XXXX, or /checkpoint-iterate status CR-XXXX.
+description: Slash command that runs a last-mile iteration session against an implemented Change Request. Opens a roll-forward ledger, records each change with what was done, why it was tried, and what the evidence showed, notes where a later change supersedes an earlier one, and checkpoint-commits code continuously. Trigger with /checkpoint-iterate [CR-XXXX], /checkpoint-iterate close CR-XXXX, or /checkpoint-iterate status CR-XXXX.
 license: Apache-2.0
 metadata:
   copyright: Copyright Daniel Grenemark 2026
@@ -9,26 +9,34 @@ metadata:
 
 # /checkpoint-iterate
 
-Runs an **iteration session** that closes the last-mile gap between an implemented Change Request and the behaviour that was actually wanted. A specification is written before the code exists, so the delivered result is approximately right rather than exactly right. Closing that gap is an interactive loop: the user names what to try, the agent makes the change and reports the evidence, the user renders the verdict. This skill records that loop in a ledger at `docs/cr/{CR_ID}-iterate.md`, so the reasoning — including every discarded attempt — survives the session instead of evaporating with the agent's context.
+Runs an **iteration session** that closes the last-mile gap between an implemented Change Request and the behaviour that was actually wanted. A specification is written before the code exists, so the delivered result is approximately right rather than exactly right. Closing that gap is an interactive loop the user drives: the user names what to try, the agent makes the change and reports what it observed, the user says what to try next. This skill records that loop as a **roll-forward ledger** at `docs/cr/{CR_ID}-iterate.md`, so the reasoning — including every approach a later change superseded — survives the session instead of evaporating with the agent's context.
 
 **Usage:**
 
 | Invocation | Effect |
 |---|---|
 | `/checkpoint-iterate CR-XXXX` | Opens a session against that Change Request, or resumes one already open |
-| `/checkpoint-iterate close CR-XXXX` | Closes the active session and distils the ledger |
-| `/checkpoint-iterate status CR-XXXX` | Reports the active session, its attempt count, and its dispositions so far |
+| `/checkpoint-iterate close CR-XXXX` | Closes the active session by setting its status and closing date |
+| `/checkpoint-iterate status CR-XXXX` | Reports the active session and the entries it has recorded so far |
 
 Every invocation **MUST** identify its governing Change Request. There is no implicit "current session".
+
+## The Roll-Forward Model
+
+An iteration session moves in one direction, and the ledger records that motion rather than adjudicating it. Three properties define the model.
+
+- **Kept is implicit.** A change made, checked, and left in the working tree stands. That is what "left in the tree" means, and nothing confirms it — there is no verdict, disposition, or classification for the ordinary outcome.
+- **Supersession is explicit.** When a later change undoes or replaces earlier work, the new entry names the earlier entry it supersedes and states why the earlier work no longer stands. A partial reversal needs no special label: the superseding entry says in prose what it replaced and what it left alone. The earlier entry is **never** edited, rewritten, or deleted when superseded — it is the record of an approach that was tried, which is exactly the material later distillation cannot get anywhere else.
+- **What stands is derived.** The current state is read forward from the entries, honouring supersessions, rather than maintained by hand. Regenerating that derived summary is not a breach of the append-only rule, which governs the entries themselves.
 
 ## Role Split
 
 The division of labour governs every step below. It is fixed and **MUST NOT** be reassigned.
 
-- **The user** initiates the session, names each thing to try next, and renders the verdict on each result. The verdict is the user's judgment; the agent records it and **MUST NOT** infer, assume, propose, or substitute its own.
-- **The agent** makes the code change, runs the project's checks, reports the evidence, then writes the ledger entry and creates the commit. The agent is the recorder for every attempt, because it is the party present at all of them and already writing to the repository.
+- **The user** initiates the session, names each thing to try next, and paces the loop, continuing until they say the session is done. Direction and pace are the user's; the agent does not ask for a judgment on each result.
+- **The agent** makes the code change, runs the project's checks, and — as a side effect of that work, not as a separate step that collects a judgment — writes the ledger entry and creates the commit. The agent is the recorder for every change, because it is the party present at all of them and already writing to the repository.
 
-The user is therefore never asked to maintain a notebook alongside the work. Their contribution is direction and judgment; the recording is a side effect of the work the agent was already doing.
+The user is therefore never asked to maintain a notebook alongside the work. Their contribution is direction; the recording happens on its own as the agent does the work it was already doing.
 
 **Initiation is user-only.** A session **MUST** be opened by explicit user invocation. It **MUST NOT** be started automatically, and **MUST NOT** be spawned by the implementation pipeline. The whole point is that a human has looked at the delivered result and judged it not yet right.
 
@@ -41,7 +49,7 @@ Follow these steps in order.
 Read the identifier from `$ARGUMENTS` (for `close` and `status`, it follows the sub-command word).
 
 - Confirm the governing Change Request document exists at `docs/cr/{CR_ID}-*.md`.
-- **If the document does not exist:** refuse to open a session, report which identifier could not be resolved, and **STOP**. No ledger is created for an unresolved identifier.
+- **If the document does not exist:** refuse to open a session against a Change Request whose document does not exist, report which identifier could not be resolved, and **STOP**. No ledger is created for an unresolved identifier.
 - **If the identifier is omitted** and more than one ledger is open in the working tree: refuse to act, list the open ledgers, and **STOP** rather than guessing which session is meant.
 
 ### Step 2: Create or Resume the Ledger
@@ -51,28 +59,26 @@ Check for an existing ledger at `docs/cr/{CR_ID}-iterate.md`.
 - **If none exists:** create it from the bundled template at `templates/ITERATE.md`. Record in its frontmatter the governing Change Request, an open status, the start date, the branch and commit the session starts from, and the working tree it was opened in.
 - **If one exists and is open:** resume it. Append to the existing ledger — **MUST NOT** recreate, rewrite, or remove any previously recorded entry. Resuming reconstructs session state without asking the user further questions.
 
-When resuming, before proposing any new attempt the agent reads the governing Change Request and every settled entry in the ledger, including discarded ones, then reports the recovered state: what has been settled, what approaches were eliminated, and what was in flight. An approach a settled entry records as `discarded` **MUST NOT** be proposed again without stating that it was already eliminated and why it is being revisited.
+When resuming, before proposing any new change the agent reads the governing Change Request and every entry in the ledger, then reports the recovered state: what stands now, and which approaches an entry records as superseded. An approach an earlier entry records as superseded **MUST NOT** be proposed again without stating that it was already eliminated and why it is being revisited.
 
-### Step 3: Loop Over Attempts
+### Step 3: Loop Over Changes
 
-Each attempt is one pass through this loop. Repeat until the user closes the session.
+The loop has four movements, and the user paces it. Repeat until the user says the session is done.
 
-1. **The user names the next thing to try.**
-2. **The agent makes the code change** for that hypothesis and **runs the project's checks** (`bats -r tests/`).
-3. **The agent reports the verification evidence to the user** — what was changed, what the checks produced. Evidence is reported **BEFORE** a disposition is requested, so the verdict is rendered against observed behaviour rather than an expectation.
-4. **The user renders the verdict:** keep, discard, or keep part.
-5. **The agent writes the ledger entry**, recording the hypothesis, the surface touched, the evidence, and the disposition — which is exactly one of `kept`, `discarded`, or `partially-kept`. The recorded disposition is the one the user supplied, transcribed verbatim; the agent does not infer it.
-6. **The agent creates the commit** on its own initiative, without waiting to be asked, using the existing checkpoint commit workflow.
+1. The user says what to try next.
+2. The agent makes the code change for that idea and runs the project's checks (`bats -r tests/`).
+3. The agent appends the ledger entry — what was changed, why it was tried, and what the evidence showed — and, where the change undoes or replaces earlier work, names the earlier entry it supersedes and why. It then creates the commit, on its own initiative, through the existing checkpoint commit workflow.
+4. The agent waits for the user's next instruction.
 
-A `discarded` entry is never deleted from the ledger — retaining it is the entire point, because it is anti-pattern evidence that exists nowhere else.
+The agent does not pause to ask for a verdict, a disposition, or a classification: anything left in the working tree is kept, and the only reversal the ledger records is a later entry superseding an earlier one. A superseded entry is never deleted from the ledger — retaining it is the entire point, because it is the failure narrative that exists nowhere else.
 
 ### Step 4: Status
 
-On a `status` invocation, report the active session for the given Change Request, its attempt count, and the dispositions recorded to date. Read-only: report state without modifying the ledger or Git.
+On a `status` invocation, report the active session for the given Change Request and the entries it has recorded, including which earlier entries a later entry superseded. Read-only: report state without modifying the ledger or Git.
 
 ### Step 5: Close
 
-On a `close` invocation, end the session and distil the ledger. A session **MUST NOT** be closed while any entry remains open; report the open entry as requiring a disposition and stop. The full commit protocol and closing distillation are specified in the sections below.
+On a `close` invocation, end the session. Closing consists of setting the ledger status to closed and recording the closing date in the frontmatter, and nothing further. The session draws no conclusions from its own ledger: it writes no patterns, no anti-patterns, and no distillation, and it neither invokes nor depends on any other skill at close. A completed ledger holds what was done, why, and what stands, and that is a complete input for a later, deliberate distillation the user runs when they choose to.
 
 ## Commit Protocol
 
@@ -94,9 +100,9 @@ git log --grep '^checkpoint(CR-XXXX-iterate):'  # iteration session only
 git log --grep '^checkpoint.*:'                 # both, the default recovery view
 ```
 
-**Code and evidence are committed atomically.** A checkpoint that contains code changes **MUST** also contain, in the same commit, the ledger entry for the attempt it embodies. Change and evidence are never separated across commits.
+**Code and evidence are committed atomically.** A checkpoint that contains code changes **MUST** also contain, in the same commit, the ledger entry for the change it embodies. Change and evidence are never separated across commits.
 
-**A discarded attempt leaves no code.** After the working tree is reverted, its commit touches the ledger alone — still a session checkpoint carrying the same scoped subject, identified by the path it changed rather than by a different subject convention:
+**A superseding change that removes earlier code leaves an entry.** After the working tree is reverted to replace an earlier approach, its commit touches the ledger alone — still a session checkpoint carrying the same scoped subject, identified by the path it changed rather than by a different subject convention:
 
 ```bash
 git log --grep '^checkpoint(CR-XXXX-iterate):' -- docs/cr/CR-XXXX-iterate.md
@@ -106,37 +112,25 @@ git log --grep '^checkpoint(CR-XXXX-iterate):' -- docs/cr/CR-XXXX-iterate.md
 
 **Re-hydration after context loss.** The ledger lives on disk, so it survives context loss entirely. Recovering a cleared or new session takes exactly **one** user action — the same invocation used to open the session — after which the agent reconstructs state with no further questions:
 
-1. Read the governing Change Request and the full ledger, including **every** settled entry (kept, discarded, and partially-kept alike).
+1. Read the governing Change Request and the full ledger, including **every** entry, superseded ones alike.
 2. Read the checkpoint commits for that Change Request via the context-recovery history query.
-3. Compare the working tree against the last commit. Uncommitted changes belong to the open entry, if there is one.
-4. Report the recovered state to the user: what has been settled, what approaches were eliminated, and what was in flight.
-5. If an entry is still open, reconcile the uncommitted working-tree changes against it and **request its disposition before starting any new attempt**. Resuming without settling it would fold unjudged work into the next attempt and misattribute it.
+3. Compare the working tree against the last commit. Uncommitted changes belong to work in flight; record them as an entry, do not adjudicate them.
+4. Report the recovered state to the user: what stands now, and which approaches an entry records as superseded.
 
-Reading the discarded entries matters as much as reading the kept ones: a re-hydrated agent **MUST NOT** re-propose an approach a settled entry records as `discarded` without stating that it was already eliminated and why it is being revisited.
+Reading the superseded entries matters as much as reading the rest: a re-hydrated agent **MUST NOT** re-propose an approach a later entry records as superseded without stating that it was already eliminated and why it is being revisited.
 
 **Concurrency.** Two sessions may run at once, but not in the same working tree. The constraint is Git, not the ledger: the checkpoint staging would otherwise sweep one session's in-flight changes into the other's commit, misattributing work and cross-contaminating both ledgers. Three rules make concurrency safe:
 
 - **One active session per working tree.** A second concurrent session runs in its own Git worktree. This is the primary isolation and the only mechanism that fully separates the two. (Creating the worktree stays with the user; the skill does not create it.)
-- **Scoped staging.** A session stages **only** the paths it touched — its ledger and the files of the attempt in hand — and **MUST NOT** stage the entire working tree. This bounds the damage if two sessions do share a tree.
+- **Scoped staging.** A session stages **only** the paths it touched — its ledger and the files of the change in hand — and **MUST NOT** stage the entire working tree. This bounds the damage if two sessions do share a tree.
 - **Explicit identification.** Every invocation names its Change Request; there is no implicit "current session". Where an invocation omits the identifier and more than one ledger is open in the working tree, the skill refuses and lists the open ledgers rather than selecting one.
 
 **Foreign-worktree detection.** The ledger records the working tree it was opened in. A session resumed in a working tree other than the one it records **MUST** be detected and reported to the user, rather than proceeding silently against a different tree.
 
-## Closing
-
-On a `close` invocation, once no entry remains open:
-
-1. **Set the ledger status to closed and record the closing date** in the frontmatter.
-2. **Populate the distillation section**, separating the findings into two lists: what worked, expressed as **recommended patterns**, and what did not, expressed as **anti-patterns**. The anti-patterns are drawn from the discarded entries and state the reason each approach did not work — this is the knowledge that exists nowhere else and the reason the ledger is kept.
-3. **Hand the result to the existing distillation workflow** (`/checkpoint-distill`), which routes durable practices into the project's standing instructions. The session **MUST NOT** define a competing distillation mechanism or a second destination; the ledger is a strictly richer input than commit history because it contains the discarded attempts commit history omits.
-
-> **Prerequisite:** the closing hand-off consumes the distillation workflow, which this repository ships as a sibling skill. Installing this skill on its own still gives a working open, iterate, and record loop; only the close-step hand-off needs the distillation skill present alongside it.
-
-**Governance reference boundary.** Guidance written into the project's standing instructions as a result of distillation **MUST** describe the *practice* and **MUST NOT** name the Change Request or the session that produced it. Standing instructions are prohibited territory for governance identifiers, so distilled guidance names patterns and anti-patterns, never the document or ledger they came from. (The ledger itself lives under `docs/cr/`, which is permitted territory, so it may name its governing Change Request freely.)
+**Governance reference boundary.** The ledger lives under `docs/cr/`, which is permitted territory for governance identifiers, so it may name its governing Change Request freely. This boundary still applies to the ledger's own content: an entry describes the work and its evidence, and does not reach into the project's standing instructions, which remain prohibited territory for governance identifiers.
 
 ## Safety Rules
 
-- **MUST NOT** perform destructive Git operations: `git reset`, `git rebase`, `git commit --amend`, `git push --force`. Reverting a discarded attempt is limited to the working tree.
-- **MUST** record the user's verdict verbatim and **MUST NOT** infer, assume, or substitute a disposition.
-- **MUST** report evidence before requesting a disposition.
+- **MUST NOT** perform destructive Git operations: `git reset`, `git rebase`, `git commit --amend`, `git push --force`. Reverting to supersede an earlier change is limited to the working tree.
 - **MUST** refuse to open a session against a Change Request whose document does not exist, naming the unresolved identifier.
+- **MUST NOT** edit, rewrite, or delete an earlier entry when a later entry supersedes it.
