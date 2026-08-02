@@ -125,7 +125,7 @@ A partial reversal needs no special disposition under this model: the supersedin
 12. The iteration skill **MUST NOT** hand off to, invoke, or depend on the distillation skill at close or at any other point.
 13. Closing a session **MUST** consist of setting the ledger status to closed and recording the closing date, and nothing further.
 14. The iteration ledger template **MUST NOT** contain a distillation, patterns, or anti-patterns section.
-15. The iteration skill **MUST** retain its safety rules unchanged: no destructive Git operation, refusal on an unresolvable Change Request identifier, refusal on an ambiguous invocation, one active session per working tree, scoped staging, and foreign-worktree detection.
+15. The iteration skill **MUST** retain the safety and isolation rules that are independent of the removed disposition machinery: no destructive Git operation, refusal on an unresolvable Change Request identifier, refusal on an ambiguous invocation, one active session per working tree, scoped staging, and foreign-worktree detection. The two disposition-bound safety bullets — "record the verdict verbatim" and "report evidence before requesting a disposition" — **MUST** be removed together with the rest of the disposition machinery, and are not among the rules retained here.
 16. The iteration skill **MUST** retain re-hydration from the ledger and the checkpoint commits, and **MUST NOT** re-propose an approach an earlier entry records as superseded without stating that it was already tried and why it is being revisited.
 17. The distillation skill **MUST** draw candidates from the iteration ledger's entries, including entries a later entry superseded.
 18. The distillation skill **MUST** treat a superseded entry as failure-narrative material, which its existing ranking already places above other categories of equal leverage.
@@ -136,11 +136,11 @@ A partial reversal needs no special disposition under this model: the supersedin
 
 ### Non-Functional Requirements
 
-1. Neither skill **MUST** gain a new runtime, test framework, or tooling dependency.
+1. Each skill **MUST NOT** gain a new runtime, test framework, or tooling dependency.
 2. The iteration skill's `SKILL.md` **MUST** stay within the skill-authoring specification's token budget, measured in tokens rather than lines.
-3. The iteration skill's prose **SHOULD** reserve RFC 2119 obligation keywords for safety and record integrity, and express the loop itself as guidance, so the skill reads as assistive rather than as a form.
+3. The iteration skill's loop prose **MUST** express each loop step as guidance rather than as an RFC 2119 obligation, reserving MUST and MUST NOT for the safety and record-integrity rules, so the skill reads as assistive rather than as a form.
 4. The iteration skill **MUST** remain usable with the distillation skill absent, since the close-time dependency is removed.
-5. Neither skill's files nor their tests **MUST** contain governance identifiers in a form that violates the repository's governance reference boundary; every placeholder stays digitless.
+5. The skills' files and their tests **MUST NOT** contain governance identifiers in a form that violates the repository's governance reference boundary; every placeholder outside permitted territory stays digitless.
 6. A ledger written under the previous format **MUST** remain readable by both skills without migration.
 
 ## Affected Components
@@ -282,7 +282,12 @@ Run `bats -r tests/` and confirm the full suite passes, including the governance
 | `tests/checkpoint-distill/test_skill_structure.bats` | `SKILL.md sources candidates from ledger entries` | Entries, not a findings section, are the input | `SKILL.md` | Documented |
 | `tests/checkpoint-distill/test_skill_structure.bats` | `SKILL.md treats a superseded entry as failure-narrative material` | Superseded work is ranked as a failure narrative | `SKILL.md` | Documented |
 | `tests/checkpoint-distill/test_skill_structure.bats` | `SKILL.md requires no findings section in the ledger` | A ledger without one is normal | `SKILL.md` | Documented |
-| `tests/checkpoint-distill/test_skill_structure.bats` | `SKILL.md reads a legacy findings section as raw candidates` | Legacy content is ranked, not copied | `SKILL.md` | Documented |
+| `tests/checkpoint-distill/test_skill_structure.bats` | `SKILL.md reads a legacy findings section as raw candidates` | Legacy content is ranked, not copied | skill package (`SKILL.md` and `references/`) | Documented |
+| `tests/checkpoint-iterate/test_skill_structure.bats` | `README iterate row describes no disposition` | The user-facing listing drops disposition language (AC-16, FR-21) | `README.md` | No disposition wording in the checkpoint-iterate row |
+| `tests/checkpoint-distill/test_skill_structure.bats` | `llms.txt carries this Change Request's entry` | The documentation index gains this Change Request's entry (AC-16, FR-21), matched by the CR slug rather than its digit-form identifier per the boundary rule | `docs/llms.txt` | Entry for the retune present |
+| `tests/checkpoint-distill/test_skill_structure.bats` | `deck ledger fragment shows no disposition` | The walkthrough deck fragment drops disposition labels (AC-16, FR-21) | `deck/slides/checkpoint-distill/index.tsx` | No `disposition:` label and no keep-discard-keep-part verdict line in the ledger fragment |
+| `tests/checkpoint-iterate/test_skill_structure.bats` | `SKILL.md frontmatter description omits disposition and distillation` | The retuned frontmatter no longer names the removed behaviour (AC-16, FR-22) | `SKILL.md` frontmatter | Neither disposition vocabulary nor session distillation named |
+| `tests/checkpoint-distill/test_skill_structure.bats` | `SKILL.md frontmatter description matches the retuned input handling` | The distill frontmatter reflects the raw-ledger input (AC-16, FR-22) | `SKILL.md` frontmatter | Frontmatter does not require a session-written findings section |
 
 ### Tests to Modify
 
@@ -292,6 +297,8 @@ Run `bats -r tests/` and confirm the full suite passes, including the governance
 | `tests/checkpoint-iterate/test_skill_structure.bats` | `SKILL.md forbids closing while an entry is open` | Remove; entry states no longer exist |
 | `tests/checkpoint-iterate/test_skill_structure.bats` | `SKILL.md forbids silently retrying an eliminated approach` | Retarget from a discarded disposition to a superseded entry |
 | `tests/checkpoint-iterate/test_skill_structure.bats` | `SKILL.md documents the re-hydration procedure` | Retarget to recovery without open-entry reconciliation |
+| `tests/checkpoint-iterate/test_skill_structure.bats` | `SKILL.md assigns recording to the agent` | Retarget to the retuned Role Split wording (the agent appends the entry and commits as a side effect of the work), so the assertion no longer depends on the removed verdict-then-write phrasing |
+| `tests/checkpoint-distill/test_skill_structure.bats` | `skill requires ledger findings to be ranked not copied` | Retarget from the ledger's "closing findings" to its entries: assert candidates are sourced from the entries and ranked, never copied through unranked, so the assertion survives Phase 3's removal of the closing-findings framing while still enforcing the ranked-not-copied rule for a legacy findings section |
 | `tests/checkpoint-iterate/test_iterate_template.bats` | `iterate template documents the open and settled entry states` | Remove |
 | `tests/checkpoint-iterate/test_iterate_template.bats` | `iterate template documents all three dispositions` | Remove |
 | `tests/checkpoint-iterate/test_iterate_template.bats` | `iterate template documents the partial-keep split` | Remove |
@@ -302,6 +309,11 @@ Run `bats -r tests/` and confirm the full suite passes, including the governance
 ### Tests to Remove
 
 Covered in the table above. No test file is deleted.
+
+### Out-of-Band Verification
+
+* **AC-17 (token budget)** is not expressible as a `bats` grep, because measuring it requires a tokenizer rather than a text match. It is verified out of band by measuring the retuned `SKILL.md` against the skill-authoring specification's token budget, in tokens rather than lines, and recording the measurement in the pull request. The suite does not assert it.
+* **Phase sequencing.** Phase 3 rewrites the distill prose that the existing `skill requires ledger findings to be ranked not copied` test greps, and Phase 5 retargets that test. To honour the invariant that each phase leaves a passing suite, the assertion in that test **MUST** be retargeted within Phase 3 alongside the prose it covers, rather than deferred to Phase 5, or the suite fails between the two phases.
 
 ## Acceptance Criteria
 
@@ -441,10 +453,11 @@ Then it still forbids destructive Git operations
 ### AC-16: The documentation surfaces match the retuned behaviour
 
 ```gherkin
-Given the skill listing, the documentation index, and the walkthrough deck
+Given the skill listing, the documentation index, the walkthrough deck, and both skills' frontmatter descriptions
 When each is read after the change
 Then none of them describes a per-attempt disposition or a session distillation
   And the documentation index carries an entry for this Change Request
+  And neither skill's frontmatter description names the removed disposition or session-distillation behaviour
 ```
 
 ### AC-17: The skill stays within its token budget
@@ -520,7 +533,7 @@ bats -r tests/
 
 **Likelihood:** medium
 **Impact:** medium
-**Mitigation:** This is the accepted cost of the decoupling. The distillation skill is invoked deliberately, and the ledger it reads is a strictly better input than a session-written summary. The close step may name the distillation skill as a suggested next action without depending on it.
+**Mitigation:** This is the accepted cost of the decoupling. The distillation skill is invoked deliberately, and the ledger it reads is a strictly better input than a session-written summary. Consistent with Functional Requirements 12 and 13, the close step neither invokes nor names the distillation skill; a user runs distillation deliberately, later, when they choose to.
 
 ### Risk 4: A legacy ledger is misread as a conclusion
 
@@ -557,3 +570,32 @@ Chosen approach: "record the work, derive what stands, and leave conclusions to 
 ## Related Items
 
 * Links to related change requests: CR-0015 introduced the iteration session and its disposition model, which this change retunes; CR-0016 introduced the distillation skill that consumes the ledger; CR-0014 established the governance reference boundary that both skills observe
+
+<!-- review-summary
+Reviewed 2026-08-02 against branch feat/tune-iterate-and-distill @ 9017fae (the CR authoring commit).
+
+DRIFT CHECK (0 drift findings): The CR was authored today against current HEAD. All ten cited paths exist with the cited shapes — skills/checkpoint-iterate/{SKILL.md,templates/ITERATE.md}, skills/checkpoint-distill/{SKILL.md,references/candidate-categories.md}, the three test files, README.md, docs/llms.txt, deck/slides/checkpoint-distill/index.tsx. `git log` since the authoring date shows no commits touching the affected components. Current-State claims verified against the code: the six-step loop, the open/settled entry states, close-time distillation and hand-off, and the distill quote at checkpoint-distill/SKILL.md:121 ("input to be reconciled and ranked, never copied through unranked") all match. The legacy ledger docs/cr/CR-0016-iterate.md exists in the old format (State / Distillation / Recommended Patterns / Anti-Patterns), grounding AC-14 and NFR-6. The governance boundary test exists at tests/governance/test_reference_boundary.bats. No path or symbol updates were required.
+
+FINDINGS BY CATEGORY:
+- contradiction (2):
+  1. Risk 3 mitigation stated "the close step may name the distillation skill as a suggested next action", contradicting FR-12 (no hand-off/invoke/depend at close or any point) and FR-13 (close is status and date, "nothing further"), and Phase 1's removal of the sibling-skill prerequisite note. FIXED: resolved in favour of the Implementation Approach — the close step neither invokes nor names the distillation skill.
+  2. FR-15 required retaining the safety rules "unchanged", but Phase 1 removes two of the Safety Rules bullets (record the verdict verbatim; report evidence before requesting a disposition) as part of the disposition machinery. FIXED: FR-15 reworded to enumerate the safety and isolation rules that are retained and to state that the two disposition-bound bullets are removed with the rest.
+- ambiguity / RFC 2119 (3):
+  1. NFR-1 "Neither skill MUST gain a new dependency" inverted the intended obligation. FIXED to "Each skill MUST NOT gain...".
+  2. NFR-5 "Neither skill's files nor their tests MUST contain governance identifiers..." inverted the obligation. FIXED to "MUST NOT contain...".
+  3. NFR-3 used SHOULD for loop-prose phrasing. FIXED: rewritten as a testable MUST that expresses each loop step as guidance while reserving MUST/MUST NOT for safety and record-integrity rules.
+- test-coverage / scope (5):
+  1. AC-16 (doc surfaces) had no Test Strategy entry. FIXED: added README, docs/llms.txt, and deck-fragment rows to Tests to Add.
+  2. FR-22 (frontmatter descriptions updated) had no AC and no test. FIXED: extended AC-16 to cover both skills' frontmatter descriptions and added two frontmatter-description test rows.
+  3. Existing distill test `skill requires ledger findings to be ranked not copied` greps "ledger's closing findings", which Phase 3 deprecates; it was absent from any Tests-to-Modify entry (distill had none). FIXED: added a Tests-to-Modify row retargeting it to the entries model, plus a phase-sequencing note requiring the retarget inside Phase 3.
+  4. Existing iterate test `SKILL.md assigns recording to the agent` greps "writes the ledger entry and creates the commit", wording Phase 1's Role-Split rewrite is likely to change. FIXED: added a Tests-to-Modify row retargeting it.
+  5. AC-17 (token budget) is not expressible as a bats grep. FIXED: added an Out-of-Band Verification note describing the token measurement recorded in the PR.
+
+FIXES APPLIED: 13 edits — FR-15, NFR-1, NFR-3, NFR-5, Risk 3 mitigation, AC-16 (Given/Then), six Tests-to-Add rows, three Tests-to-Modify rows, one Out-of-Band Verification note (grouped across the edits above).
+
+UNRESOLVED (0). Minor observations left as-is, not blocking:
+- FR-8 frames the derived current-state summary as MAY, while Phase 2 and the template test treat the section as always present in the template. Not a contradiction (the template provides the section; the skill derives into it) and left unchanged.
+- FR-7, FR-10, and FR-16 carry positive content (the three required entry fields, agent-maintained recording, re-hydration) that is test-covered but not mirrored by a dedicated AC. Coverage is adequate via the existing tests; no new ACs added to avoid over-specification.
+- Two new distill Tests-to-Add ("sources candidates from ledger entries", "reads a legacy findings section as raw candidates") assert content that lives in references/candidate-categories.md; they should use the skill-package helper (skill_package_has) rather than SKILL.md alone. Noted in the table via the "skill package" input label on the legacy-findings row.
+/review-summary -->
+
