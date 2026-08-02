@@ -1,31 +1,44 @@
 # Copyright Daniel Grenemark 2026
 #
-# Rebuilds the committed deck export whenever the deck source changes.
+# Checks that the committed deck export matches a fresh build of the deck source.
 #
-# Only the HTML half is automated. The video under docs/deck/ is still captured
+# The export is committed by the author alongside the deck change it belongs to,
+# and this workflow fails the pull request when the two have drifted. It does not
+# rebuild the export on main.
+#
+# WHY THE CHECK RATHER THAN AN AUTOMATED COMMIT. This job used to rebuild the
+# export on main and push the result. It cannot: the default branch ruleset
+# requires every change to arrive through a pull request, and the Actions token
+# has no bypass for that rule. A user-owned repository cannot grant one either,
+# because the bypass list offers repository roles, deploy keys, and installed
+# GitHub Apps, and the Actions token is none of those. The push was therefore
+# rejected with GH013 and the export silently stayed stale on main. Checking
+# freshness in the pull request keeps the export current without a credential
+# that can write to the default branch.
+#
+# Only the HTML half is checked. The video under docs/deck/ is still captured
 # by hand, because `open-slide video` is not in any published release of
 # @open-slide/core; see the tracking issue for the MP4 half.
 name: Docs Deck
 
 on:
-  push:
-    branches:
-      - main
+  pull_request:
     paths:
       - "deck/**"
+      - "docs/deck/**"
       - ".github/workflows/docs-deck.yml"
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: docs-deck
+  group: docs-deck-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build:
-    name: Build and publish deck export
+  check:
+    name: Check the deck export is current
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -64,18 +77,25 @@ jobs:
       - name: Verify the export opens
         run: npm run check:export
 
-      - name: Publish to docs/deck
-        run: cp html-export/checkpoint-distill.html ../docs/deck/checkpoint-distill.html
-
-      - name: Commit if changed
+      # The failure message carries the fix, because the reader of a red check
+      # is the party who has to repair it and should not have to reconstruct the
+      # command from the workflow file.
+      - name: Compare against the committed export
         working-directory: .
         run: |
-          if git diff --quiet -- docs/deck/; then
-            echo "docs/deck/ already up to date"
+          if diff -q deck/html-export/checkpoint-distill.html docs/deck/checkpoint-distill.html > /dev/null; then
+            echo "docs/deck/checkpoint-distill.html matches the deck source"
             exit 0
           fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/deck/checkpoint-distill.html
-          git commit -m "docs(deck): rebuild the deck export from deck source"
-          git push
+          echo "::error::The committed deck export is stale: docs/deck/checkpoint-distill.html does not match a fresh build of deck/."
+          echo ""
+          echo "Rebuild it and commit the result in this pull request:"
+          echo ""
+          echo "  cd deck"
+          echo "  npm ci"
+          echo "  npx playwright install chromium"
+          echo "  npm run build:single && npm run export:html && npm run check:export"
+          echo "  cp html-export/checkpoint-distill.html ../docs/deck/checkpoint-distill.html"
+          echo ""
+          echo "Then verify: this check passes, and the export opens in a browser."
+          exit 1
