@@ -2,7 +2,7 @@
 name: cr-0018-model-based-testing-section
 description: Add an optional Model-Based Testing section to the Change Request template, in which the author states the user goal, the user surface, and the observable success condition per scenario, ties each scenario to an acceptance criterion, and removes the section entirely when the change has no user surface.
 id: "CR-0018"
-status: "approved"
+status: "implemented"
 date: 2026-09-24
 requestor: desek
 stakeholders: desek
