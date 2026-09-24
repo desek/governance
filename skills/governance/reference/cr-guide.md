@@ -110,6 +110,21 @@ For all code changes, document:
 - Tests to remove
 - Validation methods
 
+### Model-Based Testing
+
+Model-based testing is a run of the real application by an agent from the user's seat, driving the user surface toward a stated user goal and grading the run on an observable end state. The optional `## Model-Based Testing` section, placed between `## Test Strategy` and `## Acceptance Criteria`, lists one row per scenario, and each scenario states four required fields:
+
+- **User Goal**: what the person is trying to achieve, in their terms rather than the implementation's.
+- **User Surface**: the interface the user actually touches, one of `browser`, `command line`, or `HTTP request`.
+- **Success Condition**: the observable end state that grades the run, never a property of the transcript or the step count.
+- **Criteria Proved**: the acceptance criterion the scenario proves, since no scenario floats free of a criterion.
+
+The section names no required tool. Where a project persists scenario records, for example under `.agents/scenarios/`, the record's path goes in the `Scenario Record` column; where it does not, that column stays empty.
+
+**Omission rule.** A change with no user surface carries no section: remove it from a documentation-only or a configuration-only change. Optionality governs whether the section is present, not how strongly its rules bind once it is.
+
+**Relation to the Test Strategy.** The method sits above the automated tests in the Test Strategy and replaces none of them; the two sections point at each other, and removing a unit or integration test in favour of a scenario is a regression.
+
 ## Document Numbering
 
 CRs use sequential four-digit numbering:
