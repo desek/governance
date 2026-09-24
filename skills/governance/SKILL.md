@@ -63,6 +63,7 @@ Use this checklist when creating a Change Request:
 - [ ] Create file: docs/cr/CR-NNNN-{short-title}.md
 - [ ] Fill in all required sections (including source-branch and source-commit in frontmatter)
 - [ ] Write acceptance criteria in Gherkin format
+- [ ] Decide whether the change has a user surface: fill in the Model-Based Testing section if it does, remove the section if it does not
 - [ ] Set status to "proposed"
 ```
 
@@ -79,6 +80,7 @@ Use this checklist when creating a Change Request:
 - Document length (minimum 250 lines for complex changes)
 - Number of diagrams
 - Depth of impact assessment
+- Presence of the Model-Based Testing section (governed by the user-surface test)
 
 ### Implementing an Authored CR
 
