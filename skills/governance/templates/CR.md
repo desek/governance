@@ -105,6 +105,7 @@ CHANGE REQUEST TEMPLATE GUIDELINES
      * Tests for removed functionality **MUST** be deleted
      * Tests that duplicate coverage **MUST** be consolidated
      * Tests that no longer reflect system behavior **MUST** be updated or removed
+   - Verification at the user surface is covered by the Model-Based Testing section, which does not substitute for any test named in the test strategy
 
 7. QUALITY STANDARDS COMPLIANCE (Mandatory)
    - Implementation **MUST** meet all project quality standards before completion
@@ -149,6 +150,26 @@ CHANGE REQUEST TEMPLATE GUIDELINES
      commit message, which is durable, queryable with `git log --grep`, and absent
      from the working tree where readers of the code would trip over it
    - Describe the behavior on its own terms; put the identifier in the commit
+
+10. MODEL-BASED TESTING (Optional section, mandatory obligations)
+   - Model-based testing is a run in which the agent interacts with the real
+     application at the user surface and validates the change from the user's seat
+   - Each scenario **MUST** state four fields: the user goal, the user surface,
+     the success condition, and the acceptance criteria it proves
+   - The success condition **MUST** be an observable end state, never a property
+     of the transcript or the step count
+   - The candidate surfaces are `browser`, `command line`, and `HTTP request`; the
+     surface named **MUST** be the one the user touches
+   - Every scenario **MUST** name at least one acceptance criterion it proves and
+     **MUST NOT** introduce a success condition no criterion states
+   - The section **MUST** be removed when the change has no user surface, as in a
+     documentation-only or configuration-only change
+   - The optionality governs only whether the section appears; every obligation
+     in this item stays **MUST** or **MUST NOT**
+   - The section sits above the automated tests of the Test Strategy and **MUST NOT**
+     replace any of them
+   - No skill, driver, tool, or directory is a precondition for filling it in; a
+     project with no scenario record convention leaves the Scenario Record column empty
 =============================================================================
 -->
 
@@ -336,6 +357,16 @@ Address all three categories below. If a category does not apply, explicitly sta
 |-----------|-----------|-------------------|
 | `{path/to/test_file}` | `{TestFunctionName}` | {e.g., "Tests removed feature X", "Duplicates TestY coverage"} |
 <!-- Add more rows as needed -->
+
+<!-- This is an optional element. Feel free to remove. -->
+<!-- Remove this section when the change has no user surface. -->
+## Model-Based Testing
+
+{One row per scenario the agent runs against the real application from the user's seat.}
+
+| Scenario | User Goal | User Surface | Success Condition | Criteria Proved | Scenario Record |
+|----------|-----------|--------------|-------------------|-----------------|-----------------|
+| {short name} | {what the person is trying to achieve} | {browser, command line, or HTTP request} | {the observable end state that grades the run} | {AC-n} | {path, or empty} |
 
 ## Acceptance Criteria
 
