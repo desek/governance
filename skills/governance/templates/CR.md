@@ -359,7 +359,6 @@ Address all three categories below. If a category does not apply, explicitly sta
 <!-- Add more rows as needed -->
 
 <!-- This is an optional element. Feel free to remove. -->
-<!-- Remove this section when the change has no user surface. -->
 ## Model-Based Testing
 
 {One row per scenario the agent runs against the real application from the user's seat.}
