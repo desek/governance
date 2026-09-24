@@ -8,6 +8,13 @@ metadata:
 
 # Changelog
 
+## [1.5.0](https://github.com/desek/governance/compare/governance-v1.4.0...governance-v1.5.0) (2026-09-24)
+
+
+### Features
+
+* **governance:** add optional model-based testing section to CR template ([#41](https://github.com/desek/governance/issues/41)) ([9514d10](https://github.com/desek/governance/commit/9514d10513534754d2c2b55edf6191d740f292ed))
+
 ## [1.4.0](https://github.com/desek/governance/compare/governance-v1.3.0...governance-v1.4.0) (2026-07-29)
 
 
