@@ -78,7 +78,9 @@ The governance skill documents one lifecycle, with two entry points.
 
 **Exploration entry point.** A session may start at step 3 with no CR: `/iterate-cr` with no identifier opens an exploration ledger. When the user accepts the result, `/reconcile-cr` creates one retroactive CR (or more, if the work splits into independent changes) that describes what was accepted, with status `implemented`.
 
-When step 3 does not happen, the lifecycle ends after step 2. `/checkpoint-distill` stays available after step 4 or step 2, unchanged in purpose.
+When step 3 does not happen, the lifecycle ends after step 2. `/checkpoint-distill` stays optional after step 4, or after step 2 when no iteration ran, and its purpose does not change: reconcile corrects the record of one change, so that the CR describes the code; distill extracts the lessons that apply to future work and writes them into the project's standing instructions. A reconciled CR is better distill input, because its Alternative Approaches Considered now hold the superseded approaches with their reasons.
+
+**Checkpoint skills across the lifecycle.** Every step that changes code commits through `/checkpoint-commit`, and every step that changes code starts, and resumes after context loss, with `/checkpoint-read`. `/implement-cr` and `/iterate-cr` therefore share one commit mechanism and one context-recovery mechanism. `/reconcile-cr` changes no code: it makes one `docs(cr)` commit and reads the session commits with a scoped `git log` query, because `/checkpoint-read` reads only the most recent checkpoint and has no CR or session filter.
 
 ### Proposed State Diagram
 
@@ -108,7 +110,7 @@ The skill `checkpoint-iterate` is renamed to `iterate-cr`. The roll-forward mode
 * **Each entry carries an attribution.** An entry names the CR whose behaviour it changes (`CR:` field), or `none` when it adds behaviour that no covered CR describes. The agent writes the attribution as part of the entry, the same way it writes the reason and the evidence. The attribution is a proposal; `/reconcile-cr` finalises the routing.
 * **Checkpoint commits stay the backbone of the session.** Every change is committed continuously, on the agent's own initiative, through the `/checkpoint-commit` workflow, with the code and its ledger entry in the same commit. The commit scope follows the attribution of the entry, so the existing per-CR convention survives a multi-CR session: an entry attributed to `CR-XXXX` commits as `checkpoint(CR-XXXX-iterate): {summary}`, and an entry attributed `none` commits as `checkpoint(iterate-{slug}): {summary}`. Every session commit carries an `Iteration: {slug}` trailer. The commit body restates the change, the reason, and the evidence as bullet points, so the commit is a self-contained copy of its entry.
 
-The checkpoint commits give three things that the ledger alone does not. First, `git log --grep '^checkpoint(CR-XXXX-iterate):'` finds every change a session made to one CR, across sessions, which is the per-CR history that `/checkpoint-distill` and `/checkpoint-read` already query. Second, `git log --grep 'Iteration: {slug}'` finds every commit of one session, whatever CR it touched. Third, each entry maps to exactly one commit, so the diff of that commit is the evidence of what the entry changed. Re-hydration after context loss reads the ledger and these commits, as the previous skill did. Staging stays scoped to the paths the change touched, never the whole tree.
+The checkpoint commits give three things that the ledger alone does not. First, `git log --grep '^checkpoint(CR-XXXX-iterate):'` finds every change a session made to one CR, across sessions, which is the per-CR history that `/checkpoint-distill` and `/checkpoint-read` already query. Second, `git log --grep 'Iteration: {slug}'` finds every commit of one session, whatever CR it touched. Third, each entry maps to exactly one commit, so the diff of that commit is the evidence of what the entry changed. Re-hydration after context loss starts with `/checkpoint-read` for the most recent checkpoint, then reads the ledger and the session commits with the scoped queries above. Staging stays scoped to the paths the change touched, never the whole tree.
 
 A reconciled ledger is closed: `/iterate-cr` **MUST NOT** append to a ledger that carries `reconciled:`. New adjustments open a new ledger.
 
@@ -133,9 +135,10 @@ The procedure:
 
 ### `/implement-cr` Moves Into This Repository
 
-The command is added as the skill `skills/implement-cr/`, with its behaviour preserved: resolve all arguments first, run each CR strictly in argument order, stop on the first failed CR, report one status line per CR, and set `status: implemented`. Three adjustments come with the move.
+The command is added as the skill `skills/implement-cr/`, with its behaviour preserved: resolve all arguments first, run each CR strictly in argument order, stop on the first failed CR, report one status line per CR, and set `status: implemented`. Four adjustments come with the move.
 
 * **Resolution ignores the new ledger directory.** Files under `docs/cr/iterations/` are never resolved as a CR, next to the existing `-validation-report`, `-rollback-log`, and `-iterate` exclusions.
+* **Checkpoint skills carry commits and context.** Each coherent step commits through `/checkpoint-commit` with the scope `CR-NNNN`, instead of a hand-written `checkpoint(CR-NNNN): ...` commit. The skill runs `/checkpoint-read` before the first CR, and again when it resumes after context loss, so a restarted run continues from the last checkpoint rather than from the start of the CR.
 * **The report names the next step.** After the status lines, the report names `/iterate-cr` with every completed CR as the command for post-implementation adjustment.
 * **Preconditions are stated.** The command depends on the `operating_model`, `subagent_creation`, `task_delegation`, `continuous_commit`, `testing`, and `user_scenario_testing` blocks of the consumer's agent instructions. The skill states this dependency. When those blocks are absent, the skill follows `skills/governance/reference/cr-implementation-workflow.md` instead, so a consumer without them still gets a working implementation step.
 
@@ -160,7 +163,7 @@ The command is added as the skill `skills/implement-cr/`, with its behaviour pre
 10. The subject of a session commit **MUST** be `checkpoint(CR-XXXX-iterate): {summary}` for an entry attributed to `CR-XXXX`, and `checkpoint(iterate-{slug}): {summary}` for an entry attributed `none`.
 11. Every session commit **MUST** carry the trailer `Iteration: {slug}`, and its body **MUST** restate the change, the reason, and the evidence of its entry.
 12. Session commits **MUST** stage only the paths the change touched and the ledger, never the whole working tree.
-13. On resume, `/iterate-cr` **MUST** re-hydrate from the ledger and the session checkpoint commits, and report what stands and which approaches are superseded.
+13. On resume, `/iterate-cr` **MUST** re-hydrate by running `/checkpoint-read`, then reading the ledger and the session checkpoint commits, and report what stands and which approaches are superseded.
 14. `/iterate-cr` **MUST NOT** append to a ledger whose frontmatter carries `reconciled:`, and **MUST** tell the user to open a new session instead.
 15. `/iterate-cr` **MUST** resume a legacy ledger at `docs/cr/CR-XXXX-iterate.md` when invoked with that CR and no other open ledger covers it.
 16. When more than one unreconciled ledger covers the named CRs, `/iterate-cr` **MUST** refuse and list the ledgers rather than select one.
@@ -184,15 +187,17 @@ The command is added as the skill `skills/implement-cr/`, with its behaviour pre
 
 29. A new skill `skills/implement-cr/` **MUST** be added, carrying the behaviour of the current command: argument parsing, resolve-all-first, strict argument order, stop on the first failure, one status line per CR, and `status: implemented` on each completed CR.
 30. `/implement-cr` **MUST NOT** resolve any file under `docs/cr/iterations/` as a CR.
-31. The `/implement-cr` report **MUST** end with the `/iterate-cr` command that covers every completed CR.
-32. `/implement-cr` **MUST** state the agent-instruction blocks it depends on, and **MUST** fall back to `skills/governance/reference/cr-implementation-workflow.md` when they are absent.
+31. `/implement-cr` **MUST** commit each coherent step through the `/checkpoint-commit` workflow with the scope `CR-NNNN`.
+32. `/implement-cr` **MUST** run `/checkpoint-read` before the first CR and when it resumes after context loss, and **MUST** continue from the last checkpoint of the CR in progress.
+33. The `/implement-cr` report **MUST** end with the `/iterate-cr` command that covers every completed CR.
+34. `/implement-cr` **MUST** state the agent-instruction blocks it depends on, and **MUST** fall back to `skills/governance/reference/cr-implementation-workflow.md` when they are absent.
 
 **Templates, guides, and dependants**
 
-33. The CR template **MUST** gain an optional Reconciliation section and document the optional frontmatter field `origin: retroactive`.
-34. `reference/cr-guide.md` **MUST** describe the reconciled state and retroactive CRs.
-35. `/checkpoint-distill` **MUST** resolve ledgers under `docs/cr/iterations/` whose `crs:` lists the target CR, keep resolving the legacy path, and keep matching the `checkpoint(CR-XXXX-iterate)` commits.
-36. `/checkpoint-commit` **MUST** accept an explicit scope from its caller (`CR-XXXX-iterate` or `iterate-{slug}`) and a trailer, and **MUST** skip its CR detection and its `git add -A` when the caller passes a scope and an explicit path list.
+35. The CR template **MUST** gain an optional Reconciliation section and document the optional frontmatter field `origin: retroactive`.
+36. `reference/cr-guide.md` **MUST** describe the reconciled state and retroactive CRs.
+37. `/checkpoint-distill` **MUST** resolve ledgers under `docs/cr/iterations/` whose `crs:` lists the target CR, keep resolving the legacy path, and keep matching the `checkpoint(CR-XXXX-iterate)` commits.
+38. `/checkpoint-commit` **MUST** accept an explicit scope from its caller (`CR-XXXX-iterate` or `iterate-{slug}`) and a trailer, and **MUST** skip its CR detection and its `git add -A` when the caller passes a scope and an explicit path list.
 
 ### Non-Functional Requirements
 
@@ -289,7 +294,7 @@ flowchart LR
 1. **Phase 1.** Add the Reconciliation section and the `origin` field to `templates/CR.md`. Add a "Reconciled and Retroactive CRs" section to `reference/cr-guide.md`. Add a "CR Lifecycle" section with the diagram to the governance `SKILL.md`.
 2. **Phase 2.** `git mv skills/checkpoint-iterate skills/iterate-cr` and `git mv tests/checkpoint-iterate tests/iterate-cr`. Change the frontmatter name, invocation table, scope resolution, ledger path, attribution field, commit protocol, closed-ledger rule, and legacy handling in `SKILL.md`. Add `crs:`, `reconciled:`, `reconciled-into:`, and the `CR:` entry field to `templates/ITERATE.md`. Update the tests.
 3. **Phase 3.** Write `skills/reconcile-cr/SKILL.md` with the eight-step procedure and its safety rules. Add `version.txt` and tests.
-4. **Phase 4.** Copy the content of `implement-cr.md` from the `claude-agent-teams` repository into `skills/implement-cr/SKILL.md`, add skill frontmatter, and apply the three adjustments. Update `/checkpoint-distill` input resolution. Update release configuration, README skill table, WORKFLOW stages, and `docs/llms.txt`.
+4. **Phase 4.** Copy the content of `implement-cr.md` from the `claude-agent-teams` repository into `skills/implement-cr/SKILL.md`, add skill frontmatter, and apply the four adjustments. Update `/checkpoint-distill` input resolution. Update release configuration, README skill table, WORKFLOW stages, and `docs/llms.txt`.
 
 ## Test Strategy
 
@@ -305,7 +310,9 @@ flowchart LR
 | `tests/iterate-cr/test_skill_structure.bats` | `SKILL.md refuses to append to a reconciled ledger` | Closed-ledger rule | same | Contains `reconciled:` with MUST NOT |
 | `tests/iterate-cr/test_skill_structure.bats` | `SKILL.md commits through checkpoint-commit` | Commit backbone | same | Contains `/checkpoint-commit` and the same-commit rule |
 | `tests/iterate-cr/test_skill_structure.bats` | `SKILL.md scopes commits by attribution` | Commit protocol | same | Contains `checkpoint(CR-XXXX-iterate)`, `checkpoint(iterate-`, and `Iteration:` |
-| `tests/iterate-cr/test_skill_structure.bats` | `SKILL.md re-hydrates from ledger and checkpoints` | Resume | same | Re-hydration step names the checkpoint query |
+| `tests/iterate-cr/test_skill_structure.bats` | `SKILL.md re-hydrates from ledger and checkpoints` | Resume | same | Re-hydration step names `/checkpoint-read` and the scoped query |
+| `tests/implement-cr/test_skill_structure.bats` | `SKILL.md commits through checkpoint-commit` | Commit mechanism | `skills/implement-cr/SKILL.md` | Contains `/checkpoint-commit` |
+| `tests/implement-cr/test_skill_structure.bats` | `SKILL.md recovers context with checkpoint-read` | Resume | same | Contains `/checkpoint-read` in the start and resume rule |
 | `tests/reconcile-cr/test_skill_structure.bats` | `SKILL.md maps entries to checkpoint commits` | Evidence | `skills/reconcile-cr/SKILL.md` | Contains `Iteration:` query and the diff confirmation |
 | `tests/checkpoint-commit/test_skill_structure.bats` | `SKILL.md accepts a caller scope and path list` | Caller contract | `skills/checkpoint-commit/SKILL.md` | Contains the caller-scope rule |
 | `tests/iterate-cr/test_iterate_template.bats` | `template frontmatter has crs and reconciliation fields` | Frontmatter | `templates/ITERATE.md` | `crs:`, `reconciled:`, `reconciled-into:` |
@@ -384,6 +391,7 @@ Then one commit holds the code change and its ledger entry
   And its subject starts with checkpoint(CR-A-iterate):
   And it carries the trailer Iteration: {slug}
   And git log --grep '^checkpoint.*:' lists it
+  And /checkpoint-read reports it when it is the most recent checkpoint
 ```
 
 ### AC-3b: Unattributed changes use the session scope
@@ -492,6 +500,23 @@ Given skills/implement-cr/SKILL.md
 When /implement-cr completes CR-A and CR-B
 Then its report ends with /iterate-cr CR-A CR-B
   And no file under docs/cr/iterations/ was resolved as a CR
+```
+
+### AC-14a: implement-cr uses the checkpoint skills
+
+```gherkin
+Given /implement-cr runs CR-A
+When it completes a coherent step
+Then the step is committed through /checkpoint-commit with a subject that starts with checkpoint(CR-A):
+```
+
+### AC-14b: implement-cr resumes from the last checkpoint
+
+```gherkin
+Given a run of /implement-cr CR-A CR-B lost its context after a checkpoint commit of CR-B
+When the user runs /implement-cr CR-A CR-B again
+Then the skill runs /checkpoint-read first
+  And it continues CR-B from its last checkpoint without repeating CR-A
 ```
 
 ### AC-15: implement-cr degrades without its instruction blocks
