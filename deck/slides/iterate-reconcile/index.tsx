@@ -634,7 +634,7 @@ function Problem() {
         <div style={{ flex: 1 }}>
           <Heading>One-shots are hard.</Heading>
           <Note tone={C.dim} delay={520}>
-            the CR is written before anyone has seen the result
+            the requirements are written before anyone has seen the result
           </Note>
           <Note delay={900}>→ the first implementation is approximately right</Note>
         </div>

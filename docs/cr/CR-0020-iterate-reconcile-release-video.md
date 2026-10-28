@@ -1,6 +1,6 @@
 ---
 name: cr-0020-iterate-reconcile-release-video
-description: Add a second capture-first walkthrough deck, iterate-reconcile, that teaches the iterate and reconcile lifecycle under the premise that one-shot implementations are hard, export it as a standalone page and an MP4 under docs/deck/, and make the deck tooling and its CI check handle more than one deck.
+description: Add a second capture-first walkthrough deck, iterate-reconcile, that teaches the iterate and reconcile lifecycle under the premise that one-shots are hard, because requirements are written before anyone has seen the result, export it as a standalone page and an MP4 under docs/deck/, and make the deck tooling and its CI check handle more than one deck.
 id: "CR-0020"
 status: "implemented"
 date: 2026-10-28
@@ -67,7 +67,7 @@ The story has nine pages:
 
 | # | Page | Label | Heading | What it shows |
 |---|------|-------|---------|---------------|
-| 1 | Problem | the problem | One-shots are hard. | The CR is written before anyone has seen the result. The first implementation is approximately right. |
+| 1 | Problem | the problem | One-shots are hard. | Subtitle: "the requirements are written before anyone has seen the result". The first implementation is approximately right. |
 | 2 | Implement | step 1 · implement | Ship the first version | `/implement-cr CR-XXXX CR-YYYY`: checkpoint commits, both CRs `implemented`, and the report line that names `/iterate-cr CR-XXXX CR-YYYY` |
 | 3 | Iterate | step 2 · iterate | Now you see it. Now you know what you meant. | `/iterate-cr CR-XXXX CR-YYYY` and a ledger panel at `docs/cr/iterations/…` with entries attributed to CR-XXXX, CR-YYYY, and `none`, each a checkpoint commit |
 | 4 | Drift | the drift | The CR still says what you first thought | A CR requirement next to the code that stands; the requirement no longer matches |
@@ -112,7 +112,7 @@ flowchart LR
 ### Functional Requirements
 
 1. A deck **MUST** exist at `deck/slides/iterate-reconcile/index.tsx` with the nine pages of the table above, in that order, ending with `Reset`.
-2. Page 1 **MUST** state the premise "One-shots are hard" as its heading.
+2. Page 1 **MUST** state the premise "One-shots are hard." as its heading, with the subtitle "the requirements are written before anyone has seen the result".
 3. The deck **MUST** follow the loop-variant rules of the existing deck: no step gating, mount-triggered entrances with `both` fill, a transition on every page, and a final `Reset` page.
 4. The deck **MUST** follow `DESIGN.md`: its palette, type scale, safe area, transition timing, and morph rules.
 5. The commands, paths, commit subjects, and frontmatter fields shown on the pages **MUST** match the shipped skills: `/implement-cr`, `/iterate-cr`, `/reconcile-cr`, `docs/cr/iterations/`, `checkpoint(CR-XXXX-iterate)`, `checkpoint(iterate-{slug})`, `Iteration:`, `origin: retroactive`, `reconciled:`.
@@ -209,7 +209,7 @@ flowchart LR
 |-----------|-----------|-------------|--------|-----------------|
 | `tests/deck/test_iterate_reconcile_deck.bats` | `deck source exists` | The deck file is present | `deck/slides/iterate-reconcile/index.tsx` | File exists |
 | `tests/deck/test_iterate_reconcile_deck.bats` | `deck ends with Reset` | Loop closure | same | Default export array ends with `Reset` |
-| `tests/deck/test_iterate_reconcile_deck.bats` | `deck states the premise` | Premise on page 1 | same | Contains `One-shots are hard` |
+| `tests/deck/test_iterate_reconcile_deck.bats` | `deck states the premise` | Premise on page 1 | same | Contains `One-shots are hard` and the requirements subtitle |
 | `tests/deck/test_iterate_reconcile_deck.bats` | `deck names the shipped commands` | Command accuracy | same | Contains `/implement-cr`, `/iterate-cr`, `/reconcile-cr`, `origin: retroactive` |
 | `tests/deck/test_iterate_reconcile_deck.bats` | `deck does not name the retired command` | Rename | same | No `checkpoint-iterate` |
 | `tests/deck/test_iterate_reconcile_deck.bats` | `exports are committed` | Artifacts | `docs/deck/` | `iterate-reconcile.html` and `iterate-reconcile.mp4` exist |
@@ -239,6 +239,7 @@ Given deck/slides/iterate-reconcile/index.tsx
 When the deck is rendered
 Then its pages are Problem, Implement, Iterate, Drift, Reconcile, Explore, Payoff, Cta, Reset in that order
   And page 1 has the heading "One-shots are hard."
+  And page 1 has the subtitle "the requirements are written before anyone has seen the result"
 ```
 
 ### AC-2: The pages match the shipped skills

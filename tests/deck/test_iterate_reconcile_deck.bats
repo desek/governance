@@ -18,6 +18,7 @@ setup() {
 
 @test "deck states the premise" {
   grep -qF 'One-shots are hard' "$DECK"
+  grep -qF 'the requirements are written before anyone has seen the result' "$DECK"
 }
 
 @test "deck names the shipped commands" {
