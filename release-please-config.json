@@ -20,15 +20,27 @@
       "include-component-in-tag": true,
       "include-v-in-tag": true
     },
-    "skills/checkpoint-iterate": {
+    "skills/iterate-cr": {
       "release-type": "simple",
-      "component": "checkpoint-iterate",
+      "component": "iterate-cr",
       "include-component-in-tag": true,
       "include-v-in-tag": true
     },
     "skills/checkpoint-distill": {
       "release-type": "simple",
       "component": "checkpoint-distill",
+      "include-component-in-tag": true,
+      "include-v-in-tag": true
+    },
+    "skills/reconcile-cr": {
+      "release-type": "simple",
+      "component": "reconcile-cr",
+      "include-component-in-tag": true,
+      "include-v-in-tag": true
+    },
+    "skills/implement-cr": {
+      "release-type": "simple",
+      "component": "implement-cr",
       "include-component-in-tag": true,
       "include-v-in-tag": true
     }

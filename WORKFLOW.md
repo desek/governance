@@ -12,16 +12,22 @@ This document describes the end-to-end workflow for implementing changes in this
 
 ### Overview
 
+The Change Request lifecycle has five steps: **author**, **implement**, **iterate** (optional), **reconcile**, and **end**. Distillation is optional after reconcile, or after implementation when no iteration ran.
+
 ```mermaid
 flowchart TD
-    A[Create CR] --> B[Iterate CR]
-    B --> C[/checkpoint-commit/]
-    C --> D[Implement each phase]
-    D --> E[Finalize implementation]
-    E --> F["Iterate the last mile (optional)"]
-    F --> F2["Distil into standing instructions (optional)"]
-    F2 --> G[Push & create PR]
-    G --> H[Review & merge]
+    A["1. Author CR (/governance), proposed"] --> B["2. /implement-cr, implemented"]
+    B --> Q{"Adjust after implementation?"}
+    Q -->|No| E["5. End"]
+    Q -->|Yes| C["3. /iterate-cr CR-A CR-B"]
+    X["Exploration, no CR"] --> C0["3. /iterate-cr with no CR"]
+    C --> L["Iteration ledger"]
+    C0 --> L
+    L --> R["4. /reconcile-cr"]
+    R --> E
+    E --> D["/checkpoint-distill (optional)"]
+    D --> G[Push and create PR]
+    G --> H[Review and merge]
 ```
 
 ### Step 1: Create a Change Request
@@ -45,102 +51,57 @@ Once the CR is finalized, create a checkpoint commit to preserve it.
 **Prompt:**
 > /checkpoint-commit
 
-### Step 4: Implement each phase
+### Step 4: Implement with /implement-cr
 
-For each phase defined in the CR, execute the following sub-steps in a clean context window:
-
-```mermaid
-flowchart TD
-    A[Clear context window] --> B[Read checkpoints]
-    B --> C[Implement phase]
-    C --> D[Checkpoint-commit]
-    D --> E{More phases?}
-    E -->|Yes| A
-    E -->|No| F[Finalize]
-```
-
-#### 4a. Clear the context window
-
-Start with a fresh context to avoid confusion from prior conversation.
-
-**Action:**
-> /clear
-
-#### 4b. Read checkpoint history
-
-Recover context from previous work by reading checkpoint commits.
+Run `/implement-cr` with one or many CRs. It resolves every argument first, runs each CR strictly in argument order, stops on the first failed CR, and sets `status: implemented` on each completed CR. It starts with `/checkpoint-read`, and runs it again when it resumes after context loss, so a restarted run continues from the last checkpoint. Each coherent step commits through `/checkpoint-commit` with the CR as scope.
 
 **Prompt:**
-> /checkpoint-read
+> /implement-cr CR-XXXX CR-YYYY
 
-#### 4c. Implement the phase
+The report ends with one status line per CR and names `/iterate-cr` with every completed CR as the next command for post-implementation adjustment. See the [implement-cr skill](skills/implement-cr/SKILL.md).
 
-Direct the agent to systematically implement the current phase.
+### Step 5: Iterate the last mile (optional)
 
-**Prompt:**
-> Systematically implement phase {phase number} of @path/to/cr.md
-
-#### 4d. Checkpoint-commit
-
-Preserve the phase's work with a checkpoint commit.
+A Change Request is written before the code exists, so the delivered implementation is usually approximately right rather than exactly right. When you are looped in after implementation to adjust or change things, open an iteration session. It is user-initiated and never started automatically.
 
 **Prompt:**
-> /checkpoint-commit
+> /iterate-cr CR-XXXX CR-YYYY
 
-Repeat steps 4a–4d for each phase in the CR.
+One session may cover every CR that one `/implement-cr` run delivered. The agent opens an **iteration ledger** at `docs/cr/iterations/{YYYY-MM-DD}-{slug}.md` whose frontmatter lists the covered CRs, then awaits the next thing to try. The ledger follows a roll-forward model:
 
-### Step 5: Finalize the implementation
+- **Kept is implicit** — a change left in the working tree stands.
+- **Supersession is explicit** — a later entry names the earlier entry it supersedes and why; the earlier entry is never edited.
+- **What stands is derived** — read forward from the entries, honouring supersessions.
 
-After all phases are complete, run a finalization pass to ensure everything is consistent and complete.
+Each entry carries an **attribution**: the covered CR whose behaviour it changes, or `none` when it adds behaviour no covered CR describes. The attribution is a proposal; reconcile finalises the routing.
+
+Like `/implement-cr`, the session commits every change through `/checkpoint-commit`, with the code and its ledger entry in one commit, and re-hydrates after context loss with `/checkpoint-read` followed by the ledger. An entry attributed to a CR commits as `checkpoint(CR-XXXX-iterate): {summary}`; an entry attributed `none` commits as `checkpoint(iterate-{slug}): {summary}`. Every session commit carries an `Iteration: {slug}` trailer.
+
+**Exploration entry point.** `/iterate-cr` with no identifier opens an exploration ledger (an empty CR list). The lifecycle then starts here, and reconcile creates the CR afterwards.
+
+See the [iterate-cr skill](skills/iterate-cr/SKILL.md) for the full protocol.
+
+### Step 6: Reconcile the CRs with what stands
+
+After you accept the iteration, run `/reconcile-cr` on the ledger. The ledger is the ground truth for what you want.
 
 **Prompt:**
-> Finalize the implementation of @path/to/cr.md
+> /reconcile-cr {ledger path or slug}
 
-### Step 6: Iterate the last mile (optional)
+The agent derives what stands, routes each standing change by its attribution, and shows one reconciliation plan before it writes anything. On your answer it rewrites each covered CR so it describes the behaviour that stands, moves superseded approaches into Alternative Approaches Considered, and adds a Reconciliation section. Unattributed changes, and every change of an exploration ledger, go into a new **retroactive CR** (status `implemented`, `origin: retroactive`). The ledger is marked reconciled and closed; new adjustments open a new ledger. Reconcile changes no code and makes one `docs(cr)` commit. See the [reconcile-cr skill](skills/reconcile-cr/SKILL.md).
 
-A Change Request is written before the code exists, so the delivered implementation is usually approximately right rather than exactly right. Closing that final gap is an interactive loop you drive: you name what to try next, the agent makes the change and reports what it observed, you name the next thing to try. When you have looked at the finalized result and judged it not yet right, open a **last-mile iteration session** to work that gap while it is recorded rather than forgotten.
+The lifecycle then ends: the CRs are final.
 
-The session is opt-in and user-initiated — it is never started automatically. It maintains a **roll-forward ledger** beside the Change Request that records every change, including the approaches a later change superseded, which are the observations the commit history alone would lose.
+### Step 7: Distil into standing instructions (optional)
 
-#### 6a. Open a session
+Reconcile corrects the record of one change, so that the CR describes the code. Distillation is different: it extracts the lessons that apply to future work and writes them into the project's standing instructions. Run it after reconcile, or after implementation when no iteration ran. A reconciled CR is better input, because its Alternative Approaches Considered hold the superseded approaches with their reasons.
 
-Open (or resume) a session against the implemented Change Request.
-
-**Prompt:**
-> /checkpoint-iterate CR-XXXX
-
-The agent creates a ledger at `docs/cr/CR-XXXX-iterate.md` (or resumes the open one), then awaits the next thing to try.
-
-#### 6b. Iterate
-
-Name each thing to try. The agent makes the change, runs the tests, records what it observed, and commits — then waits for your next instruction. It does not pause to ask for a verdict. The ledger follows a roll-forward model with three properties:
-
-- **Kept is implicit** — a change left in the working tree stands; nothing confirms the ordinary outcome.
-- **Supersession is explicit** — when a later change undoes or replaces earlier work, the new entry names the earlier entry it supersedes and why. The earlier entry is never edited or deleted; it is the record of an approach that was tried.
-- **What stands is derived** — the ledger's current-state summary is read forward from the entries, honouring supersessions, rather than maintained by hand.
-
-Each session commit uses the scoped subject `checkpoint(CR-XXXX-iterate): {summary}`, so session work stays visible to `/checkpoint-read` while remaining separable from the core implementation commits. The ledger survives context loss: after a `/clear`, the same invocation re-hydrates the session from the ledger alone.
-
-#### 6c. Stop when the gap is closed
-
-There is nothing to close. The session ends when you stop naming things to try, and the ledger is complete because its last entry is its last entry. No sub-command marks it, and none needs to: the ledger is a tracked document, so what was recorded is in the file and when each entry landed is in `git log`. Ask the agent what the session has done and it reads the ledger back to you.
-
-The session draws no conclusions from its own ledger and hands off to no other skill. The ledger holds what was done, why, and what stands; that is a complete input for the distillation stage (Step 7), which you run deliberately when you choose to.
-
-See the [checkpoint-iterate skill](skills/checkpoint-iterate/SKILL.md) for the full protocol, including concurrency rules for running sessions in separate Git worktrees.
-
-### Step 7: Distil the session into standing instructions (optional)
-
-Finished work leaves a durable record — the Change Request, its validation report, and (when a last-mile session ran) its iteration ledger — that holds knowledge worth carrying into future sessions: the invariants the implementation now depends on, the paths that were tried and abandoned, the foot-guns that cost real debugging time. Nothing promotes that record into the project's standing instructions on its own. This stage does, converting the completed unit of work into guidance the next session inherits rather than relearns.
-
-The stage is opt-in and user-initiated. It reads the durable artifacts, identifies candidates across invariants, failure narratives, reusable patterns, foot-guns, and documentation drift, ranks them by leverage against decay risk and cost of being wrong into three tiers, and then **stops**. Nothing is written without per-tier approval — you may accept the top tier and decline the rest. On approval each rule is written as narrative that carries the mechanism making it work, the cost of breaking it, and what was tried before it stuck, matching whatever structure the target document already uses.
-
-**Run it before the branch merges.** The three file-borne inputs survive a squash merge, but the branch's checkpoint commits do not — they collapse into a single squashed commit and their per-phase reasoning is lost from the default branch. A run that wants the commit-borne reasoning must therefore happen while the branch is still unmerged, which is why this stage sits before the push and review. The stage reports which inputs it found rather than silently producing a thinner analysis, so a post-merge run remains useful but is visibly working from the file inputs alone.
+The stage is opt-in and user-initiated. It reads the durable artifacts, ranks candidates into tiers, and writes nothing without per-tier approval. Run it before the branch merges, because the checkpoint commits it reads collapse in a squash merge.
 
 **Prompt:**
 > /checkpoint-distill CR-XXXX
 
-The analysis is scoped to the unit of work the identifier names, not to a count of recent commits. Approved additions land on the branch and travel into the same pull request as the implementation. See the [checkpoint-distill skill](skills/checkpoint-distill/SKILL.md) for the full protocol, including the branch-scoped mode and the input-availability reporting.
+See the [checkpoint-distill skill](skills/checkpoint-distill/SKILL.md) for the full protocol.
 
 ### Step 8: Push and create a PR
 
@@ -179,15 +140,12 @@ Squash merge the PR into `main`. The PR title becomes the commit message and mus
 flowchart TD
     A[Create CR] --> B[Iterate CR]
     B --> C[/checkpoint-commit/]
-    C --> D[/clear/]
-    D --> E[/checkpoint-read/]
-    E --> F["Implement phase N"]
-    F --> G[/checkpoint-commit/]
-    G --> H{More phases?}
-    H -->|Yes| D
-    H -->|No| I[Finalize implementation]
-    I --> P["Iterate the last mile (optional)"]
-    P --> P2["Distil into standing instructions (optional)"]
+    C --> I["/implement-cr (checkpoint-read and checkpoint-commit)"]
+    I --> Q{"Adjust after implementation?"}
+    Q -->|Yes| P["/iterate-cr (optional)"]
+    P --> R["/reconcile-cr"]
+    R --> P2["/checkpoint-distill (optional)"]
+    Q -->|No| P2
     P2 --> J[Push & create PR]
     J --> K[Review]
     K --> L{Issues?}

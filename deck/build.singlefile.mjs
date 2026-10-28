@@ -16,7 +16,7 @@
  * Usage:
  *   node build.singlefile.mjs          # → dist-single/index.html
  *
- * @agents-index Builds the checkpoint-distill deck into one self-contained HTML file.
+ * @agents-index Builds every deck under slides/ into one self-contained HTML file.
  */
 
 import { readFileSync, rmSync, writeFileSync } from 'node:fs';

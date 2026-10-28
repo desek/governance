@@ -20,7 +20,8 @@ design drifting apart; there is now a single source.
 
 ```
 deck/
-  slides/checkpoint-distill/index.tsx   the deck — one file, by open-slide convention
+  slides/checkpoint-distill/index.tsx   the checkpoint-distill deck — one file, by open-slide convention
+  slides/iterate-reconcile/index.tsx    the iterate-reconcile deck, same rules
   licenses/                             OFL texts for the embedded fonts
   open-slide.config.ts
   package.json
@@ -37,10 +38,14 @@ npm install
 npm run dev            # author with hot reload
 npm run build          # static site → dist/
 npm run build:single   # inlined build, feeds the export → dist-single/
-npm run export:html    # the shipped artifact → html-export/
+npm run export:html    # the shipped artifact → html-export/checkpoint-distill.html
+node export.html.mjs --slide iterate-reconcile   # → html-export/iterate-reconcile.html
 npm run check:export   # open that artifact from disk and assert no page is blank
+node check.export.mjs html-export/iterate-reconcile.html   # the same, for the second deck
 npm run export:png     # one PNG per page → png-export/
 npm run capture        # single MP4 of the whole deck → video-export/
+npm run export:png:iterate-reconcile   # the PNGs of the second deck
+npm run capture:iterate-reconcile      # the MP4 of the second deck
 ```
 
 `export:html` produces what gets committed. Always follow it with
@@ -59,7 +64,8 @@ and look at frames across a boundary, not at settled pages.
 
 Both halves are committed by hand. The Docs Deck workflow checks the page half
 rather than producing it: on a pull request touching `deck/` it rebuilds the
-export and fails when `docs/deck/checkpoint-distill.html` does not match, so a
+export of every deck it lists (`checkpoint-distill`, `iterate-reconcile`) and
+fails when `docs/deck/<deck>.html` does not match, so a
 stale export cannot reach `main` unnoticed.
 
 The workflow used to rebuild on `main` and push the result. It cannot: the
@@ -70,7 +76,10 @@ GitHub Apps, and the Actions token is none of those. The push was rejected with
 `GH013` while the workflow otherwise looked healthy, which left the export stale
 and said nothing about it.
 
-1. Edit `slides/checkpoint-distill/index.tsx`.
+The steps name `checkpoint-distill`; for `iterate-reconcile` use its scripts
+(`export:png:iterate-reconcile`, `capture:iterate-reconcile`) and its id below.
+
+1. Edit `slides/<deck>/index.tsx`.
 2. `npm run export:png` and read every changed page.
 3. `npm run capture`, then diff the first and last frames. The loop closes when
    the per-channel difference stays near zero. The seam is the one defect nobody
@@ -81,6 +90,9 @@ and said nothing about it.
    ```bash
    npm run build:single && npm run export:html && npm run check:export
    cp html-export/checkpoint-distill.html ../docs/deck/checkpoint-distill.html
+   # iterate-reconcile:
+   node export.html.mjs --slide iterate-reconcile && node check.export.mjs html-export/iterate-reconcile.html
+   cp html-export/iterate-reconcile.html ../docs/deck/iterate-reconcile.html
    ```
 
 ## Tooling caveat
@@ -100,12 +112,14 @@ a Chromium for Playwright (`npx playwright install chromium`).
 
 ## Two artifacts, and why `build:single` is not one of them
 
-`docs/deck/` holds exactly two files:
+`docs/deck/` holds exactly two files per deck:
 
 | File | Job | Motion |
 |---|---|---|
 | `checkpoint-distill.html` | the deck, opens from disk | settled states only |
 | `checkpoint-distill.mp4` | the walkthrough as film | full |
+| `iterate-reconcile.html` | the second deck, opens from disk | settled states only |
+| `iterate-reconcile.mp4` | the second walkthrough as film | full |
 
 The standalone file comes from open-slide's own HTML export, which renders every
 page through React, keeps the markup, inlines the readable CSS, and ships a few

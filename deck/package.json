@@ -11,7 +11,9 @@
     "export:html": "node export.html.mjs",
     "check:export": "node check.export.mjs",
     "export:png": "open-slide export --slide checkpoint-distill --out ./png-export",
-    "capture": "open-slide video --slide checkpoint-distill --fps 30 --dwell 1600 --out ./video-export"
+    "capture": "open-slide video --slide checkpoint-distill --fps 30 --dwell 1600 --out ./video-export",
+    "export:png:iterate-reconcile": "open-slide export --slide iterate-reconcile --out ./png-export",
+    "capture:iterate-reconcile": "open-slide video --slide iterate-reconcile --fps 30 --dwell 1600 --out ./video-export"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.3.0",

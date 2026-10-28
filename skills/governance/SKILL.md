@@ -86,6 +86,41 @@ Use this checklist when creating a Change Request:
 
 Once a CR exists, [reference/cr-implementation-workflow.md](reference/cr-implementation-workflow.md) provides a project-agnostic agent-team workflow that carries it from review through phased implementation, finalization, validation, gap-fixing, and documentation. It follows the host project's own build, lint, and test conventions.
 
+## CR Lifecycle
+
+A change moves through five steps. Steps 3 and 4 run only when the user adjusts the result after implementation.
+
+1. **Author.** Create the CR with this skill. Status `proposed`.
+2. **Implement.** Run `/implement-cr` with one or many CRs. Each completed CR gets status `implemented`.
+3. **Iterate (optional, user-initiated).** Run `/iterate-cr` with every CR the session covers. Each iteration ledger entry carries an attribution: the covered CR it changes, or `none`.
+4. **Reconcile.** After the iteration is accepted, run `/reconcile-cr` on the ledger. The reconciled iteration ledger is the ground truth for user intent: each covered CR is rewritten to describe what was kept, and changes attributed to no covered CR go into a new retroactive CR.
+5. **End.** The ledger is marked reconciled and the CRs are final. The lifecycle has ended.
+
+**Exploration entry point.** A session may start at step 3 with no CR: `/iterate-cr` with no identifier opens an exploration ledger. When the user accepts the result, `/reconcile-cr` creates one retroactive CR (or more, if the work splits into independent changes) with status `implemented` and `origin: retroactive`.
+
+When step 3 does not happen, the lifecycle ends after step 2. `/checkpoint-distill` stays optional after step 4, or after step 2 when no iteration ran: reconcile corrects the record of one change, distill extracts lessons for future work into the standing instructions.
+
+**Checkpoint skills.** Every step that changes code commits through `/checkpoint-commit`, and starts, or resumes after context loss, with `/checkpoint-read`. `/reconcile-cr` changes no code: it makes one `docs(cr)` commit and reads the session commits with a scoped `git log` query.
+
+```mermaid
+flowchart TD
+    G["1. /governance authors CR, proposed"] --> I["2. /implement-cr CR-A CR-B, implemented"]
+    I --> Q{"User adjusts after implementation?"}
+    Q -->|No| E["5. End"]
+    Q -->|Yes| IT["3. /iterate-cr CR-A CR-B"]
+    X["Exploration, no CR"] --> IT0["3. /iterate-cr with no CR"]
+    IT --> L["Iteration ledger, entries attributed to CRs"]
+    IT0 --> L
+    L --> R["4. /reconcile-cr ledger"]
+    R --> U["Covered CRs rewritten to match what stands"]
+    R --> N["Retroactive CR for unattributed changes"]
+    U --> M["Ledger marked reconciled"]
+    N --> M
+    M --> E
+```
+
+See [reference/cr-guide.md](reference/cr-guide.md) for the reconciled and retroactive CR shapes.
+
 ## Templates
 
 - **ADR**: [templates/ADR.md](templates/ADR.md)

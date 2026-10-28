@@ -62,10 +62,10 @@ A Change Request scoped run gathers up to four inputs. The first three are track
 |---|---|---|
 | The Change Request document | `docs/cr/CR-XXXX-*.md` | yes |
 | The validation report | `docs/cr/CR-XXXX-validation-report.md` | yes |
-| The iteration ledger | `docs/cr/CR-XXXX-iterate.md` | yes |
+| The iteration ledgers | `docs/cr/iterations/*.md` whose `crs:` lists `CR-XXXX`, and the legacy `docs/cr/CR-XXXX-iterate.md` | yes |
 | Checkpoint commits for the identifier | Git history, matched by subject scope (below) | no |
 
-Resolve each of the three files at its conventional path. The Change Request document itself must resolve, or the run refuses per the invocation contract. The validation report and the iteration ledger are optional: a project may run neither an iteration session nor a validation pass, so either or both may be absent, and their absence is a normal state rather than an error.
+Resolve each of the three inputs at its conventional location. For the iteration ledgers, read every file under `docs/cr/iterations/` whose frontmatter `crs:` list names the target Change Request, and also resolve the legacy path `docs/cr/CR-XXXX-iterate.md`, so ledgers written before the iterations directory existed are still read. The Change Request document itself must resolve, or the run refuses per the invocation contract. The validation report and the iteration ledger are optional: a project may run neither an iteration session nor a validation pass, so either or both may be absent, and their absence is a normal state rather than an error.
 
 **Checkpoint commits span two subject scopes.** A single Change Request's commits are written under two distinct subject forms, and gathering only one silently drops the other. Match **both**:
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bats
 # Copyright Daniel Grenemark 2026
 #
-# Structure and workflow-content tests for the checkpoint-iterate skill. These
+# Structure and workflow-content tests for the iterate-cr skill. These
 # assert the skill files exist, are registered for release and listed for users,
 # and that SKILL.md documents each load-bearing behaviour of the iteration
 # session workflow. Content assertions grep the skill prose so that a behaviour
@@ -32,30 +32,81 @@ setup() {
     ! grep -vE '(MUST NOT|must not|do not|never|NOT)' "$SKILL_MD" | grep -qE 'git (reset|rebase|commit|push --force|amend)'
 }
 
-@test "release-please-config contains checkpoint-iterate component" {
-    grep -q '"skills/checkpoint-iterate"' "${REPO_ROOT}/release-please-config.json"
-    grep -q '"component": "checkpoint-iterate"' "${REPO_ROOT}/release-please-config.json"
+@test "release-please-config contains iterate-cr component" {
+    grep -q '"skills/iterate-cr"' "${REPO_ROOT}/release-please-config.json"
+    grep -q '"component": "iterate-cr"' "${REPO_ROOT}/release-please-config.json"
 }
 
 @test "release-please-manifest contains the skill" {
-    grep -q '"skills/checkpoint-iterate"' "${REPO_ROOT}/.release-please-manifest.json"
+    grep -q '"skills/iterate-cr"' "${REPO_ROOT}/.release-please-manifest.json"
 }
 
 @test "README lists the skill in Available Skills" {
-    grep -q 'checkpoint-iterate' "${REPO_ROOT}/README.md"
+    grep -q 'iterate-cr' "${REPO_ROOT}/README.md"
 }
 
-@test "SKILL.md documents the single invocation form" {
-    # One invocation: the bare form with an identifier, which opens or resumes.
-    grep -qi 'Opens a session' "$SKILL_MD"
+@test "SKILL.md accepts zero, one, or many CRs" {
+    grep -q '^| `/iterate-cr` |' "$SKILL_MD"
+    grep -q '^| `/iterate-cr CR-XXXX` |' "$SKILL_MD"
+    grep -q '^| `/iterate-cr CR-XXXX CR-YYYY` |' "$SKILL_MD"
+}
+
+@test "SKILL.md requires every named CR to resolve" {
+    grep -qi 'Every named Change Request \*\*MUST\*\* resolve' "$SKILL_MD"
+    grep -qi 'No ledger is created when any identifier is unresolved' "$SKILL_MD"
+}
+
+@test "SKILL.md opens an exploration ledger with an empty crs list" {
+    grep -qi 'exploration' "$SKILL_MD"
+    grep -q 'an empty list for exploration' "$SKILL_MD"
+}
+
+@test "SKILL.md creates the ledger under docs/cr/iterations" {
+    grep -q 'docs/cr/iterations/{YYYY-MM-DD}-{slug}.md' "$SKILL_MD"
+}
+
+@test "SKILL.md attributes each entry to a CR or none" {
+    grep -q '`CR:` field' "$SKILL_MD"
+    grep -q 'literal `none`' "$SKILL_MD"
+}
+
+@test "SKILL.md refuses to append to a reconciled ledger" {
+    grep -qE 'MUST NOT\*\* append to a ledger whose frontmatter carries `reconciled:`' "$SKILL_MD"
+    grep -qi 'open a new session' "$SKILL_MD"
+}
+
+@test "SKILL.md resumes a legacy ledger" {
+    grep -q 'docs/cr/{CR_ID}-iterate.md' "$SKILL_MD"
+    grep -qi 'legacy ledger is resumed in place' "$SKILL_MD"
+}
+
+@test "SKILL.md refuses ambiguous ledgers" {
+    grep -qi 'more than one open ledger covers the named Change Requests' "$SKILL_MD"
+}
+
+@test "SKILL.md commits through checkpoint-commit" {
+    grep -q '/checkpoint-commit' "$SKILL_MD"
+    grep -qi 'in the same commit, the ledger entry' "$SKILL_MD"
+}
+
+@test "SKILL.md scopes commits by attribution" {
+    grep -q 'checkpoint(CR-XXXX-iterate)' "$SKILL_MD"
+    grep -q 'checkpoint(iterate-' "$SKILL_MD"
+    grep -q 'Iteration: {slug}' "$SKILL_MD"
+    grep -qi 'restates the change, the reason, and the evidence' "$SKILL_MD"
+}
+
+@test "SKILL.md re-hydrates from ledger and checkpoints" {
+    grep -q 'Run `/checkpoint-read`' "$SKILL_MD"
+    grep -q "git log --grep 'Iteration: {slug}'" "$SKILL_MD"
 }
 
 @test "SKILL.md defines no close or status sub-command" {
     # Genuine absence. Neither sub-command reports anything the tracked ledger
     # and its Git history do not already hold, so both cost a command to
     # remember and return nothing for it.
-    ! grep -q 'checkpoint-iterate close' "$SKILL_MD"
-    ! grep -q 'checkpoint-iterate status' "$SKILL_MD"
+    ! grep -q 'iterate-cr close' "$SKILL_MD"
+    ! grep -q 'iterate-cr status' "$SKILL_MD"
 }
 
 @test "SKILL.md documents refusing a missing Change Request" {
@@ -104,8 +155,8 @@ setup() {
 
 @test "SKILL.md documents the re-hydration procedure" {
     grep -qi 'Re-hydration after context loss' "$SKILL_MD"
-    grep -qi 'Read the governing Change Request and the full ledger' "$SKILL_MD"
-    grep -qi 'Read the checkpoint commits for that Change Request' "$SKILL_MD"
+    grep -qi 'Read every covered Change Request and the full ledger' "$SKILL_MD"
+    grep -qi 'Read the session checkpoint commits' "$SKILL_MD"
     # Retuned recovery: uncommitted work is recorded as an entry, not reconciled
     # as an open entry, since entry states no longer exist.
     grep -qi 'record them as an entry' "$SKILL_MD"
@@ -201,8 +252,8 @@ setup() {
 
 @test "README iterate row describes no disposition" {
     # The user-facing listing drops disposition language. Isolate the
-    # checkpoint-iterate row and assert it carries no disposition wording.
-    row="$(grep 'checkpoint-iterate' "${REPO_ROOT}/README.md")"
+    # iterate-cr row and assert it carries no disposition wording.
+    row="$(grep -F '[iterate-cr]' "${REPO_ROOT}/README.md")"
     ! echo "$row" | grep -qiE 'disposition|discarded|partially-kept'
 }
 

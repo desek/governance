@@ -170,6 +170,15 @@ CHANGE REQUEST TEMPLATE GUIDELINES
      replace any of them
    - No skill, driver, tool, or directory is a precondition for filling it in; a
      project with no scenario record convention leaves the Scenario Record column empty
+
+11. RECONCILED AND RETROACTIVE CRs (Optional fields and section)
+   - `reconciled: {YYYY-MM-DD}` is an optional frontmatter field, set when an
+     iteration ledger is reconciled into the CR; the Reconciliation section then
+     records one row per divergence
+   - `origin: retroactive` is an optional frontmatter field for a CR written after
+     the code, from accepted changes that no covered CR describes; such a CR has
+     status `implemented` and names the ledger path in Related Items
+   - Omit both fields for a CR authored before its implementation
 =============================================================================
 -->
 
@@ -496,6 +505,15 @@ Chosen approach: "{brief description}", because {justification for this approach
 * **Completed:** {YYYY-MM-DD}
 * **Deployed to Production:** {YYYY-MM-DD}
 * **Notes:** {any relevant notes about implementation}
+
+<!-- This is an optional element. Feel free to remove. -->
+## Reconciliation
+
+{Present only after an iteration ledger was reconciled into this CR. One row per divergence between the text first written and the behaviour that stands. The original text is not kept inline; Git history holds it. Set the frontmatter `reconciled:` date when this section is added; the status stays `implemented`.}
+
+| Original Statement | Reconciled Statement | Ledger Entry | Checkpoint Commit |
+|--------------------|----------------------|--------------|-------------------|
+| {short form of the original requirement, criterion, or scope item} | {what the CR now states} | {ledger path and entry number} | {short SHA} |
 
 <!-- This is an optional element. Feel free to remove. -->
 ## Related Items

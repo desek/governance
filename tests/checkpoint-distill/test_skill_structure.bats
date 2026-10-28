@@ -299,3 +299,18 @@ setup() {
     desc="$(grep '^description:' "$SKILL_MD")"
     ! echo "$desc" | grep -qiE 'findings section|disposition|patterns and anti-patterns'
 }
+
+# --- Ledger resolution after the iterations directory ------------------------
+
+@test "SKILL.md resolves ledgers under the iterations directory by crs" {
+    grep -q 'docs/cr/iterations/' "$SKILL_MD"
+    grep -q '`crs:`' "$SKILL_MD"
+}
+
+@test "SKILL.md keeps resolving the legacy ledger path" {
+    grep -q 'docs/cr/CR-XXXX-iterate.md' "$SKILL_MD"
+}
+
+@test "SKILL.md keeps matching the iterate-scoped checkpoint commits" {
+    grep -q "checkpoint(CR-XXXX-iterate):" "$SKILL_MD"
+}

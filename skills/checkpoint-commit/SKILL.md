@@ -15,13 +15,17 @@ Creates a governance checkpoint commit to preserve work-in-progress state. Analy
 
 Both arguments are optional. The command will auto-detect the CR ID and generate a summary if not provided.
 
+**Caller-supplied scope.** A calling skill (such as `/iterate-cr`) may pass an explicit scope (`CR-XXXX-iterate` or `iterate-{slug}`), a trailer (such as `Iteration: {slug}`), and an explicit path list. When the caller passes a scope and an explicit path list, the command **MUST** use that scope as given, **MUST** skip CR detection (Step 1) and any `CR-XXXX` pattern check on the scope, and **MUST** stage only the listed paths instead of running `git add -A` (Step 5). The caller owns the scope, so a scope that is not a plain CR identifier is not an error.
+
 ## Workflow
 
 Follow these steps in order.
 
 ### Step 1: Context Detection
 
-Determine the CR identifier:
+If the caller supplied a scope and an explicit path list, skip this step and use the caller's scope.
+
+Otherwise, determine the CR identifier:
 
 - **If CR-ID is provided in `$ARGUMENTS`:** Use the provided CR-ID.
 - **If CR-ID is NOT provided:**
@@ -65,13 +69,22 @@ Before staging, review untracked files and update `.gitignore` to exclude:
 
 Compose the full commit message:
 
-- **Subject line:** `checkpoint(CR-xxxx): {summary}`
+- **Subject line:** `checkpoint(CR-xxxx): {summary}`, or `checkpoint({scope}): {summary}` with the caller-supplied scope.
 - **Body:** Detailed description with bullet points explaining what changed and why.
+- **Trailer:** when the caller supplied a trailer, append it after the body, separated by a blank line.
 
-### Step 5: Stage All Changes
+### Step 5: Stage Changes
+
+Without a caller-supplied path list, stage all changes:
 
 ```bash
 git add -A
+```
+
+With a caller-supplied scope and path list, stage only the listed paths and never run `git add -A`:
+
+```bash
+git add -- {path} [{path} ...]
 ```
 
 ### Step 6: Create Checkpoint Commit
@@ -80,6 +93,16 @@ git add -A
 git commit -m "checkpoint(CR-xxxx): {summary}
 
 {detailed body with bullet points}"
+```
+
+With a caller-supplied scope and trailer:
+
+```bash
+git commit -m "checkpoint({scope}): {summary}
+
+{detailed body with bullet points}
+
+{trailer}"
 ```
 
 ### Step 7: Report

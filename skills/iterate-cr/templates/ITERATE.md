@@ -1,7 +1,7 @@
 ---
 name: iterate-ledger
-description: Session ledger for a last-mile iteration session against an implemented Change Request. Records each attempt as what changed, why it was tried, and the evidence observed, names any earlier entry a later one supersedes, and derives what currently stands from the entries.
-cr: "CR-XXXX"
+description: Session ledger for a last-mile iteration session against zero, one, or many implemented Change Requests. Records each attempt as what changed, why it was tried, the evidence observed, and the Change Request it is attributed to, names any earlier entry a later one supersedes, and derives what currently stands from the entries.
+crs: ["CR-XXXX"]
 opened: "{YYYY-MM-DD when the session was opened}"
 source-branch: "{Git branch the session started from, from `git rev-parse --abbrev-ref HEAD`}"
 source-commit: "{short commit hash the session started from, from `git rev-parse --short HEAD`}"
@@ -41,6 +41,18 @@ NO LIFECYCLE. There is no status field and no closing date, because no command
 sets one. The session ends when the user stops iterating; the last entry is the
 last entry, and `git log` on this file says when each one landed.
 
+LOCATION. The ledger lives at docs/cr/iterations/{YYYY-MM-DD}-{slug}.md. `crs`
+lists every covered Change Request and is an empty list ([]) for an exploration
+session.
+
+RECONCILIATION. `reconciled:` (date) and `reconciled-into:` (list of CR IDs) are
+ABSENT until /reconcile-cr sets them. Do not add them when creating the ledger.
+A ledger that carries `reconciled:` is closed: never append to it.
+
+ATTRIBUTION. Each entry's CR field names one covered Change Request whose
+behaviour the change alters, or the literal `none`. It is a proposal that
+/reconcile-cr finalises.
+
 FRONTMATTER. No `metadata.copyright` or `metadata.version` field appears in this
 frontmatter, consistent with the convention for documents under `docs/cr/`.
 =============================================================================
@@ -52,11 +64,11 @@ frontmatter, consistent with the convention for documents under `docs/cr/`.
 
 <!--
 What this session is trying to close, and the state it starts from. Reference
-the governing Change Request rather than restating it: the CR records what was
+the covered Change Requests rather than restating it: the CR records what was
 specified beforehand, this ledger records what was attempted afterwards.
 -->
 
-* **Governing Change Request:** CR-XXXX — {one-line reminder of what it delivered}
+* **Covered Change Requests:** CR-XXXX — {one-line reminder of what each delivered; "none, exploration" when crs is empty}
 * **Gap being closed:** {what about the delivered implementation is not yet what was wanted}
 * **Starting point:** branch `{source-branch}` at commit `{source-commit}`, working tree `{worktree}`
 
@@ -73,6 +85,7 @@ made the change and run the checks. Never edit an earlier entry.
 
 ### Attempt 1 — {short name of what was tried}
 
+* **CR:** {CR-XXXX, one covered Change Request whose behaviour this change alters, or none}
 * **Change:** {what was changed — the files or surfaces touched, and what was done to them}
 * **Reason:** {why it was tried — the gap it aims to close, and why this change should close it}
 * **Evidence:** {the observed behaviour after the change — checks run, output seen, what the evidence shows}

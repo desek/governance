@@ -1,7 +1,7 @@
 #!/usr/bin/env bats
 # Copyright Daniel Grenemark 2026
 #
-# Ledger template tests for the checkpoint-iterate skill. These assert the
+# Ledger template tests for the iterate-cr skill. These assert the
 # bundled ITERATE.md template carries the frontmatter fields a session needs,
 # omits the template-describing metadata that documents under docs/cr/ must not
 # carry, provides the retuned ledger sections, and keeps the append-only rule
@@ -15,8 +15,21 @@ setup() {
     grep -q '^worktree:' "$ITERATE_TEMPLATE"
 }
 
-@test "iterate template has governing CR field" {
-    grep -q '^cr:' "$ITERATE_TEMPLATE"
+@test "template frontmatter has crs and reconciliation fields" {
+    grep -q '^crs:' "$ITERATE_TEMPLATE"
+    ! grep -q '^cr:' "$ITERATE_TEMPLATE"
+    grep -q 'reconciled:' "$ITERATE_TEMPLATE"
+    grep -q 'reconciled-into:' "$ITERATE_TEMPLATE"
+    # Both reconciliation fields are absent from the frontmatter until set.
+    ! grep -q '^reconciled' "$ITERATE_TEMPLATE"
+}
+
+@test "template documents the iterations ledger path" {
+    grep -q 'docs/cr/iterations/' "$ITERATE_TEMPLATE"
+}
+
+@test "template entry has a CR attribution field" {
+    grep -q '^\* \*\*CR:\*\*' "$ITERATE_TEMPLATE"
 }
 
 @test "iterate template has no lifecycle status or closing date" {

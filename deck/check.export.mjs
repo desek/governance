@@ -13,7 +13,8 @@
  * Usage:
  *   node check.export.mjs [path/to/exported.html]
  *
- * Defaults to html-export/checkpoint-distill.html. Exits non-zero with a
+ * Defaults to html-export/checkpoint-distill.html. Check another deck by
+ * passing its export, e.g. html-export/iterate-reconcile.html. Exits non-zero with a
  * diagnosis on failure.
  *
  * @agents-index Opens the exported deck from disk and fails if any page is blank or errored.
