@@ -2,7 +2,7 @@
 name: cr-0019-iterate-and-reconcile-cr-lifecycle
 description: Treat post-implementation iteration as the ground truth for user intent. Replace /checkpoint-iterate with /iterate-cr, which covers zero, one, or many implemented Change Requests, add /reconcile-cr, which rewrites each covered Change Request to match what the iteration kept or creates a retroactive one, and bring /implement-cr into this repository so the whole lifecycle ships from one place.
 id: "CR-0019"
-status: "proposed"
+status: "approved"
 date: 2026-10-28
 requestor: desek
 stakeholders: desek
@@ -122,7 +122,7 @@ A reconciled ledger is closed: `/iterate-cr` **MUST NOT** append to a ledger tha
 
 The procedure:
 
-1. **Derive what stands.** Read the ledger entries in order, honour every supersession, and map each entry to the checkpoint commit that added it (`git log --grep 'Iteration: {slug}'`, or the `checkpoint(CR-XXXX-iterate)` commits for a legacy ledger). Compare the derived state with the working tree; uncommitted changes stop the reconcile, because the ground truth must be committed. The checkpoint commits are the evidence; the ledger is the narrative.
+1. **Derive what stands.** Read the ledger entries in order, honour every supersession, and map each entry to the checkpoint commit that added it (`git log --grep 'Iteration: {slug}'`, or the `checkpoint(CR-XXXX-iterate)` commits for a legacy ledger). Compare the derived state with the working tree; uncommitted changes to files that the ledger entries touch stop the reconcile, because the ground truth must be committed. The checkpoint commits are the evidence; the ledger is the narrative.
 2. **Route each standing change.** Group the standing changes by their attribution. Confirm each attribution against the diff of its checkpoint commit. A change whose attribution is ambiguous, or which touches behaviour of two CRs, is routed by the agent to the CR whose requirements it changes, and the routing is listed in the plan.
 3. **Show the reconciliation plan once.** Before any document is written, the agent shows one table: each covered CR, the requirements, acceptance criteria, and scope items that change, and each retroactive CR that will be created. The user answers once. This is the only stop of the procedure; it exists because a misrouted change rewrites the wrong governance document.
 4. **Rewrite each covered CR in place.** The Proposed Change, Requirements, Scope Boundaries, Acceptance Criteria, and Model-Based Testing sections are changed to describe the behaviour that stands. A superseded approach becomes an entry in Alternative Approaches Considered, with the reason the ledger gives. The original text is not kept inline; Git history holds it.
@@ -228,7 +228,7 @@ The command is added as the skill `skills/implement-cr/`, with its behaviour pre
 * The lifecycle documentation in the governance skill
 * The rename and extension of the iteration skill
 * The new reconcile skill
-* The move of `/implement-cr` into this repository as a skill, with the three stated adjustments
+* The move of `/implement-cr` into this repository as a skill, with the four stated adjustments
 * The CR template, CR guide, distill skill, release configuration, README, WORKFLOW, and llms.txt changes that the above needs
 * Tests for all of the above
 
@@ -491,6 +491,17 @@ Given a legacy ledger at docs/cr/CR-XXXX-iterate.md
 When the user runs /reconcile-cr on it
 Then every standing entry is routed to CR-XXXX
   And /checkpoint-distill CR-XXXX still resolves that ledger and its commits
+  And /checkpoint-distill CR-XXXX also resolves every ledger under docs/cr/iterations/ whose crs lists CR-XXXX
+```
+
+### AC-13a: checkpoint-commit accepts a caller scope
+
+```gherkin
+Given /iterate-cr calls /checkpoint-commit with the scope iterate-{slug}, the trailer Iteration: {slug}, and an explicit path list
+When the commit is made
+Then the subject starts with checkpoint(iterate-{slug}):
+  And no CR detection runs and no CR-XXXX pattern check rejects the scope
+  And only the listed paths are staged
 ```
 
 ### AC-14: implement-cr ships here and points forward
