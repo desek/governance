@@ -31,6 +31,12 @@
       "component": "checkpoint-distill",
       "include-component-in-tag": true,
       "include-v-in-tag": true
+    },
+    "skills/reconcile-cr": {
+      "release-type": "simple",
+      "component": "reconcile-cr",
+      "include-component-in-tag": true,
+      "include-v-in-tag": true
     }
   }
 }
