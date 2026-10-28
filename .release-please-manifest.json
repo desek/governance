@@ -3,7 +3,7 @@
   "skills/checkpoint-commit": "2.0.0",
   "skills/checkpoint-read": "1.0.0",
   "skills/iterate-cr": "2.0.0",
-  "skills/checkpoint-distill": "1.1.0",
+  "skills/checkpoint-distill": "2.0.0",
   "skills/reconcile-cr": "1.0.0",
   "skills/implement-cr": "1.0.0"
 }
