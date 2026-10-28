@@ -37,6 +37,12 @@
       "component": "reconcile-cr",
       "include-component-in-tag": true,
       "include-v-in-tag": true
+    },
+    "skills/implement-cr": {
+      "release-type": "simple",
+      "component": "implement-cr",
+      "include-component-in-tag": true,
+      "include-v-in-tag": true
     }
   }
 }
