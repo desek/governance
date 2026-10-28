@@ -20,9 +20,9 @@
       "include-component-in-tag": true,
       "include-v-in-tag": true
     },
-    "skills/checkpoint-iterate": {
+    "skills/iterate-cr": {
       "release-type": "simple",
-      "component": "checkpoint-iterate",
+      "component": "iterate-cr",
       "include-component-in-tag": true,
       "include-v-in-tag": true
     },
