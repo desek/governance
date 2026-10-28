@@ -2,7 +2,7 @@
 name: cr-0020-iterate-reconcile-release-video
 description: Add a second capture-first walkthrough deck, iterate-reconcile, that teaches the iterate and reconcile lifecycle under the premise that one-shot implementations are hard, export it as a standalone page and an MP4 under docs/deck/, and make the deck tooling and its CI check handle more than one deck.
 id: "CR-0020"
-status: "approved"
+status: "implemented"
 date: 2026-10-28
 requestor: desek
 stakeholders: desek
@@ -97,7 +97,7 @@ Placeholders `CR-XXXX` and `CR-YYYY` are used; no real CR identifier appears on 
 
 ```mermaid
 flowchart LR
-    S1["slides/checkpoint-distill"] --> E["export.html.mjs SLIDE_ID from argument"]
+    S1["slides/checkpoint-distill"] --> E["export.html.mjs SLIDE_ID from --slide"]
     S2["slides/iterate-reconcile"] --> E
     E --> H1["docs/deck/checkpoint-distill.html"]
     E --> H2["docs/deck/iterate-reconcile.html"]
