@@ -2,7 +2,7 @@
 name: cr-0020-iterate-reconcile-release-video
 description: Add a second capture-first walkthrough deck, iterate-reconcile, that teaches the iterate and reconcile lifecycle under the premise that one-shot implementations are hard, export it as a standalone page and an MP4 under docs/deck/, and make the deck tooling and its CI check handle more than one deck.
 id: "CR-0020"
-status: "proposed"
+status: "approved"
 date: 2026-10-28
 requestor: desek
 stakeholders: desek
