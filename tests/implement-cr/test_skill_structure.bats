@@ -53,12 +53,13 @@ setup() {
     grep -q 'status: implemented' "$SKILL_MD"
 }
 
-@test "skill has version.txt" {
-    [ "$(cat "${SKILL_DIR}/version.txt")" = "0.0.0" ]
+@test "skill has version.txt with valid semver content" {
+    # Release Please bumps this file on every release, so pin the format, not a value.
+    [[ "$(cat "${SKILL_DIR}/version.txt")" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
 }
 
 @test "skill is registered for release" {
     grep -q '"skills/implement-cr"' "${REPO_ROOT}/release-please-config.json"
     grep -q '"component": "implement-cr"' "${REPO_ROOT}/release-please-config.json"
-    grep -q '"skills/implement-cr": "0.0.0"' "${REPO_ROOT}/.release-please-manifest.json"
+    grep -qE '"skills/implement-cr": "[0-9]+\.[0-9]+\.[0-9]+"' "${REPO_ROOT}/.release-please-manifest.json"
 }
