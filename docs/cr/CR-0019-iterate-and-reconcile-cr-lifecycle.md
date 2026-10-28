@@ -2,7 +2,7 @@
 name: cr-0019-iterate-and-reconcile-cr-lifecycle
 description: Treat post-implementation iteration as the ground truth for user intent. Replace /checkpoint-iterate with /iterate-cr, which covers zero, one, or many implemented Change Requests, add /reconcile-cr, which rewrites each covered Change Request to match what the iteration kept or creates a retroactive one, and bring /implement-cr into this repository so the whole lifecycle ships from one place.
 id: "CR-0019"
-status: "approved"
+status: "implemented"
 date: 2026-10-28
 requestor: desek
 stakeholders: desek
@@ -648,9 +648,9 @@ Chosen approach: "rename the iteration skill to `/iterate-cr` with zero-to-many 
 
 ## Implementation Status
 
-* **Started:** {YYYY-MM-DD}
-* **Completed:** {YYYY-MM-DD}
-* **Notes:** {notes}
+* **Started:** 2026-10-28
+* **Completed:** 2026-10-28
+* **Notes:** Implemented in seven checkpoint commits on `docs/cr-0019-iterate-reconcile-lifecycle`. Bats suite: 181 ok, 0 not ok. The Model-Based Testing scenarios were not run.
 
 ## Related Items
 
