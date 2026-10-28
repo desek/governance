@@ -41,6 +41,8 @@ The governance 2.0.0 release replaces the single-CR iteration session with a lif
 * `DESIGN.md` holds the visual and motion rules ("Instrument Diagram"): colours, typography, layout safe area, transitions of 140 to 280 ms, morph rules, the snapshot contract, and ambient motion.
 * `deck/README.md` documents the publishing procedure: edit, `export:png` and read every page, `capture` and diff the first and last frames, copy the MP4, rebuild and check the HTML export, commit both.
 * `open-slide video` exists only on the fork at `~/Repo/github/1weiho/open-slide` (branch `feat/cli-capture-deck-as-video`, built `packages/core/dist`), installed with `npm install --no-save`. `ffmpeg` is on `PATH`.
+* `deck/export.html.mjs` hard-codes `SLIDE_ID = 'checkpoint-distill'` and already uses its one positional argument, `process.argv[2]`, as the build directory (default `dist-single/`). It saves the download under `download.suggestedFilename()`, which open-slide derives from the deck.
+* `deck/build.singlefile.mjs` builds the whole site and has no deck-specific logic, but its `@agents-index` line names `checkpoint-distill`.
 * `.github/workflows/docs-deck.yml` rebuilds the export on a pull request that touches `deck/` or `docs/deck/` and fails when `docs/deck/checkpoint-distill.html` differs.
 * `docs/deck/` holds `checkpoint-distill.html` and `checkpoint-distill.mp4`.
 
@@ -84,12 +86,12 @@ Placeholders `CR-XXXX` and `CR-YYYY` are used; no real CR identifier appears on 
 
 ### Multi-Deck Tooling
 
-* `export.html.mjs` takes the slide id as its first argument, defaulting to `checkpoint-distill` so existing commands keep working.
+* `export.html.mjs` takes the slide id as a flag, `--slide <id>`, defaulting to `checkpoint-distill`. The positional build-directory argument keeps its meaning and its default, so existing commands keep working. The script saves the export as `html-export/<slide-id>.html`, whatever name the download suggests, so every caller can name the file. Its docstring states the new usage.
 * `check.export.mjs` already takes a path argument; its documentation names the per-deck usage.
 * `package.json` gains per-deck scripts for the new deck (`export:png:iterate-reconcile`, `capture:iterate-reconcile`) and keeps the existing ones unchanged.
-* `build.singlefile.mjs` is checked for a deck-specific assumption and generalised only if it has one.
-* `docs-deck.yml` builds and compares the export of every deck listed in one place in the workflow (`checkpoint-distill`, `iterate-reconcile`), and fails naming the stale file.
-* `deck/README.md` and `DESIGN.md` name both decks where they now name one.
+* `build.singlefile.mjs` keeps its logic; its `@agents-index` line is changed to describe a deck-agnostic build.
+* `docs-deck.yml` builds and compares the export of every deck listed in one place in the workflow (`checkpoint-distill`, `iterate-reconcile`). On a mismatch it fails, names the stale file, and prints the fix commands for that deck.
+* `deck/README.md` (the Layout block, the Commands block, the publishing steps, and the artifacts table) and `DESIGN.md` name both decks where they now name one.
 
 ### Proposed State Diagram
 
@@ -114,13 +116,13 @@ flowchart LR
 3. The deck **MUST** follow the loop-variant rules of the existing deck: no step gating, mount-triggered entrances with `both` fill, a transition on every page, and a final `Reset` page.
 4. The deck **MUST** follow `DESIGN.md`: its palette, type scale, safe area, transition timing, and morph rules.
 5. The commands, paths, commit subjects, and frontmatter fields shown on the pages **MUST** match the shipped skills: `/implement-cr`, `/iterate-cr`, `/reconcile-cr`, `docs/cr/iterations/`, `checkpoint(CR-XXXX-iterate)`, `checkpoint(iterate-{slug})`, `Iteration:`, `origin: retroactive`, `reconciled:`.
-6. No page **MUST** name `/checkpoint-iterate`, and no page **MUST** show a real CR identifier.
+6. A page **MUST NOT** name `/checkpoint-iterate`, and a page **MUST NOT** show a real CR identifier.
 7. `docs/deck/iterate-reconcile.html` **MUST** be the open-slide HTML export of the deck and **MUST** pass `check.export.mjs`.
 8. `docs/deck/iterate-reconcile.mp4` **MUST** be a capture of the deck at 30 fps with a dwell of 1600 ms.
 9. The first and last frames of the MP4 **MUST** match, with a per-channel mean difference below 1 on a 0 to 255 scale.
-10. `export.html.mjs` **MUST** take the slide id as an argument and default to `checkpoint-distill`.
-11. `docs-deck.yml` **MUST** check the export of both decks and **MUST** name the stale file when one differs.
-12. `deck/README.md` **MUST** document the commands for each deck.
+10. `export.html.mjs` **MUST** take the slide id as `--slide <id>` with the default `checkpoint-distill`, **MUST** keep the positional build-directory argument and its default, and **MUST** write the export to `html-export/<slide-id>.html`.
+11. `docs-deck.yml` **MUST** check the export of both decks and, when one differs, **MUST** name the stale file and print the fix commands for that deck.
+12. `deck/README.md` **MUST** document both decks in its Layout block, its Commands block, its publishing steps, and its artifacts table.
 13. `checkpoint-distill` and its exports **MUST NOT** change.
 
 ### Non-Functional Requirements
@@ -192,7 +194,7 @@ flowchart LR
 
 ### Detailed Implementation Steps
 
-1. Generalise `export.html.mjs` (argument, default) and the scripts in `package.json`; inspect `build.singlefile.mjs` for a deck-specific assumption.
+1. Add `--slide <id>` and the `<slide-id>.html` output name to `export.html.mjs`, add the per-deck scripts to `package.json`, and correct the `@agents-index` line of `build.singlefile.mjs`.
 2. Author `deck/slides/iterate-reconcile/index.tsx`, copying the primitives of the existing deck and writing the nine pages.
 3. Run `npm run export:png:iterate-reconcile` and read every PNG; fix crop, wrap, and size defects; repeat until clean.
 4. Install the fork with `npm install --no-save ~/Repo/github/1weiho/open-slide/packages/core`, run `npm run capture:iterate-reconcile`, extract the first and last frames with `ffmpeg`, and compute the per-channel mean difference; fix the seam until it is below 1. Restore the published dependency afterwards with `npm ci`.
@@ -223,7 +225,7 @@ Not applicable: no test becomes obsolete.
 
 ### Out-of-Band Verification
 
-* `npm run check:export -- html-export/iterate-reconcile.html` exits 0.
+* `node check.export.mjs html-export/iterate-reconcile.html` exits 0.
 * Every PNG of `export:png:iterate-reconcile` read back, with no crop or wrap.
 * First and last frame per-channel mean difference below 1.
 * The Docs Deck workflow passes on the pull request.
@@ -279,7 +281,7 @@ Then it exits 0 and no page is blank
 Given a pull request that touches deck/
 When the Docs Deck workflow runs
 Then it compares docs/deck/checkpoint-distill.html and docs/deck/iterate-reconcile.html with fresh exports
-  And a stale export fails the job with the name of the stale file
+  And a stale export fails the job with the name of the stale file and the fix commands for that deck
 ```
 
 ### AC-7: The existing deck is unchanged
@@ -288,7 +290,7 @@ Then it compares docs/deck/checkpoint-distill.html and docs/deck/iterate-reconci
 Given the change is complete
 When git diff is run on deck/slides/checkpoint-distill and docs/deck/checkpoint-distill.*
 Then it shows no change
-  And npm run export:html with no argument still exports checkpoint-distill
+  And node export.html.mjs with no argument still writes html-export/checkpoint-distill.html
 ```
 
 ### AC-8: The suite passes
@@ -331,7 +333,7 @@ Then every test passes
 cd deck
 npm run build
 npm run export:png:iterate-reconcile
-npm run build:single && node export.html.mjs iterate-reconcile && node check.export.mjs html-export/iterate-reconcile.html
+npm run build:single && node export.html.mjs --slide iterate-reconcile && node check.export.mjs html-export/iterate-reconcile.html
 cd .. && bats -r tests/
 ```
 
