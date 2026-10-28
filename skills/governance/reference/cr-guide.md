@@ -14,6 +14,7 @@ Detailed guidance for creating and managing Change Requests.
 
 - [When to Create a CR](#when-to-create-a-cr)
 - [CR Lifecycle](#cr-lifecycle)
+- [Reconciled and Retroactive CRs](#reconciled-and-retroactive-crs)
 - [Requirements](#requirements)
 - [Document Numbering](#document-numbering)
 - [Source Traceability](#source-traceability)
@@ -56,6 +57,25 @@ any status → obsolete (when externally invalidated)
 - After stakeholder review, it becomes `approved`, `rejected`, or `on-hold`
 - Approved CRs move to `implemented` when development is complete
 - Any CR may become `obsolete` if external factors invalidate it
+
+## Reconciled and Retroactive CRs
+
+An implemented CR can drift from the code when the user adjusts the result after implementation. An iteration session records each adjustment in an iteration ledger, and each ledger entry carries an attribution: the covered CR whose behaviour it changes, or `none`. Once the user accepts the iteration, the ledger is the ground truth for what the user wants, and reconciliation brings the governance record back in line with it.
+
+**Reconciled CR.** Reconciliation rewrites each covered CR in place so that its Proposed Change, Requirements, Scope Boundaries, Acceptance Criteria, and Model-Based Testing describe the behaviour that stands. A superseded approach moves to Alternative Approaches Considered with the reason the ledger gives. The CR then gains:
+
+- A **Reconciliation** section with one row per divergence: the original statement in short form, the reconciled statement, the ledger entry that caused it, and the short SHA of its checkpoint commit.
+- The frontmatter field `reconciled: {YYYY-MM-DD}` and an updated `date`.
+
+The status stays `implemented`. The original text is not kept inline, because Git history holds it. After reconciliation the CR is final and the lifecycle of the change has ended.
+
+**Retroactive CR.** A change attributed `none`, and every change of an exploration ledger (one that covers no CR), goes into a new CR written after the code. A retroactive CR:
+
+- Uses the standard template and is a complete CR, with requirements and Gherkin acceptance criteria that the standing code satisfies.
+- Has status `implemented` from the start and the frontmatter field `origin: retroactive`.
+- Names the ledger path in Related Items.
+
+Reconciliation changes governance documents only, never code.
 
 ## Requirements
 

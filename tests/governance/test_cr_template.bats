@@ -30,3 +30,11 @@ setup() {
     echo "$comment_text" | grep -qi "Governance identifiers"
     echo "$comment_text" | grep -qi "commit"
 }
+
+@test "CR template has optional Reconciliation section" {
+    grep -B1 "^## Reconciliation$" "$CR_TEMPLATE" | head -1 | grep -q "<!-- This is an optional element. Feel free to remove. -->"
+}
+
+@test "CR template documents origin retroactive" {
+    grep -q "origin: retroactive" "$CR_TEMPLATE"
+}
