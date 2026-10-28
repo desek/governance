@@ -42,7 +42,7 @@ setup() {
 }
 
 @test "README lists the skill in Available Skills" {
-    grep -q 'checkpoint-iterate' "${REPO_ROOT}/README.md"
+    grep -q 'iterate-cr' "${REPO_ROOT}/README.md"
 }
 
 @test "SKILL.md documents the single invocation form" {
@@ -202,7 +202,7 @@ setup() {
 @test "README iterate row describes no disposition" {
     # The user-facing listing drops disposition language. Isolate the
     # checkpoint-iterate row and assert it carries no disposition wording.
-    row="$(grep 'checkpoint-iterate' "${REPO_ROOT}/README.md")"
+    row="$(grep -F '[iterate-cr]' "${REPO_ROOT}/README.md")"
     ! echo "$row" | grep -qiE 'disposition|discarded|partially-kept'
 }
 
