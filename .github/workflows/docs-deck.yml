@@ -68,34 +68,36 @@ jobs:
         run: npm run build:single
 
       # open-slide offers this export only through its UI, so the script drives
-      # the browser that is already installed.
-      - name: Export standalone HTML
-        run: npm run export:html
-
-      # A deck that captured nothing still exports cleanly and exits 0. Opening
-      # the artifact is the only check that tells the difference.
-      - name: Verify the export opens
-        run: npm run check:export
-
-      # The failure message carries the fix, because the reader of a red check
-      # is the party who has to repair it and should not have to reconstruct the
-      # command from the workflow file.
-      - name: Compare against the committed export
+      # the browser that is already installed. A deck that captured nothing
+      # still exports cleanly and exits 0, so each export is also opened.
+      #
+      # DECKS is the one list of decks this workflow checks. The failure
+      # message carries the fix, because the reader of a red check is the party
+      # who has to repair it and should not have to reconstruct the command
+      # from the workflow file.
+      - name: Export, verify, and compare every deck
         working-directory: .
+        env:
+          DECKS: checkpoint-distill iterate-reconcile
         run: |
-          if diff -q deck/html-export/checkpoint-distill.html docs/deck/checkpoint-distill.html > /dev/null; then
-            echo "docs/deck/checkpoint-distill.html matches the deck source"
-            exit 0
-          fi
-          echo "::error::The committed deck export is stale: docs/deck/checkpoint-distill.html does not match a fresh build of deck/."
-          echo ""
-          echo "Rebuild it and commit the result in this pull request:"
-          echo ""
-          echo "  cd deck"
-          echo "  npm ci"
-          echo "  npx playwright install chromium"
-          echo "  npm run build:single && npm run export:html && npm run check:export"
-          echo "  cp html-export/checkpoint-distill.html ../docs/deck/checkpoint-distill.html"
-          echo ""
-          echo "Then verify: this check passes, and the export opens in a browser."
-          exit 1
+          stale=0
+          for deck in $DECKS; do
+            (cd deck && node export.html.mjs --slide "$deck" && node check.export.mjs "html-export/$deck.html") || exit 1
+            if diff -q "deck/html-export/$deck.html" "docs/deck/$deck.html" > /dev/null; then
+              echo "docs/deck/$deck.html matches the deck source"
+              continue
+            fi
+            stale=1
+            echo "::error::The committed deck export is stale: docs/deck/$deck.html does not match a fresh build of deck/."
+            echo ""
+            echo "Rebuild it and commit the result in this pull request:"
+            echo ""
+            echo "  cd deck"
+            echo "  npm ci"
+            echo "  npx playwright install chromium"
+            echo "  npm run build:single && node export.html.mjs --slide $deck && node check.export.mjs html-export/$deck.html"
+            echo "  cp html-export/$deck.html ../docs/deck/$deck.html"
+            echo ""
+            echo "Then verify: this check passes, and the export opens in a browser."
+          done
+          exit $stale

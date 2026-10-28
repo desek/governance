@@ -16,9 +16,13 @@
  * captured. For motion, use the video capture instead.
  *
  * Usage:
- *   node export.html.mjs [path/to/built/dir]   # defaults to dist-single/
+ *   node export.html.mjs [--slide <id>] [path/to/built/dir]
  *
- * Writes to html-export/. Exits non-zero if the export never arrives.
+ * --slide defaults to checkpoint-distill; the build directory defaults to
+ * dist-single/. Writes html-export/<slide-id>.html whatever name the download
+ * suggests, so a caller can name the file, and replaces only that file, so the
+ * exports of several decks can sit side by side. Exits non-zero if the export
+ * never arrives.
  *
  * @agents-index Drives open-slide's in-browser HTML export to produce a standalone deck file.
  */
@@ -29,12 +33,35 @@ import http from 'node:http';
 import path from 'node:path';
 import { chromium } from 'playwright-chromium';
 
-const SLIDE_ID = 'checkpoint-distill';
+/**
+ * Splits argv into the --slide flag and the positional build directory.
+ *
+ * @param {string[]} args - The arguments after the script path.
+ * @returns {{ slideId: string, buildDir: string | undefined }}
+ */
+function parseArgs(args) {
+  let slideId = 'checkpoint-distill';
+  let buildDir;
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--slide') {
+      slideId = args[++i];
+      if (!slideId) {
+        console.error('FAIL: --slide needs a slide id, e.g. "--slide iterate-reconcile" (a folder under deck/slides/). Verify: html-export/<id>.html exists afterwards.');
+        process.exit(2);
+      }
+    } else {
+      buildDir = args[i];
+    }
+  }
+  return { slideId, buildDir };
+}
+
+const { slideId: SLIDE_ID, buildDir } = parseArgs(process.argv.slice(2));
 const PORT = 8974;
 /** The export renders and rasterises every page, so it is far from instant. */
 const EXPORT_TIMEOUT_MS = 120_000;
 
-const sourceDir = path.resolve(process.argv[2] ?? path.join(import.meta.dirname, 'dist-single'));
+const sourceDir = path.resolve(buildDir ?? path.join(import.meta.dirname, 'dist-single'));
 const outDir = path.join(import.meta.dirname, 'html-export');
 
 if (!existsSync(path.join(sourceDir, 'index.html'))) {
@@ -73,8 +100,9 @@ function serve(dir, port) {
     .listen(port);
 }
 
-rmSync(outDir, { recursive: true, force: true });
+const targetPath = path.join(outDir, `${SLIDE_ID}.html`);
 mkdirSync(outDir, { recursive: true });
+rmSync(targetPath, { force: true });
 
 const server = serve(sourceDir, PORT);
 const browser = await chromium.launch();
@@ -93,7 +121,7 @@ try {
   await page.getByRole('menuitem', { name: 'Export as HTML' }).click();
 
   const download = await downloadPromise;
-  savedPath = path.join(outDir, download.suggestedFilename());
+  savedPath = targetPath;
   await download.saveAs(savedPath);
 } finally {
   await browser.close();
@@ -105,7 +133,4 @@ if (!savedPath || !existsSync(savedPath)) {
   process.exit(1);
 }
 
-// A .zip means the deck referenced same-origin assets that had to travel
-// alongside the markup; a bare .html means everything fitted in one file.
-const kind = savedPath.endsWith('.zip') ? 'zip (html plus assets/)' : 'single html file';
-console.log(`html export → ${savedPath} (${(statSync(savedPath).size / 1024).toFixed(0)} kB, ${kind})`);
+console.log(`html export → ${savedPath} (${(statSync(savedPath).size / 1024).toFixed(0)} kB)`);
