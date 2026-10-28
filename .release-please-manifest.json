@@ -1,9 +1,9 @@
 {
-  "skills/governance": "1.5.0",
+  "skills/governance": "2.0.0",
   "skills/checkpoint-commit": "1.0.0",
   "skills/checkpoint-read": "1.0.0",
-  "skills/iterate-cr": "1.1.0",
+  "skills/iterate-cr": "2.0.0",
   "skills/checkpoint-distill": "1.1.0",
   "skills/reconcile-cr": "1.0.0",
-  "skills/implement-cr": "0.0.0"
+  "skills/implement-cr": "1.0.0"
 }
