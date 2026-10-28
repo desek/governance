@@ -39,7 +39,10 @@ concurrency:
 jobs:
   check:
     name: Check the deck export is current
-    runs-on: ubuntu-latest
+    # Pinned rather than ubuntu-latest: the pinned playwright-chromium ships no
+    # Chromium build for Ubuntu 26.04, so npm ci fails there before the export
+    # runs. Move this forward together with the playwright-chromium version.
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: deck
