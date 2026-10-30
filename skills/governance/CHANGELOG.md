@@ -8,6 +8,13 @@ metadata:
 
 # Changelog
 
+## [2.1.0](https://github.com/desek/governance/compare/governance-v2.0.0...governance-v2.1.0) (2026-10-30)
+
+
+### Features
+
+* **governance:** a CR states the behaviour and the goal of the user for an interface, not words and pixels ([#51](https://github.com/desek/governance/issues/51)) ([fae52b3](https://github.com/desek/governance/commit/fae52b38d94335e8c9e39472b43c3b3df2036277))
+
 ## [2.0.0](https://github.com/desek/governance/compare/governance-v1.5.0...governance-v2.0.0) (2026-10-28)
 
 
