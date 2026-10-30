@@ -55,6 +55,8 @@ CHANGE REQUEST TEMPLATE GUIDELINES
    - This minimum ensures that all sections are properly filled out with meaningful content
    - Incomplete or superficial CRs lead to ambiguity, rework, and implementation errors
    - Each section should contain enough detail for implementers to work independently
+   - The minimum does not apply to the part of a CR that specifies a user interface:
+     never reach it with fixed words, sizes or colours (see USER INTERFACES below)
    - If your CR is under 250 lines, review each section and add:
      * More specific requirements with concrete examples
      * Detailed acceptance criteria covering edge cases
@@ -179,6 +181,18 @@ CHANGE REQUEST TEMPLATE GUIDELINES
      the code, from accepted changes that no covered CR describes; such a CR has
      status `implemented` and names the ledger path in Related Items
    - Omit both fields for a CR authored before its implementation
+12. USER INTERFACES (Behaviour and the goal of the user, not words and pixels)
+   - A CR is written before anyone sees the interface, so it **MUST NOT** fix what
+     only the screen can judge
+   - For a user interface, a requirement states what the user must be able to see
+     and do, and why (for example "the operator sees at once whether mail is sent")
+   - A requirement **MUST NOT** fix the exact words, sizes, colours or layout; they
+     live in the design system, the text files and the components of the project,
+     where they are judged in context
+   - A requirement may fix a word only when the word carries a fact: a legal text,
+     an error code, or a name that another system shows
+   - Acceptance criteria for an interface check the behaviour and the end state,
+     not a string or a pixel value
 =============================================================================
 -->
 

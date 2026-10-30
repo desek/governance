@@ -38,3 +38,9 @@ setup() {
 @test "CR template documents origin retroactive" {
     grep -q "origin: retroactive" "$CR_TEMPLATE"
 }
+
+@test "CR template states that an interface requirement fixes behaviour, not words and pixels" {
+    grep -q "USER INTERFACES (Behaviour and the goal of the user, not words and pixels)" "$CR_TEMPLATE"
+    grep -q "MUST NOT\*\* fix the exact words, sizes, colours or layout" "$CR_TEMPLATE"
+    grep -q "The minimum does not apply to the part of a CR that specifies a user interface" "$CR_TEMPLATE"
+}

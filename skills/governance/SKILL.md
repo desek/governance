@@ -77,7 +77,7 @@ Use this checklist when creating a Change Request:
 - Requirements keywords: RFC 2119 (MUST, SHOULD, MAY)
 
 **Flexible (adapt to context):**
-- Document length (minimum 250 lines for complex changes)
+- Document length (minimum 250 lines for complex changes; no minimum for the part that specifies a user interface, which states behaviour, not words and pixels)
 - Number of diagrams
 - Depth of impact assessment
 - Presence of the Model-Based Testing section (governed by the user-surface test)
