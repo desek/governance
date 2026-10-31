@@ -3,7 +3,8 @@ name: cr-template
 description: Template for creating Change Requests (CRs).
 # These are required metadata elements. Feel free to add additional if motivated.
 id: "CR-XXXX"
-status: "{proposed | approved | rejected | implemented | on-hold | cancelled}"
+status: "{proposed | approved | rejected | implemented | on-hold | cancelled | obsolete | superseded}"
+superseded-by: ["CR-XXXX"] # present only when status is superseded: the list of CR ids that replaced this CR
 date: {YYYY-MM-DD when the change request was last updated}
 requestor: {person or team requesting the change}
 stakeholders: {list everyone involved in reviewing/approving the change}
@@ -181,7 +182,17 @@ CHANGE REQUEST TEMPLATE GUIDELINES
      the code, from accepted changes that no covered CR describes; such a CR has
      status `implemented` and names the ledger path in Related Items
    - Omit both fields for a CR authored before its implementation
-12. USER INTERFACES (Behaviour and the goal of the user, not words and pixels)
+12. SUPERSEDED CRs (Optional field and section)
+   - Status `superseded` with the frontmatter list `superseded-by` is for a CR whose
+     goal one or more named later CRs replaced with a different design
+   - `superseded-by` is present only when the status is `superseded`
+   - The CR gains a Supersession section: two sentences on what replaced it and why,
+     then a table with the columns Criterion, Outcome, and Evidence, where Outcome is
+     `met`, `superseded by CR-NNNN`, or `dropped`
+   - The rest of the body stays as written; each successor CR names this CR in
+     Related Items
+   - `superseded` is terminal
+13. USER INTERFACES (Behaviour and the goal of the user, not words and pixels)
    - A CR is written before anyone sees the interface, so it **MUST NOT** fix what
      only the screen can judge
    - For a user interface, a requirement states what the user must be able to see
@@ -528,6 +539,15 @@ Chosen approach: "{brief description}", because {justification for this approach
 | Original Statement | Reconciled Statement | Ledger Entry | Checkpoint Commit |
 |--------------------|----------------------|--------------|-------------------|
 | {short form of the original requirement, criterion, or scope item} | {what the CR now states} | {ledger path and entry number} | {short SHA} |
+
+<!-- This is an optional element. Feel free to remove. -->
+## Supersession
+
+{Present only when the status is `superseded`. Two sentences: what replaced this CR, and why. Then one row per acceptance criterion. The rest of the body stays as written.}
+
+| Criterion | Outcome | Evidence |
+|-----------|---------|----------|
+| {acceptance criterion in short form} | {met \| superseded by CR-NNNN \| dropped} | {commit, file, or successor CR section} |
 
 <!-- This is an optional element. Feel free to remove. -->
 ## Related Items

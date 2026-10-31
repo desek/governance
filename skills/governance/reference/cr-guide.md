@@ -15,6 +15,7 @@ Detailed guidance for creating and managing Change Requests.
 - [When to Create a CR](#when-to-create-a-cr)
 - [CR Lifecycle](#cr-lifecycle)
 - [Reconciled and Retroactive CRs](#reconciled-and-retroactive-crs)
+- [Superseded CRs](#superseded-crs)
 - [Requirements](#requirements)
 - [Document Numbering](#document-numbering)
 - [Source Traceability](#source-traceability)
@@ -41,7 +42,8 @@ Create a CR when:
 | **Rejected** | Change was declined with reasoning documented |
 | **On-Hold** | Change is postponed for future consideration |
 | **Cancelled** | Change is no longer needed or relevant |
-| **Obsolete** | Change is outdated due to external factors or superseded requirements |
+| **Obsolete** | External factors invalidated the change, and no successor CR exists |
+| **Superseded** | One or more named later CRs replaced the goal of the change with a different design |
 
 ### Status Transitions
 
@@ -50,13 +52,20 @@ proposed → approved → implemented
 proposed → rejected
 proposed → on-hold → approved/cancelled
 approved → cancelled
-any status → obsolete (when externally invalidated)
+proposed → superseded
+approved → superseded
+on-hold → superseded
+implemented → superseded
+any status except superseded → obsolete (when externally invalidated, no successor CR)
 ```
 
 - A CR starts as `proposed`
 - After stakeholder review, it becomes `approved`, `rejected`, or `on-hold`
 - Approved CRs move to `implemented` when development is complete
-- Any CR may become `obsolete` if external factors invalidate it
+- Any CR except a superseded one may become `obsolete` if external factors invalidate it and no successor CR exists
+- A CR becomes `superseded` when one or more named later CRs replaced its goal with a different design
+- `superseded` is terminal: a superseded CR does not move to another status
+- The frontmatter list `superseded-by` is required when the status is `superseded` and absent otherwise; each id names an existing CR in the same `docs/cr/` directory
 
 ## Reconciled and Retroactive CRs
 
@@ -76,6 +85,21 @@ The status stays `implemented`. The original text is not kept inline, because Gi
 - Names the ledger path in Related Items.
 
 Reconciliation changes governance documents only, never code.
+
+## Superseded CRs
+
+Supersession and reconciliation answer different drift. Reconciliation applies when the behaviour of one implemented CR drifted inside that CR. Supersession applies when the goal of a CR moved to one or more named later CRs that chose a different design.
+
+**Frontmatter.** A superseded CR has status `superseded` and the field `superseded-by`, a list of the CR ids that replaced it, for example `superseded-by: ["CR-NNNN"]`. The field is present only when the status is `superseded`, and each id names an existing CR in the same `docs/cr/` directory. The status is terminal.
+
+**Supersession section.** The superseded CR gains a **Supersession** section:
+
+- Two sentences: what replaced the CR, and why.
+- A table with the columns Criterion, Outcome, and Evidence, one row per acceptance criterion of the CR. Outcome is one of `met`, `superseded by CR-NNNN`, or `dropped`.
+
+The rest of the body of a superseded CR stays as written and is not rewritten, unlike a reconciled CR. Git holds the history, and the CR records the design that was decided at its time.
+
+**Successor CRs.** Each successor CR names the superseded CR in its Related Items section. A successor CR carries no `supersedes` frontmatter field; the `superseded-by` list on the superseded CR is the only frontmatter link.
 
 ## Requirements
 
