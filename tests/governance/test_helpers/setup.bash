@@ -9,6 +9,7 @@ CR_TEMPLATE="${REPO_ROOT}/skills/governance/templates/CR.md"
 ADR_TEMPLATE="${REPO_ROOT}/skills/governance/templates/ADR.md"
 GOVERNANCE_SKILL="${REPO_ROOT}/skills/governance/SKILL.md"
 CR_GUIDE="${REPO_ROOT}/skills/governance/reference/cr-guide.md"
+IMPLEMENT_CR_SKILL="${REPO_ROOT}/skills/implement-cr/SKILL.md"
 DOCS_INDEX="${REPO_ROOT}/docs/llms.txt"
 
 # Governance reference pattern: a governance identifier is one of the five

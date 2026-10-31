@@ -35,6 +35,7 @@ The procedure per CR is the `change_flow` of the `operating_model` block, with t
 
 - Each argument must match exactly one `docs/cr/CR-NNNN-*.md` that is not a `-validation-report`, `-rollback-log`, or `-iterate` file.
 - Files under `docs/cr/iterations/` are iteration ledgers and **MUST NOT** be resolved as a CR.
+- The resolved file's frontmatter `status` **MUST NOT** be `superseded`, `obsolete`, `cancelled`, or `rejected`. Such a CR is closed without implementation: stop before any work, name the argument and its status, and make no commit.
 - If any argument fails, stop before any work, name the failed argument, and make no commit.
 
 ## 3. Recover context
