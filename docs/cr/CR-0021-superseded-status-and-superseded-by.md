@@ -2,7 +2,7 @@
 name: cr-0021-superseded-status-and-superseded-by
 description: Add the CR status superseded and the frontmatter field superseded-by, align the template status enum with every status of the guide's lifecycle table (obsolete included), and make /implement-cr refuse a CR whose status ends its lifecycle without implementation.
 id: "CR-0021"
-status: "approved"
+status: "implemented"
 date: 2026-10-31
 requestor: desek
 stakeholders: desek
