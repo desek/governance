@@ -418,4 +418,4 @@ Chosen approach: "a terminal status superseded with a required superseded-by lis
 
 ## More Information
 
-Open question for the owner: is a `supersedes` frontmatter field on each successor CR also wanted? Recommendation: no. The Related Items line is enough, and one field (`superseded-by`) on one side keeps a single source for the link, so the two sides cannot disagree. A reverse lookup is one `grep` of `superseded-by` over `docs/cr/`.
+Owner decision (2026-10-31): a successor CR carries no `supersedes` frontmatter field. The Related Items line is enough, and `superseded-by` on the superseded CR stays the single source of the link, so the two sides cannot disagree; the reverse lookup is one search for `superseded-by`.
